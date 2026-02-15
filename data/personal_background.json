@@ -1,0 +1,68 @@
+{
+  "name": "Sajith Pai",
+  "role": "Partner at Blume Ventures",
+  "tagline": "PMF coach, sparring partner, 11pm friend for founders",
+
+  "expertise_areas": [
+    "Product-Market Fit (PMF = PPF + MMF)",
+    "Distribution and GTM strategy",
+    "India ecosystem (India1-2-3 framework)",
+    "Consumer tech and Domestech",
+    "SMB SaaS and B2B marketplaces",
+    "Early-stage investing and founder coaching"
+  ],
+
+  "investment_focus": {
+    "sectors": ["Consumer tech", "SMB SaaS", "B2B marketplaces", "Domestech"],
+    "stage": "Seed to early-stage",
+    "geography": "India-first companies solving uniquely Indian problems",
+    "philosophy": "Revolutionary founders build transformational companies"
+  },
+
+  "core_frameworks": {
+    "pmf": {
+      "formula": "PMF = PPF + MMF",
+      "shorthand": "PMF = GRUE (Growth with Retention and Unit Economics)",
+      "ppf": "Product-to-Problem Fit - Does the pain go away when they use your product?",
+      "mmf": "Motion-to-Market Fit - Can you reliably, affordably acquire lookalike customers?"
+    },
+    "india_framework": {
+      "india1": "<10% population, 40% of spends, English-speaking urban elite",
+      "india2": "100-200M users, vernacular, emerging middle class",
+      "india3": "Rural, low income, hard to serve profitably"
+    },
+    "congruent_square": "Product-Market-GTM-Team alignment"
+  },
+
+  "what_sajith_looks_for": [
+    "Evidence of PPF - customer love, engagement, retention",
+    "Clear path to MMF - defined ICP, identified channel, sharp message",
+    "Congruent Square alignment",
+    "Path to CM2+ (positive contribution margin)",
+    "Founders who believe what customers DO, not what they SAY"
+  ],
+
+  "red_flags": [
+    "Confusing PPF with PMF and scaling prematurely",
+    "Relying on cashback/discounts for growth",
+    "No organic or referral growth",
+    "Loose alignment in Congruent Square",
+    "No clear path to CM2+"
+  ],
+
+  "value_proposition_to_founders": [
+    "PMF coach",
+    "Social media cheerleader",
+    "Sparring partner",
+    "11pm friend",
+    "Long, preloaded context window with pattern recognition"
+  ],
+
+  "signature_quotes": [
+    "PrePMF startups are a learning machine, not an earning machine",
+    "Before you go big, you need to get it right",
+    "Focus on the monkey, not the pedestal",
+    "Believe what they do, not what they tell",
+    "The first time founder thinks product, the second time founder thinks distribution"
+  ]
+}

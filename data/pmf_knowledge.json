@@ -1,0 +1,330 @@
+{
+  "category": "Product Market Fit (PMF)",
+  "description": "All knowledge about PMF from Sajith Pai - frameworks, case studies, interview insights",
+  
+  "core_framework": {
+    "formula": "PMF = PPF + MMF",
+    "full_form": "Product-Market Fit = Product-to-Problem Fit + Motion-to-Market Fit",
+    "shorthand": "PMF = GRUE (Growth with Retention and Unit Economics)",
+    
+    "ppf": {
+      "name": "Product-to-Problem Fit",
+      "definition": "Validate that your solution is able to address problems for a set of customers",
+      "question": "Does the pain that the customer has go away when they use your product?",
+      "nature": "Not an on/off switch - it's a continuum of strength of fit",
+      "signals": {
+        "b2c": [
+          "High engagement and usage",
+          "Retention curve flatlines at 10% at D90",
+          "Referrals and word of mouth",
+          "Organic channels constitute majority of leads"
+        ],
+        "b2b": [
+          "Speed through the funnel",
+          "30-45 days for SMB",
+          "2-3 months for midmarket",
+          "6-9 months for enterprise"
+        ],
+        "sean_ellis_test": "40%+ say 'very disappointed' if product gone"
+      },
+      "advice": "Don't overbuild the product at this stage. Time is money. Break down assumptions into modular components and test hard things first."
+    },
+    
+    "mmf": {
+      "name": "Motion-to-Market Fit",
+      "definition": "Reliably, affordably acquire lookalikes of PPF customers to build a large business",
+      "components": {
+        "persona": "Customer type you wish to serve",
+        "channel": "Way to reach the persona",
+        "message": "Proposition for the customer"
+      },
+      "golden_rule": "Uncomfortably narrow personas addressed by one hero channel through a sharp message",
+      "iteration_order": [
+        "1. Change message first",
+        "2. Then change channel",
+        "3. Then change persona",
+        "4. Finally change product (hardest)"
+      ],
+      "signals": {
+        "growth": "Monthly double digit growth",
+        "churn": {
+          "enterprise": "<3%",
+          "midmarket": "<7%",
+          "smb": "<20%",
+          "b2c_paid": "<10%"
+        },
+        "unit_economics": [
+          "CM2 positive",
+          "LTV:CAC 3:1",
+          "S&M costs as 1/3rd of contribution margin",
+          "Sales yield > 1"
+        ]
+      }
+    }
+  },
+
+  "funding_stages_and_pmf": {
+    "pre_seed": {
+      "risk": "Product development risk",
+      "investors": "Angels, friends & family, MicroVCs",
+      "goal": "Build MVP"
+    },
+    "seed": {
+      "risk": "Market development risk",
+      "investors": "Seed VCs",
+      "goal": "Achieve PMF",
+      "proof_needed": "Market exists, playbook to achieve it"
+    },
+    "series_a_plus": {
+      "risk": "Scaling risk",
+      "investors": "Series A/B VCs",
+      "goal": "Scale to multiple channels or markets",
+      "proof_needed": "PMF achieved, rinse and repeat strategy"
+    }
+  },
+
+  "biggest_pmf_mistake": {
+    "error": "Confusing PPF (product love from a few customers) for PMF",
+    "consequence": "Pouring on GTM/customer acquisition fuel in advance of true PMF",
+    "why_bad": "Premature scaling is the key reason for startup failure"
+  },
+
+  "pmf_playbook_chapters": [
+    {
+      "chapter": "I",
+      "title": "Understanding PMF",
+      "content": "Sets context for why PMF matters, defines PMF as PPF + MMF, case studies of success and failure",
+      "url": "https://sajithpai.com/pmf-playbook-chapter-i-understanding-pmf/",
+      "length": "13k words"
+    },
+    {
+      "chapter": "II",
+      "title": "The Pick",
+      "content": "Importance of picking the right problem, four routes to the pick, evaluation criteria",
+      "url": "https://sajithpai.com/pmf-playbook-chapter-ii-the-pick/",
+      "length": "20k words",
+      "key_concepts": {
+        "four_routes_to_pick": ["Pain", "Personal experience", "Prospecting", "Opportunism"],
+        "evaluation_criteria": ["Why this?", "Why now?", "Why you?"],
+        "two_phases": ["Problem discovery", "Problem validation"]
+      }
+    },
+    {
+      "chapter": "III",
+      "title": "Achieving PPF",
+      "status": "Coming Q1 2026"
+    },
+    {
+      "chapter": "IV",
+      "title": "Achieving MMF",
+      "status": "Coming Q2 2026"
+    },
+    {
+      "chapter": "V",
+      "title": "After PMF",
+      "status": "Coming Q3 2026"
+    }
+  ],
+
+  "pmf_convos_interviews": [
+    {
+      "number": 20,
+      "guest": "Rajan Bajaj",
+      "company": "slice",
+      "sector": "Fintech/Banking",
+      "date": "September 2025",
+      "key_insight": "slice evolved from fintech to bank after merger with North East Small Finance Bank"
+    },
+    {
+      "number": 19,
+      "guest": "Romita Mazumdar",
+      "company": "Foxtale",
+      "sector": "Beauty/D2C",
+      "date": "November 2024",
+      "key_insight": "Spoke to 900+ women and 100+ brands. Earned insight: Indian customers want instant gratification and efficacy"
+    },
+    {
+      "number": 18,
+      "guest": "Srikrishnan Ganesan",
+      "company": "Rocketlane",
+      "sector": "SaaS",
+      "date": "September 2024",
+      "key_insight": "Customer onboarding software, raised $24m Series B, strong US market momentum"
+    },
+    {
+      "number": 17,
+      "guest": "Mohit Kumar",
+      "company": "Ultrahuman",
+      "sector": "Consumer Health",
+      "date": "September 2024"
+    },
+    {
+      "number": 16,
+      "guest": "Shubham Goel",
+      "company": "Affinity",
+      "sector": "CRM/SaaS",
+      "date": "December 2023",
+      "key_insight": "Built 'late eight figures' revenue business in crowded CRM space, strong in investor community"
+    },
+    {
+      "number": 15,
+      "guest": "Ranjeet Singh",
+      "company": "Pratilipi",
+      "sector": "Vernacular Content",
+      "date": "December 2023",
+      "key_insight": "Paved way for wave of vernacular language apps"
+    },
+    {
+      "number": 14,
+      "guest": "Vinay Hiremath",
+      "company": "Loom",
+      "sector": "Video/SaaS",
+      "date": "November 2023",
+      "key_insight": "Tech leader's perspective on PMF"
+    },
+    {
+      "number": 13,
+      "guest": "Arindam Paul",
+      "company": "Atomberg",
+      "sector": "Consumer Electronics",
+      "date": "September 2023",
+      "key_insight": "Insightful marketing voice, practical advice on brand marketing for D2C"
+    },
+    {
+      "number": 12,
+      "guest": "Shreya Mishra",
+      "company": "SolarSquare (prev Flyrobe)",
+      "sector": "CleanTech/Fashion Rental",
+      "date": "July 2023",
+      "key_insight": "Discussed failed PMF at Flyrobe (fashion rental)"
+    },
+    {
+      "number": 11,
+      "guest": "Abhishek Kejriwal",
+      "company": "Kutumb",
+      "sector": "Consumer Social",
+      "date": "June 2023"
+    },
+    {
+      "number": 10,
+      "guest": "Prukalpa Sankar",
+      "company": "Atlan",
+      "sector": "Data/SaaS",
+      "date": "June 2023"
+    },
+    {
+      "number": 9,
+      "guest": "Konark Singhal",
+      "company": "Mountblue (ex-Mockbank)",
+      "sector": "EdTech",
+      "date": "April 2023",
+      "key_insight": "Definition of PMF as 'effortless growth', company struggled and was acquired"
+    },
+    {
+      "number": 8,
+      "guest": "Prashant Singh",
+      "company": "Jar",
+      "sector": "Fintech",
+      "date": "April 2023",
+      "key_insight": "Original thinker, PM's PM, differentiated thinking"
+    },
+    {
+      "number": 7,
+      "guest": "Vasanth Kamath",
+      "company": "smallcase",
+      "sector": "Fintech/Investing",
+      "date": "March 2023",
+      "key_insight": "Intentional, deliberate operators building well-crafted product"
+    },
+    {
+      "number": 6,
+      "guest": "Asad Khan",
+      "company": "LambdaTest",
+      "sector": "DevTools/SaaS",
+      "date": "January 2023",
+      "key_insight": "Satya Nadella praised: 'doing for test automation what Kubernetes did for container orchestration'"
+    },
+    {
+      "number": 5,
+      "guest": "Pulkit Agrawal",
+      "company": "Chameleon",
+      "sector": "SaaS/Product Adoption",
+      "date": "January 2023",
+      "key_insight": "Took 6 years from Seed to Series A"
+    },
+    {
+      "number": 4,
+      "guest": "Nishchay A G",
+      "company": "Jar",
+      "sector": "Fintech",
+      "date": "December 2022",
+      "key_insight": "Hit escape velocity through clever product and growth hacking"
+    },
+    {
+      "number": 3,
+      "guest": "Sheel Mohnot",
+      "company": "Better Tomorrow Ventures",
+      "sector": "VC",
+      "date": "November 2022",
+      "key_insight": "Funder's perspective on PMF"
+    },
+    {
+      "number": 2,
+      "guest": "Anshuman Bapna",
+      "company": "Terra.do (ex-Mygola)",
+      "sector": "ClimateTech/Travel",
+      "date": "November 2022",
+      "key_insight": "Failed pitch to Joe Gebbia (Airbnb founder), Mygola acquired by MakeMyTrip"
+    }
+  ],
+
+  "additional_pmf_frameworks": {
+    "pmf_x_ray": {
+      "title": "PMF X-Ray Framework",
+      "description": "Structured way to understand choices and tradeoffs startups took on route to achieving (or not) PMF",
+      "url": "https://sajithpai.com/the-pmf-x-ray-framework/",
+      "stages": [
+        "Idea stage (The Pick)",
+        "PPF stage",
+        "MMF stage"
+      ]
+    },
+    "congruent_square": {
+      "title": "The Congruent Square",
+      "description": "Pre-PMF startups need tight alignment between four key mechanisms",
+      "components": ["Product", "Market", "GTM", "Team"],
+      "insight": "Lack of alignment between these four can be damaging to achieving PMF"
+    },
+    "cm2_importance": {
+      "title": "Why CM2+ Matters",
+      "definition": "CM2 = Contribution Margin 2",
+      "insight": "Getting to CM2+ is a good shorthand for getting to PMF"
+    }
+  },
+
+  "pmf_quotes": [
+    "PMF is like love, you'll know it when you have it - this is WRONG. PMF needs a systematic framework.",
+    "PrePMF startups are a learning machine, not an earning machine",
+    "Before you go big, you need to get it right. This is what PMF is.",
+    "The biggest error founders make is confusing PPF for PMF, then pouring on GTM fuel prematurely",
+    "Focus on the monkey, not the pedestal! Solve for the hardest thing first!",
+    "Uncomfortably narrow personas addressed by one hero channel through a sharp message is how first-time MMF is achieved",
+    "Believe what they do, not what they tell",
+    "PMF can come and go (ask Paytm's Wallet team or the Clubhouse guys)"
+  ],
+
+  "special_cases": {
+    "marketplaces": {
+      "description": "Two-sided PMF - must achieve for both sides",
+      "harder_side": "Usually the side with more options",
+      "pmf_definition": "Figuring a repeatable plan for onboarding the harder side",
+      "example": "Daycare marketplace: parents (easy side) vs daycare centers (hard side)"
+    },
+    "media_businesses": {
+      "description": "Two-stage PMF",
+      "stage_1": "User acquisition through content",
+      "stage_2": "Monetization (selling to advertisers)",
+      "priority": "Focus on user acquisition first, then monetization"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "_note": "Replace with Sajith's actual pitch evaluation criteria",
+  "good_pitch_signals": [
+    "Specific traction metrics",
+    "Clear customer understanding",
+    "Founder-market fit",
+    "Unique insight or access"
+  ],
+  "red_flags": [
+    "Generic AI/ML claims",
+    "No customer validation",
+    "Vague market sizing",
+    "Copy-paste business models"
+  ],
+  "questions_to_ask": [
+    "What did you try that didn't work?",
+    "Why are you the right person to build this?",
+    "What's your unfair advantage?"
+  ]
+}

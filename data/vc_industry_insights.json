@@ -1,0 +1,187 @@
+{
+  "category": "VC Industry Insights & Fundraising",
+  "description": "Sajith Pai's insights on how the VC industry works, fundraising, and investor relations",
+
+  "understanding_valuations": {
+    "title": "Exhaust Fumes - Understanding Startup Valuations",
+    "key_insight": "Early stage valuations aren't really valuations",
+    "what_they_are": "The exhaust fumes of a negotiation about two things",
+    "negotiation_components": [
+      "The amount raised",
+      "The ownership percentage"
+    ],
+    "implication": "Don't obsess over valuation - focus on what matters: building the business"
+  },
+
+  "capital_types": {
+    "title": "Nailing Capital vs Scaling Capital",
+    "nailing_capital": {
+      "purpose": "Capital to figure out PMF",
+      "stage": "Pre-PMF, Seed",
+      "characteristics": [
+        "Smaller amounts",
+        "Patient capital",
+        "Focused on learning",
+        "Tolerant of pivots"
+      ]
+    },
+    "scaling_capital": {
+      "purpose": "Capital to scale after PMF",
+      "stage": "Series A+",
+      "characteristics": [
+        "Larger amounts",
+        "Growth-focused",
+        "Expectation of hockey stick",
+        "Less tolerant of pivots"
+      ]
+    },
+    "warning": "Raising scaling capital before achieving PMF is dangerous - leads to premature scaling"
+  },
+
+  "what_great_vcs_do": {
+    "title": "The Best VCs are Long, Preloaded, Context Windows for Founders",
+    "insight": "VCs should bring context and pattern recognition from portfolio",
+    "value_add": [
+      "Pattern recognition from multiple startups",
+      "Network access",
+      "Strategic guidance",
+      "Emotional support",
+      "Domain expertise"
+    ],
+    "sajith_offering": [
+      "PMF coach",
+      "Social media cheerleader",
+      "Sparring partner",
+      "11 pm friend",
+      "Occasional drinking bud",
+      "Official podcast recommender"
+    ]
+  },
+
+  "venture_as_temporal_arbitrage": {
+    "title": "Venture as Temporal Arbitrage",
+    "concept": "VCs essentially buy future value at today's prices",
+    "dynamics": [
+      "Information asymmetry",
+      "Patient capital",
+      "Portfolio approach",
+      "Power law returns"
+    ],
+    "market_making": "Rise of market-making in venture capital"
+  },
+
+  "funding_stages": {
+    "pre_seed": {
+      "risk": "Product development risk",
+      "investors": "Angels, friends & family, MicroVCs",
+      "goal": "Build MVP",
+      "typical_raise": "$100K-$500K"
+    },
+    "seed": {
+      "risk": "Market development risk",
+      "investors": "Seed VCs like Blume",
+      "goal": "Achieve PMF",
+      "proof_needed": "Market exists, playbook to achieve it",
+      "typical_raise": "$1M-$3M"
+    },
+    "series_a": {
+      "risk": "Scaling risk",
+      "investors": "Series A VCs",
+      "goal": "Scale proven playbook",
+      "proof_needed": "PMF achieved, rinse and repeat strategy",
+      "typical_raise": "$5M-$20M"
+    },
+    "series_b_plus": {
+      "risk": "Execution risk",
+      "investors": "Growth VCs",
+      "goal": "Market domination",
+      "proof_needed": "Strong unit economics, clear path to profitability"
+    }
+  },
+
+  "what_vcs_look_for": {
+    "at_seed": [
+      "The Pick - right problem, right timing, right team",
+      "Evidence of PPF (even early signals)",
+      "Path to MMF",
+      "Team-problem fit",
+      "Market size potential"
+    ],
+    "at_series_a": [
+      "Proven PMF",
+      "Repeatable growth playbook",
+      "Strong unit economics (CM2+)",
+      "Clear path to scale",
+      "Team scaling ability"
+    ],
+    "red_flags": [
+      "Premature scaling",
+      "Cashback-driven growth",
+      "No organic/referral growth",
+      "Founder not close to customers",
+      "Loose product-market-GTM alignment"
+    ]
+  },
+
+  "narrative_capital": {
+    "title": "Narrative Capital",
+    "definition": "The story and perception around your company",
+    "components": [
+      "Founder narrative",
+      "Company narrative",
+      "Market narrative",
+      "Investor narrative"
+    ],
+    "importance": "Helps in fundraising, recruiting, partnerships"
+  },
+
+  "fundraising_advice": {
+    "timing": {
+      "when_to_raise": "When you have proof points, not when you need money",
+      "runway_guidance": "18 months is standard runway per raise",
+      "pivot_math": "With 18 months, you have at most 1 market pivot and 1 product pivot"
+    },
+    "preparation": {
+      "know_your_metrics": [
+        "Retention curves",
+        "DAU/MAU (B2C)",
+        "Sales cycle metrics (B2B)",
+        "Unit economics",
+        "Growth rates"
+      ],
+      "know_your_story": [
+        "Why this problem?",
+        "Why now?",
+        "Why you?",
+        "Why us (the investor)?"
+      ]
+    },
+    "process": {
+      "approach": "Fundraising is a learning opportunity",
+      "parallel_tracking": "Talk to multiple investors in parallel",
+      "timeline": "Typical process is 3-6 months"
+    }
+  },
+
+  "investor_founder_dynamics": {
+    "blume_philosophy": {
+      "relationship": "Lifelong partners",
+      "horizon": "8-10 years",
+      "approach": "Partner-led, founder-first"
+    },
+    "sajith_promise": "Safe space for founders to think aloud on challenges",
+    "expectation_setting": "Clear communication on both sides"
+  },
+
+  "indus_valley_ecosystem": {
+    "description": "The Indian startup/VC ecosystem",
+    "characteristics": [
+      "Unique forcing functions",
+      "Emerged playbooks",
+      "Growing maturity",
+      "Global ambitions"
+    ],
+    "report": "The Indus Valley Report - annual analysis",
+    "playbook": "The Indus Valley Playbook - evolution chronicled"
+  }
+}

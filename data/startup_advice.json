@@ -1,0 +1,13 @@
+{
+  "_note": "Replace with Sajith's actual advice patterns and frameworks",
+  "common_advice": [
+    "Focus on PMF before scaling",
+    "Distribution is as important as product",
+    "Talk to customers early and often",
+    "Metrics matter - track the right ones"
+  ],
+  "frameworks": {
+    "pmf_signals": ["Retention", "Word of mouth", "Organic growth"],
+    "red_flags": ["No customer conversations", "Solution looking for problem", "Premature scaling"]
+  }
+}

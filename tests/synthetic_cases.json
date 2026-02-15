@@ -1,0 +1,585 @@
+{
+  "test_cases": [
+    {
+      "id": "high_quality_founder_1",
+      "category": "high_quality_human",
+      "expected_outcome": "pass",
+      "expected_score_range": [7, 10],
+      "contact": {
+        "name": "Priya Sharma",
+        "email": "priya@finstack.in",
+        "current_work": "Building fintech infrastructure for small retailers. 2 years in, ex-Razorpay PM."
+      },
+      "conversation": [
+        {
+          "user": "I've built a fintech product for small retailers. 2 years in, 200 paying customers, 15L MRR. Raised 1.5Cr from Upekkha. Previously PM at Razorpay for 3 years.",
+          "turn": 1
+        },
+        {
+          "user": "Initially tried to sell directly to retailers. Failed because they don't trust new software vendors. Pivoted to working through distributors who already have trust. Got 150 customers in 3 months via 5 distributor partnerships in Maharashtra.",
+          "turn": 2
+        },
+        {
+          "user": "Realized in Sept 2023 when our CAC hit 5k but LTV was only 2k. We were burning on Facebook ads. Switched to distributor model in Oct, CAC dropped to 500. Now LTV/CAC is 6x.",
+          "turn": 3
+        }
+      ],
+      "signals": {
+        "traction": ["200 customers", "15L MRR", "1.5Cr funding", "LTV/CAC 6x"],
+        "credentials": ["ex-Razorpay", "Upekkha"]
+      }
+    },
+    {
+      "id": "high_quality_founder_2",
+      "category": "high_quality_human",
+      "expected_outcome": "pass",
+      "expected_score_range": [7, 10],
+      "contact": {
+        "name": "Rahul Verma",
+        "email": "rahul@medtech.co",
+        "current_work": "Second-time founder building diagnostic tools. Exited previous company."
+      },
+      "conversation": [
+        {
+          "user": "Second-time founder. Sold my first company (logistics SaaS) to Delhivery in 2021 for an undisclosed amount. Now building AI-powered diagnostic tools for tier 2 hospitals.",
+          "turn": 1
+        },
+        {
+          "user": "First company took 4 years to get to 50L ARR. Made the mistake of going after enterprise too early. This time, starting with SMB hospitals - 12 paying customers in 6 months, 8L MRR.",
+          "turn": 2
+        },
+        {
+          "user": "The insight I have is that tier 2 hospitals can't afford full-time radiologists but need diagnostic support. We provide AI-assisted reads at 1/10th the cost. My co-founder is ex-AIIMS radiology chief.",
+          "turn": 3
+        }
+      ],
+      "signals": {
+        "traction": ["12 customers", "8L MRR", "exit to Delhivery"],
+        "credentials": ["serial founder", "ex-AIIMS co-founder"]
+      }
+    },
+    {
+      "id": "high_quality_founder_3",
+      "category": "high_quality_human",
+      "expected_outcome": "pass",
+      "expected_score_range": [6, 9],
+      "contact": {
+        "name": "Ankit Jain",
+        "email": "ankit@saasproduct.io",
+        "current_work": "Building developer tools. IIT Bombay, ex-Google."
+      },
+      "conversation": [
+        {
+          "user": "Building developer productivity tools. IIT Bombay 2018, spent 4 years at Google on Chrome DevTools. Launched 3 months ago, 500 developers using it, 50 paying ($29/month).",
+          "turn": 1
+        },
+        {
+          "user": "Biggest mistake was building too many features initially. Users wanted one thing - faster debugging. Stripped everything else. Conversion went from 2% to 12%.",
+          "turn": 2
+        },
+        {
+          "user": "I chose not to raise initially because I wanted to prove the model works. Now at $1.5k MRR with 40% MoM growth. Looking to raise to accelerate.",
+          "turn": 3
+        }
+      ],
+      "signals": {
+        "traction": ["500 users", "50 paying", "$1.5k MRR", "40% MoM"],
+        "credentials": ["IIT Bombay", "ex-Google"]
+      }
+    },
+    {
+      "id": "ai_polished_weak_1",
+      "category": "ai_polished_weak",
+      "expected_outcome": "fail",
+      "expected_score_range": [0, 3],
+      "contact": {
+        "name": "Generic Founder",
+        "email": "founder@startup.com",
+        "current_work": "Building an innovative AI solution to help businesses grow."
+      },
+      "conversation": [
+        {
+          "user": "I hope this message finds you well. I'm building an innovative AI-powered solution that leverages cutting-edge technology to help businesses streamline their operations and unlock significant value. Our comprehensive suite of tools enables seamless integration with existing workflows.",
+          "turn": 1
+        },
+        {
+          "user": "Thank you for that insightful question. Our approach is comprehensive and multi-faceted:\n1. We focus on exceptional user experience\n2. We leverage advanced machine learning algorithms\n3. We provide actionable insights through robust analytics\n4. We ensure scalable and seamless integration",
+          "turn": 2
+        },
+        {
+          "user": "I completely understand your concern. Generally speaking, there are multiple factors that contribute to our unique value proposition. We believe our holistic approach to addressing market needs positions us well for significant growth. Moving forward, we are focused on driving synergies across our key stakeholders.",
+          "turn": 3
+        }
+      ],
+      "ai_detection_notes": "Multiple AI phrases, numbered lists, corporate speak, no concrete details"
+    },
+    {
+      "id": "ai_polished_weak_2",
+      "category": "ai_polished_weak",
+      "expected_outcome": "fail",
+      "expected_score_range": [0, 3],
+      "contact": {
+        "name": "ChatGPT User",
+        "email": "user@email.com",
+        "current_work": "Entrepreneur building next-gen solutions"
+      },
+      "conversation": [
+        {
+          "user": "I am reaching out to discuss an exciting opportunity. I am building a revolutionary platform that will disrupt the market. Our end-to-end solution provides best-in-class features that drive growth and maximize efficiency for our valued customers.",
+          "turn": 1
+        },
+        {
+          "user": "That's an excellent question! Let me elaborate on our strategic approach:\n\n**Market Opportunity**: We are targeting a $50B market\n**Our Solution**: A paradigm-shifting platform\n**Competitive Advantage**: Our innovative technology stack\n**Growth Strategy**: Leveraging synergies across verticals",
+          "turn": 2
+        },
+        {
+          "user": "I appreciate you raising this point. In terms of traction, we have been making significant progress. We have engaged with numerous potential customers who have expressed strong interest. Our pipeline is robust and we are confident in our ability to capture market share.",
+          "turn": 3
+        }
+      ],
+      "ai_detection_notes": "Markdown formatting, bullet points, AI phrases, no specific numbers"
+    },
+    {
+      "id": "ai_polished_weak_3",
+      "category": "ai_polished_weak",
+      "expected_outcome": "fail",
+      "expected_score_range": [0, 4],
+      "contact": {
+        "name": "Vague Visionary",
+        "email": "visionary@future.io",
+        "current_work": "Transforming industries with AI"
+      },
+      "conversation": [
+        {
+          "user": "I wanted to reach out to share my vision for transforming how businesses operate. In today's rapidly evolving landscape, companies need innovative solutions that can adapt to changing market conditions. Our AI-powered platform addresses this critical need.",
+          "turn": 1
+        },
+        {
+          "user": "Certainly! I'd be delighted to provide more details. Our comprehensive platform includes:\n- Advanced analytics capabilities\n- Seamless workflow automation\n- Real-time insights generation\n- Enterprise-grade security\n\nThese features work together to create substantial value for our customers.",
+          "turn": 2
+        },
+        {
+          "user": "Indeed, that's a valid consideration. It is important to note that our approach is differentiated in several key ways. We have invested significantly in building robust infrastructure that enables us to deliver superior results. Our team brings together diverse expertise from leading technology companies.",
+          "turn": 3
+        }
+      ],
+      "ai_detection_notes": "Excessive hedging, AI politeness markers, no concrete metrics"
+    },
+    {
+      "id": "mixed_strategy_1",
+      "category": "mixed_strategy",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 5],
+      "contact": {
+        "name": "Semi-Real Founder",
+        "email": "founder@realish.com",
+        "current_work": "Building B2B SaaS, some traction"
+      },
+      "conversation": [
+        {
+          "user": "Building a B2B SaaS for HR teams. We have 30 customers and about 5L MRR.",
+          "turn": 1
+        },
+        {
+          "user": "I completely understand your question. Our comprehensive approach to customer acquisition leverages multiple channels:\n1. Inbound marketing through content\n2. Strategic partnerships with HR consultants\n3. Direct sales to enterprise accounts\n\nThis multi-faceted strategy has proven effective in driving sustainable growth.",
+          "turn": 2
+        },
+        {
+          "user": "Thank you for asking. In terms of what didn't work, I would say that generally speaking, there were multiple factors that contributed to early challenges. We have since pivoted our approach and are seeing positive results moving forward.",
+          "turn": 3
+        }
+      ],
+      "ai_detection_notes": "Started real, switched to AI for harder questions, evasion detected"
+    },
+    {
+      "id": "mixed_strategy_2",
+      "category": "mixed_strategy",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 5],
+      "contact": {
+        "name": "Half Authentic",
+        "email": "half@real.co",
+        "current_work": "Fintech founder with some metrics"
+      },
+      "conversation": [
+        {
+          "user": "I'm building a payments product. We process about 2Cr in transactions monthly across 100 merchants.",
+          "turn": 1
+        },
+        {
+          "user": "Great question! Let me walk you through our journey:\n\n**Initial Phase**: We started with a hypothesis about merchant pain points\n**Validation**: Through extensive customer research\n**Iteration**: Multiple pivots based on feedback\n**Current State**: Product-market fit achieved\n\nThis systematic approach has been instrumental in our success.",
+          "turn": 2
+        },
+        {
+          "user": "Absolutely, I'd be happy to elaborate. The specific challenge we faced was related to regulatory compliance. It is important to note that navigating the complex regulatory landscape requires careful consideration of multiple factors. We have built robust systems to address these concerns.",
+          "turn": 3
+        }
+      ],
+      "ai_detection_notes": "Real numbers in first response, AI patterns in follow-ups"
+    },
+    {
+      "id": "student_seeking_advice_1",
+      "category": "student",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "IIT Student",
+        "email": "student@iitd.ac.in",
+        "current_work": "Final year student interested in startups"
+      },
+      "conversation": [
+        {
+          "user": "I'm a final year student at IIT Delhi interested in the startup ecosystem. I want to learn about venture capital and potentially start something after graduation.",
+          "turn": 1
+        },
+        {
+          "user": "I haven't started building anything yet, but I have some ideas around EdTech. I want to understand what VCs look for before I start.",
+          "turn": 2
+        },
+        {
+          "user": "I was hoping to get career advice and understand the VC perspective. Maybe get some mentorship on how to approach building a startup.",
+          "turn": 3
+        }
+      ],
+      "classification_notes": "Student email domain, seeking general advice, no specific actionable need"
+    },
+    {
+      "id": "student_seeking_advice_2",
+      "category": "student",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "MBA Student",
+        "email": "mba@isb.edu",
+        "current_work": "MBA student exploring entrepreneurship"
+      },
+      "conversation": [
+        {
+          "user": "I'm doing my MBA at ISB and want to connect with VCs to understand the funding landscape better. Would love 30 minutes of your time for a coffee chat.",
+          "turn": 1
+        },
+        {
+          "user": "I'm exploring different startup ideas but haven't committed to one yet. Looking to understand what makes founders successful from an investor's perspective.",
+          "turn": 2
+        },
+        {
+          "user": "I think it would be valuable to learn about your investment thesis and what patterns you see in successful companies. This would help me make better decisions about my career.",
+          "turn": 3
+        }
+      ],
+      "classification_notes": "Generic networking request, no specific value exchange"
+    },
+    {
+      "id": "partnership_pitch_1",
+      "category": "partnership",
+      "expected_outcome": "fail",
+      "expected_score_range": [0, 2],
+      "contact": {
+        "name": "BD Manager",
+        "email": "bd@saasvendor.com",
+        "current_work": "Business development at a SaaS company"
+      },
+      "conversation": [
+        {
+          "user": "I wanted to reach out about a potential partnership opportunity. Our company provides enterprise solutions that could benefit your portfolio companies.",
+          "turn": 1
+        },
+        {
+          "user": "We offer a comprehensive suite of tools including CRM, analytics, and automation. Many leading VCs have partnered with us to provide value to their portfolios.",
+          "turn": 2
+        },
+        {
+          "user": "I'd love to schedule a call to discuss how we can collaborate. We have flexible partnership models that could work well for Blume's portfolio.",
+          "turn": 3
+        }
+      ],
+      "classification_notes": "Sales/partnership pitch, not a founder seeking investment"
+    },
+    {
+      "id": "partnership_pitch_2",
+      "category": "partnership",
+      "expected_outcome": "fail",
+      "expected_score_range": [0, 2],
+      "contact": {
+        "name": "Sales Rep",
+        "email": "sales@consulting.firm",
+        "current_work": "Strategy consulting"
+      },
+      "conversation": [
+        {
+          "user": "Hello! I hope this message finds you well. I am reaching out from a leading strategy consulting firm. We specialize in helping startups scale their operations efficiently.",
+          "turn": 1
+        },
+        {
+          "user": "Our services include market research, go-to-market strategy, and operational optimization. We have worked with several unicorns and would love to explore collaboration opportunities.",
+          "turn": 2
+        },
+        {
+          "user": "I believe there are significant synergies between our offerings and Blume's portfolio needs. Would you be open to a brief call to explore potential partnership models?",
+          "turn": 3
+        }
+      ],
+      "classification_notes": "Service provider pitch, using AI language, partnership/sales"
+    },
+    {
+      "id": "generic_edtech_1",
+      "category": "low_signal_archetype",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "EdTech Founder",
+        "email": "founder@learnplatform.in",
+        "current_work": "Building online learning platform"
+      },
+      "conversation": [
+        {
+          "user": "I'm building an online learning platform to democratize education. We want to make quality education accessible to everyone in India.",
+          "turn": 1
+        },
+        {
+          "user": "We have a mobile app with video courses and quizzes. Currently working on getting our first users through social media marketing.",
+          "turn": 2
+        },
+        {
+          "user": "The market is huge - millions of students need affordable education. We believe our platform can make a real difference.",
+          "turn": 3
+        }
+      ],
+      "archetype_notes": "Generic EdTech, no traction, vague market sizing, matches low-signal archetype"
+    },
+    {
+      "id": "generic_ai_for_x_1",
+      "category": "low_signal_archetype",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "AI Founder",
+        "email": "ai@healthtech.io",
+        "current_work": "AI for healthcare"
+      },
+      "conversation": [
+        {
+          "user": "I'm building an AI-powered healthcare solution. We use machine learning to improve patient outcomes.",
+          "turn": 1
+        },
+        {
+          "user": "Our AI can analyze medical data and provide insights. We're targeting hospitals and clinics.",
+          "turn": 2
+        },
+        {
+          "user": "The healthcare AI market is massive. We believe our technology can transform how healthcare is delivered.",
+          "turn": 3
+        }
+      ],
+      "archetype_notes": "AI for X pattern, no specific problem, no traction, vague claims"
+    },
+    {
+      "id": "marketplace_archetype_1",
+      "category": "low_signal_archetype",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "Marketplace Founder",
+        "email": "founder@localmarket.co",
+        "current_work": "Building local services marketplace"
+      },
+      "conversation": [
+        {
+          "user": "I'm building a marketplace connecting local service providers with customers. Think Uber but for home services.",
+          "turn": 1
+        },
+        {
+          "user": "We launched last month and have onboarded 50 service providers. Working on getting demand side traction now.",
+          "turn": 2
+        },
+        {
+          "user": "The opportunity is huge - every household needs these services. We just need to crack the chicken-and-egg problem.",
+          "turn": 3
+        }
+      ],
+      "archetype_notes": "Uber-for-X pattern, marketplace cold start problem, no demand traction"
+    },
+    {
+      "id": "operator_exploring_1",
+      "category": "operator",
+      "expected_outcome": "conditional",
+      "expected_score_range": [4, 6],
+      "contact": {
+        "name": "Tech Lead",
+        "email": "lead@bigtech.com",
+        "current_work": "Engineering lead at a tech company, exploring startup ideas"
+      },
+      "conversation": [
+        {
+          "user": "I'm an engineering lead at a large tech company, been here 5 years. Thinking about leaving to start something. Want to understand the VC perspective before taking the leap.",
+          "turn": 1
+        },
+        {
+          "user": "I've identified a problem in developer tooling - seen it firsthand. Have a prototype but haven't quit yet. Talking to potential users on weekends.",
+          "turn": 2
+        },
+        {
+          "user": "Specific problem: deployment pipelines are broken for microservices. Talked to 15 DevOps engineers, 12 said they'd pay for a solution. Prototype can reduce deploy time by 40%.",
+          "turn": 3
+        }
+      ],
+      "notes": "Operator with relevant experience, has done validation, specific problem, borderline case"
+    },
+    {
+      "id": "international_founder_1",
+      "category": "international",
+      "expected_outcome": "conditional",
+      "expected_score_range": [5, 8],
+      "contact": {
+        "name": "US Founder",
+        "email": "founder@uscompany.com",
+        "current_work": "Building B2B SaaS, looking to enter India"
+      },
+      "conversation": [
+        {
+          "user": "I'm a US-based founder with a B2B SaaS doing $50K MRR. Want to understand the India market and potentially expand there. Looking for local VC perspective.",
+          "turn": 1
+        },
+        {
+          "user": "Our product is workflow automation for sales teams. 30 customers in the US, mostly SMBs. Seeing inbound interest from Indian companies.",
+          "turn": 2
+        },
+        {
+          "user": "Built this over 18 months, bootstrapped. Previous startup was acquired by Salesforce (small exit). Co-founder is ex-Zoho, has India connections.",
+          "turn": 3
+        }
+      ],
+      "notes": "International founder with traction, relevant experience, specific India expansion question"
+    },
+    {
+      "id": "high_quality_early_stage_1",
+      "category": "high_quality_human",
+      "expected_outcome": "pass",
+      "expected_score_range": [6, 8],
+      "contact": {
+        "name": "Early Founder",
+        "email": "founder@newsaas.io",
+        "current_work": "Pre-launch founder with domain expertise"
+      },
+      "conversation": [
+        {
+          "user": "I spent 7 years at Freshworks building their SMB sales motion. Leaving to build vertical SaaS for accounting firms. Haven't launched yet but have 15 design partners lined up.",
+          "turn": 1
+        },
+        {
+          "user": "At Freshworks, I learned that generic horizontal SaaS struggles with retention in India. Accounting firms have specific workflows nobody serves well. I know because my family runs one.",
+          "turn": 2
+        },
+        {
+          "user": "The 15 design partners are through my family's CA network. They've committed to pay Rs 5000/month each once we launch. Total addressable is 80,000 CA firms in India.",
+          "turn": 3
+        }
+      ],
+      "signals": {
+        "traction": ["15 design partners", "5000/month commitment"],
+        "credentials": ["ex-Freshworks 7 years", "family CA network"]
+      }
+    },
+    {
+      "id": "high_ai_but_good_signals_1",
+      "category": "mixed_signals",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "Polished Founder",
+        "email": "polished@startup.io",
+        "current_work": "Building fintech with good metrics but AI writing"
+      },
+      "conversation": [
+        {
+          "user": "I hope this message finds you well. I am building an innovative fintech solution. We currently have 100 customers and 10L MRR. Our comprehensive platform leverages cutting-edge technology.",
+          "turn": 1
+        },
+        {
+          "user": "Thank you for that insightful question. Our go-to-market strategy involves:\n1. Strategic partnerships with banks\n2. Direct sales to enterprises\n3. Inbound marketing initiatives\n\nThis multi-pronged approach has proven effective.",
+          "turn": 2
+        },
+        {
+          "user": "I completely understand. The challenges we faced were multi-faceted. Generally speaking, regulatory compliance and customer acquisition presented significant hurdles. Moving forward, we have implemented robust solutions.",
+          "turn": 3
+        }
+      ],
+      "notes": "Good metrics but heavy AI writing style - authenticity score should limit final score"
+    },
+    {
+      "id": "vague_fintech_1",
+      "category": "low_signal_archetype",
+      "expected_outcome": "fail",
+      "expected_score_range": [2, 4],
+      "contact": {
+        "name": "Fintech Founder",
+        "email": "founder@finclusion.in",
+        "current_work": "Financial inclusion for the underserved"
+      },
+      "conversation": [
+        {
+          "user": "I'm building a fintech solution for financial inclusion. We want to bring banking to the unbanked population in rural India.",
+          "turn": 1
+        },
+        {
+          "user": "Our approach is to leverage mobile technology to reach underserved communities. We believe everyone deserves access to financial services.",
+          "turn": 2
+        },
+        {
+          "user": "The opportunity is massive - hundreds of millions without bank accounts. We're working on partnerships with local organizations.",
+          "turn": 3
+        }
+      ],
+      "archetype_notes": "Vague fintech, no traction, naive about regulatory challenges"
+    },
+    {
+      "id": "authentic_failure_story_1",
+      "category": "high_quality_human",
+      "expected_outcome": "pass",
+      "expected_score_range": [6, 9],
+      "contact": {
+        "name": "Honest Founder",
+        "email": "honest@startup.co",
+        "current_work": "Second attempt after failed startup"
+      },
+      "conversation": [
+        {
+          "user": "My first startup failed last year. Raised 2Cr, burned it in 18 months trying to build a D2C brand. Learned a lot about what not to do.",
+          "turn": 1
+        },
+        {
+          "user": "Main mistake: we focused on Instagram growth instead of unit economics. Had 50k followers but CAC was 800 and AOV was 600. Math never worked. Shut down in March 2024.",
+          "turn": 2
+        },
+        {
+          "user": "Now building B2B - selling to businesses, not consumers. Same category (personal care) but white-labeling for hotels. Already have 3 hotel chains as customers, 4L MRR.",
+          "turn": 3
+        }
+      ],
+      "signals": {
+        "traction": ["3 hotel chains", "4L MRR"],
+        "credentials": ["previous founder", "learned from failure"]
+      },
+      "notes": "Authentic failure story, specific learnings, pivoted successfully"
+    }
+  ],
+  "metadata": {
+    "total_cases": 22,
+    "categories": {
+      "high_quality_human": 6,
+      "ai_polished_weak": 3,
+      "mixed_strategy": 2,
+      "student": 2,
+      "partnership": 2,
+      "low_signal_archetype": 4,
+      "operator": 1,
+      "international": 1,
+      "mixed_signals": 1
+    },
+    "expected_outcomes": {
+      "pass": 7,
+      "fail": 13,
+      "conditional": 2
+    }
+  }
+}

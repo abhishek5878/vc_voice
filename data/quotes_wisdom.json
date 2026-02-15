@@ -1,0 +1,121 @@
+{
+  "category": "Sajith Pai's Quotes & Wisdom",
+  "description": "Collection of memorable quotes, one-liners, and wisdom from Sajith Pai's writings",
+
+  "pmf_quotes": [
+    "PMF is like love, you'll know it when you have it - this is WRONG. PMF needs a systematic framework.",
+    "PrePMF startups are a learning machine, not an earning machine",
+    "Before you go big, you need to get it right. This is what PMF is.",
+    "PMF is effectively the nailing before the scaling",
+    "The biggest error founders make is confusing PPF for PMF, then pouring on GTM fuel prematurely",
+    "Focus on the monkey, not the pedestal! Solve for the hardest thing first!",
+    "Uncomfortably narrow personas addressed by one hero channel through a sharp message is how first-time MMF is achieved",
+    "Believe what they do, not what they tell",
+    "PMF can come and go (ask Paytm's Wallet team or the Clubhouse guys)",
+    "PMF = PPF + MMF (Product-to-Problem Fit + Motion-to-Market Fit)",
+    "PMF = GRUE (Growth with Retention and Unit Economics)",
+    "Getting to CM2+ is a good shorthand for getting to PMF"
+  ],
+
+  "strategy_quotes": [
+    "Where you play is more important than how you play",
+    "Strategy is about choices and tradeoffs around where to play and how to win",
+    "The first time founder thinks product while the second time founder thinks distribution",
+    "The best founders think of product and distribution as joined at the hip"
+  ],
+
+  "tam_quotes": [
+    "TAM in itself is not very useful, but THINKING about TAM is extremely useful",
+    "Like Eisenhower on plans: 'Plans are worthless, but planning is everything'",
+    "Best founders go beyond TAM to look at TEM (Total Expandable Market)"
+  ],
+
+  "india_ecosystem_quotes": [
+    "India is not one but three Indias (India1, India2 and India3)",
+    "Much of our consumption is driven by India1 (<10% population but 40% of spends)",
+    "It is not easy for India1 startups to expand to India2 or vice versa",
+    "Finding PMF in India1 doesn't mean automatic fit in India2",
+    "The next wave of global startups are emerging out of India"
+  ],
+
+  "vc_investor_quotes": [
+    "Early stage valuations aren't really valuations. They are the exhaust fumes of a negotiation about two things — the amount raised and the ownership percentage",
+    "Nailing capital vs scaling capital - know the difference",
+    "The best VCs are long, preloaded, context windows for their founders",
+    "Venture as temporal arbitrage",
+    "I am greedy to be part of ambitious founder journeys, and help inflect them to greatness"
+  ],
+
+  "founder_wisdom": [
+    "The founders who select me to be part of their journeys pick me to be their PMF coach, sparring partner, 11pm friend",
+    "Offer a safe space for founders to think aloud on their challenges, and help them get to a solution",
+    "Revolutionary founders build transformational companies",
+    "The three jobs of a startup CEO: Prioritisation, Hiring, Fundraising - in that order"
+  ],
+
+  "product_wisdom": [
+    "Don't overbuild the product at this stage. Time is money.",
+    "Break down assumptions into modular components and test hard things first",
+    "Believe what customers do, not what they tell",
+    "Product-market-GTM-team - the Congruent Square needs alignment"
+  ],
+
+  "unit_economics_quotes": [
+    "CM2+ (CM2 positive) is a key goal that early stage startups should strive for",
+    "Getting to CM2+ is integrally linked with getting to PMF",
+    "LTV:CAC 3:1 is a good benchmark",
+    "S&M costs should be 1/3rd of contribution margin"
+  ],
+
+  "learning_quotes": [
+    "There are 3 routes on how the best founders drive learnings: Customer interactions, Hiring process, Fundraising conversations",
+    "There is extremely high alpha in startup/tech podcasts vs other content formats",
+    "I like to read, think about and write on tech, business, culture and their intersections"
+  ],
+
+  "pivot_wisdom": [
+    "As far as possible, pivot on the market, not the product",
+    "It's much harder to change product to fit market; vice versa is what you're seeking",
+    "With 18 months runway per raise, you have at most 1 market pivot and 1 product pivot"
+  ],
+
+  "one_liners": {
+    "on_pmf": "PMF is the nailing before the scaling",
+    "on_focus": "Focus on the monkey, not the pedestal",
+    "on_customers": "Believe what they do, not what they tell",
+    "on_founders": "First time founders think product, second time founders think distribution",
+    "on_strategy": "Where you play is more important than how you play",
+    "on_startups": "PrePMF startups are a learning machine, not an earning machine",
+    "on_india": "India is not one but three Indias",
+    "on_vcs": "The best VCs are long, preloaded, context windows for their founders"
+  },
+
+  "frameworks_named": [
+    "PPF + MMF = PMF",
+    "GRUE (Growth with Retention and Unit Economics)",
+    "India1-India2-India3 Stack",
+    "The Congruent Square",
+    "The Three Jobs of a CEO",
+    "CM2+ as PMF proxy",
+    "The Pick (Four Routes)",
+    "PMF X-Ray Framework",
+    "Nailing Capital vs Scaling Capital",
+    "TEM (Total Expandable Market)"
+  ],
+
+  "memorable_phrases": [
+    "11pm friend",
+    "PMF coach",
+    "Social media cheerleader",
+    "Sparring partner",
+    "Official podcast recommender",
+    "Kaffeeklatscher",
+    "Narrative capital",
+    "English tax",
+    "Avocado startups",
+    "Domestech",
+    "Exhaust fumes of negotiation",
+    "Monkey not the pedestal",
+    "Uncomfortably narrow personas"
+  ]
+}

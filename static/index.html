@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI Triage - Sajith Pai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-pi">PI</span>
+                <span class="logo-text">Personal Intelligence</span>
+            </div>
+            <div class="header-info">
+                <span class="header-status" id="status-indicator">Ready</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- API Key Setup (Step 0) -->
+            <section class="section api-key-section" id="api-key-section">
+                <div class="section-header">
+                    <h2>Setup</h2>
+                    <p class="section-desc">Enter your OpenAI API key to begin. Your key is stored locally and never sent to our servers.</p>
+                </div>
+                <form class="api-key-form" id="api-key-form">
+                    <div class="form-group">
+                        <label for="api-key">OpenAI API Key</label>
+                        <input
+                            type="password"
+                            id="api-key"
+                            name="api_key"
+                            placeholder="sk-..."
+                            required
+                            autocomplete="off"
+                        >
+                        <span class="form-hint">Your API key starts with 'sk-' and is available at platform.openai.com</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Continue</button>
+                </form>
+            </section>
+
+            <!-- Contact Intake (Step 1) -->
+            <section class="section intake-section hidden" id="intake-section">
+                <div class="section-header">
+                    <h2>Before we begin</h2>
+                    <p class="section-desc">This is a triage system for Sajith Pai. Provide your information to start.</p>
+                </div>
+                <form class="intake-form" id="intake-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="you@company.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="current-work">What are you currently working on?</label>
+                        <textarea
+                            id="current-work"
+                            name="current_work"
+                            required
+                            placeholder="Describe your current work, role, or what you're building..."
+                            rows="4"
+                        ></textarea>
+                        <span class="form-hint">Be specific. Include your role, company/startup, and what you're doing.</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Start Conversation</button>
+                </form>
+            </section>
+
+            <!-- Chat Interface (Step 2) -->
+            <section class="section chat-section hidden" id="chat-section">
+                <div class="chat-header">
+                    <div class="chat-info">
+                        <span class="chat-title">Triage Conversation</span>
+                        <span class="turn-counter" id="turn-counter">Turn 0/5</span>
+                    </div>
+                    <div class="signal-indicator" id="signal-indicator">
+                        <span class="signal-label">Signals:</span>
+                        <span class="signal-value" id="signal-count">0</span>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be inserted here -->
+                </div>
+
+                <div class="chat-input-container" id="chat-input-container">
+                    <form class="chat-form" id="chat-form">
+                        <textarea
+                            id="chat-input"
+                            name="message"
+                            placeholder="Type your response..."
+                            rows="3"
+                            required
+                        ></textarea>
+                        <button type="submit" class="btn btn-send" id="send-btn">
+                            <span class="btn-text">Send</span>
+                            <span class="btn-loading hidden">Sending...</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Evaluation Result (Step 3) -->
+            <section class="section evaluation-section hidden" id="evaluation-section">
+                <div class="evaluation-header">
+                    <h2>Evaluation Complete</h2>
+                </div>
+                <div class="evaluation-content" id="evaluation-content">
+                    <!-- Evaluation will be inserted here -->
+                </div>
+                <div class="evaluation-actions">
+                    <button class="btn btn-secondary" id="start-over-btn">Start New Conversation</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>PI Triage System v1.0 | <a href="#" id="clear-key-link">Clear API Key</a></p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Processing...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

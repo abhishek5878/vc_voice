@@ -1,0 +1,9 @@
+{
+  "_note": "Replace with actual India ecosystem data",
+  "key_players": {
+    "vcs": ["Blume Ventures", "Sequoia India", "Accel", "Matrix Partners"],
+    "accelerators": ["Upekkha", "100x.VC", "Antler India"]
+  },
+  "market_dynamics": "Large domestic market, mobile-first, tier 2/3 expansion",
+  "regulatory_notes": "RBI guidelines for fintech, DPDP Act for data"
+}

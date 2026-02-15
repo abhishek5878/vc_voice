@@ -1,0 +1,58 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/api/health.py"
+    },
+    {
+      "src": "/api/intake",
+      "dest": "/api/intake.py"
+    },
+    {
+      "src": "/api/chat",
+      "dest": "/api/chat.py"
+    },
+    {
+      "src": "/",
+      "dest": "/static/index.html"
+    },
+    {
+      "src": "/styles.css",
+      "dest": "/static/styles.css"
+    },
+    {
+      "src": "/app.js",
+      "dest": "/static/app.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/static/$1"
+    }
+  ],
+  "functions": {
+    "api/*.py": {
+      "maxDuration": 20
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, X-API-Key" }
+      ]
+    }
+  ]
+}

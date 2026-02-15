@@ -1,0 +1,9 @@
+{
+  "_note": "Replace with actual Blume portfolio data",
+  "portfolio_companies": [],
+  "investment_criteria": {
+    "stage": "Seed to Series A",
+    "sectors": ["Consumer", "Fintech", "SaaS", "D2C"],
+    "check_size": "Variable"
+  }
+}

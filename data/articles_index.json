@@ -1,0 +1,378 @@
+{
+  "category": "Complete Articles Index",
+  "description": "Index of all Sajith Pai's articles across platforms for reference",
+  "last_updated": "January 2026",
+
+  "pmf_essays": [
+    {
+      "title": "The PMF X-Ray Framework",
+      "url": "https://sajithpai.com/the-pmf-x-ray-framework/",
+      "date": "September 2025",
+      "type": "Framework",
+      "key_topic": "Structured way to analyze startup PMF journey"
+    },
+    {
+      "title": "PMF Playbook: Chapter II – The Pick",
+      "url": "https://sajithpai.com/pmf-playbook-chapter-ii-the-pick/",
+      "date": "August 2025",
+      "type": "Book Chapter",
+      "length": "20k words",
+      "key_topic": "Selecting the right problem to work on"
+    },
+    {
+      "title": "PMF Playbook: Chapter I – Understanding PMF",
+      "url": "https://sajithpai.com/pmf-playbook-chapter-i-understanding-pmf/",
+      "date": "July 2025",
+      "type": "Book Chapter",
+      "length": "13k words",
+      "key_topic": "PPF + MMF = PMF framework"
+    },
+    {
+      "title": "The Busy Founder's Guide to PMF",
+      "url": "https://sajithpai.com/the-busy-founders-guide-to-pmf/",
+      "date": "November 2024",
+      "type": "Summary",
+      "key_topic": "TL;DR of PMF framework"
+    },
+    {
+      "title": "Notes & Thoughts on First Round Capital's PMF Method",
+      "url": "https://sajithpai.com/notes-thoughts-on-first-round-capitals-pmf-method/",
+      "date": "April 2024",
+      "type": "Analysis"
+    },
+    {
+      "title": "Why CM2+ Matters for Startups",
+      "url": "https://sajithpai.com/why-cm2-matters-for-startups/",
+      "date": "November 2023",
+      "type": "Framework",
+      "key_topic": "CM2+ as PMF proxy"
+    },
+    {
+      "title": "What is PMF? Learnings from 10 Interviews",
+      "url": "https://sajithpai.com/what-is-pmf-learnings-from-10-interviews/",
+      "date": "May 2023",
+      "type": "Research Summary"
+    },
+    {
+      "title": "The Congruent Square",
+      "url": "https://sajithpai.com/the-congruent-square/",
+      "date": "November 2021",
+      "type": "Framework",
+      "key_topic": "Product-Market-GTM-Team alignment"
+    },
+    {
+      "title": "Defining 'Product-Market Fit'",
+      "url": "https://sajithpai.com/defining-product-market-fit/",
+      "date": "November 2021",
+      "type": "Definition"
+    },
+    {
+      "title": "Down the 'product-market fit' rabbit hole!",
+      "url": "https://sajithpai.com/down-the-product-market-fit-rabbit-hole/",
+      "date": "November 2021",
+      "type": "History/Research"
+    }
+  ],
+
+  "pmf_convos": [
+    {
+      "number": 20,
+      "title": "PMF Convo #20 – Rajan Bajaj, slice",
+      "url": "https://sajithpai.com/pmf-convo-20-rajan-bajaj-slice/",
+      "date": "September 2025"
+    },
+    {
+      "number": 19,
+      "title": "PMF Convo #19 – Romita Mazumdar, Foxtale",
+      "url": "https://sajithpai.com/pmf-convo-19-romita-mazumdar-foxtale/",
+      "date": "November 2024"
+    },
+    {
+      "number": 18,
+      "title": "PMF Convo #18 – Srikrishnan Ganesan, Rocketlane",
+      "url": "https://sajithpai.com/pmf-convo-18-srikrishnan-ganeshan-rocketlane/",
+      "date": "September 2024"
+    },
+    {
+      "number": 17,
+      "title": "PMF Convo #17 – Mohit Kumar, Ultrahuman",
+      "url": "https://sajithpai.com/pmf-convo-17-mohit-kumar-ultrahuman/",
+      "date": "September 2024"
+    },
+    {
+      "number": 16,
+      "title": "PMF Convo #16 – Shubham Goel, Affinity",
+      "url": "https://sajithpai.com/pmf-convo-16-shubham-goel-affinity/",
+      "date": "December 2023"
+    },
+    {
+      "number": 15,
+      "title": "PMF Convo #15 – Ranjeet Singh, Pratilipi",
+      "url": "https://sajithpai.com/pmf-convo-15-ranjeet-singh-pratilipi/",
+      "date": "December 2023"
+    },
+    {
+      "number": 14,
+      "title": "PMF Convo #14 – Vinay Hiremath, Loom",
+      "url": "https://sajithpai.com/pmf-convo-14-vinay-hiremath-loom/",
+      "date": "November 2023"
+    },
+    {
+      "number": 13,
+      "title": "PMF Convo #13 – Arindam Paul, Atomberg",
+      "url": "https://sajithpai.com/pmf-convo-13-arindam-paul-atomberg/",
+      "date": "September 2023"
+    },
+    {
+      "number": 12,
+      "title": "PMF Convo #12 – Shreya Mishra, SolarSquare/Flyrobe",
+      "url": "https://sajithpai.com/pmf-convo-12-shreya-mishra-solarsquare-prev-flyrobe/",
+      "date": "July 2023"
+    },
+    {
+      "number": 11,
+      "title": "PMF Convo #11 – Abhishek Kejriwal, Kutumb",
+      "url": "https://sajithpai.com/pmf-convo-11-abhishek-kejriwal-kutumb/",
+      "date": "June 2023"
+    },
+    {
+      "number": 10,
+      "title": "PMF Convo #10 – Prukalpa Sankar, Atlan",
+      "url": "https://sajithpai.com/pmf-convo-10-prukalpa-sankar-atlan/",
+      "date": "June 2023"
+    },
+    {
+      "number": 9,
+      "title": "PMF Convo #9 – Konark Singhal, Mountblue/Mockbank",
+      "url": "https://sajithpai.com/pmf-convo-9-konark-singhal-mountblue-ex-mockbank/",
+      "date": "April 2023"
+    },
+    {
+      "number": 8,
+      "title": "PMF Convo #8 – Prashant Singh, Jar",
+      "url": "https://sajithpai.com/pmf-convo-8-prashant-singh-jar/",
+      "date": "April 2023"
+    },
+    {
+      "number": 7,
+      "title": "PMF Convo #7 – Vasanth Kamath, smallcase",
+      "url": "https://sajithpai.com/pmf-convo-7-vasanth-kamath-smallcase/",
+      "date": "March 2023"
+    },
+    {
+      "number": 6,
+      "title": "PMF Convo #6 – Asad Khan, LambdaTest",
+      "url": "https://sajithpai.com/pmf-convo-6-asad-khan-lambdatest/",
+      "date": "January 2023"
+    },
+    {
+      "number": 5,
+      "title": "PMF Convo #5 – Pulkit Agrawal, Chameleon",
+      "url": "https://sajithpai.com/pmf-convo-5-pulkit-agrawal-chameleon/",
+      "date": "January 2023"
+    },
+    {
+      "number": 4,
+      "title": "PMF Convo #4 – Nishchay A G, Jar",
+      "url": "https://sajithpai.com/pmf-convo-4-nishchay-a-g-jar/",
+      "date": "December 2022"
+    },
+    {
+      "number": 3,
+      "title": "PMF Convo #3 – Sheel Mohnot, Better Tomorrow Ventures",
+      "url": "https://sajithpai.com/pmf-convo-3-sheel-mohnot-better-tomorrow-ventures/",
+      "date": "November 2022"
+    },
+    {
+      "number": 2,
+      "title": "PMF Convo #2 – Anshuman Bapna, Terra.do",
+      "url": "https://sajithpai.com/pmfconvo-2-anshuman-bapna-terra-do/",
+      "date": "November 2022"
+    },
+    {
+      "number": 1,
+      "title": "PMF Convo #1 – Chaitanya Ramalingegowda, Wakefit",
+      "url": "https://sajithpai.com/pmf-convo-1-chaitanya-ramalingegowda-wakefit/",
+      "date": "October 2022"
+    }
+  ],
+
+  "vc_startup_articles": [
+    {
+      "title": "Agent-Powered Interactions and Future of Work",
+      "url": "https://sajithpai.com/agent-powered-interactions-second-order-effects-and-the-future-of-work/",
+      "date": "January 2026",
+      "publication": "The Generalist"
+    },
+    {
+      "title": "AMA with Sajith Pai | SeedToScale",
+      "url": "https://sajithpai.com/ama-with-sajith-pai-seedtoscale/",
+      "date": "June 2025",
+      "type": "Transcript"
+    },
+    {
+      "title": "The best VCs are long, preloaded, context windows for their founders",
+      "url": "https://sajithpai.com/the-best-vcs-are-long-preloaded-context-windows-for-their-founders/",
+      "date": "May 2025"
+    },
+    {
+      "title": "The Four Routes to Starting Up",
+      "url": "https://sajithpai.com/the-four-routes-to-starting-up/",
+      "date": "April 2025"
+    },
+    {
+      "title": "Venture as temporal arbitrage",
+      "url": "https://sajithpai.com/venture-as-temporal-arbitrage-and-the-rise-of-marketmaking-in-venture/",
+      "date": "March 2025"
+    },
+    {
+      "title": "The Three Jobs of a Startup CEO",
+      "url": "https://sajithpai.com/the-three-jobs-of-a-startup-ceo/",
+      "type": "Framework"
+    },
+    {
+      "title": "Revenue Equation, KPIs, and Controllable Input Metrics",
+      "url": "https://sajithpai.com/revenue-equation-kpis-and-controllable-input-metrics/",
+      "type": "Framework"
+    },
+    {
+      "title": "TAM: Notes & Thoughts",
+      "url": "https://sajithpai.com/tam-notes-thoughts/",
+      "type": "Framework"
+    },
+    {
+      "title": "Reflections on Strategy",
+      "url": "https://sajithpai.com/reflections-on-strategy/",
+      "type": "Framework"
+    }
+  ],
+
+  "medium_articles": [
+    {
+      "title": "Narrative Capital",
+      "url": "https://sajithpai.medium.com/narrative-capital-cff7bc28664",
+      "platform": "Medium"
+    },
+    {
+      "title": "Tokeni$eMe",
+      "url": "https://sajithpai.medium.com/tokeni-eme-5b51449ba3c1",
+      "platform": "Medium",
+      "type": "Fiction"
+    },
+    {
+      "title": "Shower Thoughts",
+      "url": "https://sajithpai.medium.com/shower-thoughts-61e5beb8c835",
+      "platform": "Medium"
+    },
+    {
+      "title": "Nailing Capital vs Scaling Capital",
+      "url": "https://sajithpai.medium.com/nailing-capital-vs-scaling-capital-70b2b22b553d",
+      "platform": "Medium"
+    },
+    {
+      "title": "Exhaust Fumes - Understanding Startup Valuations",
+      "url": "https://sajithpai.medium.com/exhaust-fumes-or-understanding-startup-valuations-610897d7bcf8",
+      "platform": "Medium"
+    },
+    {
+      "title": "Network States and Nation SPACs",
+      "url": "https://sajithpai.medium.com/network-states-and-nation-spacs-or-westphalia-redux-5bd9204bc011",
+      "platform": "Medium"
+    }
+  ],
+
+  "key_reports": [
+    {
+      "title": "The Indus Valley Report",
+      "url": "https://indusvalleyreport.com",
+      "type": "Annual Report",
+      "editions": ["2022", "2023", "2024", "2025"],
+      "description": "100+ slide annual report on Indian startup ecosystem"
+    },
+    {
+      "title": "The Indus Valley Playbook",
+      "date": "January 2021",
+      "type": "Long-form Essay",
+      "description": "Evolution of Indian venture + startup ecosystem"
+    }
+  ],
+
+  "miscellany_culture": [
+    {
+      "title": "Reflections of a Podcast Power User",
+      "url": "https://sajithpai.com/reflections-of-a-podcast-power-user-january-2026/",
+      "date": "January 2026"
+    },
+    {
+      "title": "Reflections on completing 10 years in Delhi",
+      "url": "https://sajithpai.com/reflections-on-completing-10-years-in-delhi/",
+      "date": "April 2025"
+    },
+    {
+      "title": "My fave books of 2024",
+      "url": "https://sajithpai.com/my-fave-books-of-2024/",
+      "date": "December 2024"
+    },
+    {
+      "title": "My fave podcast episodes of 2024",
+      "url": "https://sajithpai.com/my-fave-podcast-episodes-of-2024/",
+      "date": "December 2024"
+    },
+    {
+      "title": "My fave articles of 2024",
+      "url": "https://sajithpai.com/my-fave-articles-of-2024/",
+      "date": "December 2024"
+    },
+    {
+      "title": "Smart productivity vs wisdom productivity",
+      "url": "https://sajithpai.com/smart-productivity-vs-wisdom-productivity/",
+      "date": "October 2024"
+    },
+    {
+      "title": "What I enjoyed reading, listening, and watching in 2023",
+      "url": "https://sajithpai.com/what-i-enjoyed-reading-listening-and-watching-in-2023/",
+      "date": "December 2023"
+    }
+  ],
+
+  "interleavings_series": {
+    "description": "Notes and thoughts on recent reads - recurring series",
+    "frequency": "Monthly",
+    "latest_editions": [
+      "December 2025",
+      "October 2025",
+      "September 2025",
+      "August 2025",
+      "July 2025",
+      "June 2025",
+      "May 2025",
+      "April 2025",
+      "March 2025"
+    ],
+    "content_type": "Curated links with commentary"
+  },
+
+  "external_publications": [
+    {
+      "publication": "Scroll",
+      "topics": "Tech, Culture"
+    },
+    {
+      "publication": "Buzzfeed",
+      "topics": "Culture"
+    },
+    {
+      "publication": "Quartz",
+      "topics": "Business, Tech"
+    },
+    {
+      "publication": "Arre",
+      "topics": "Culture"
+    },
+    {
+      "publication": "The Generalist",
+      "topics": "AI, Future of Work",
+      "article": "Infinite Personal Agents (Jan 2026)"
+    }
+  ]
+}
