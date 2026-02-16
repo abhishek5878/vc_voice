@@ -4,21 +4,30 @@ Uses existing 'sajith' tenant, creates dummy Lead, exercises /chat and asserts
 extracted_signals, cumulative_ai_score, and final evaluation.
 
 Run from voicevc project root: pytest tests/test_triage_flow.py -v
-Requires: pytest, pytest-asyncio, httpx. Optional: pyproject.toml [tool.pytest.ini_options] asyncio_mode = "auto"
+Requires: pytest, pytest-asyncio, httpx, app.main, app.database. Skips if app not available.
 """
+from __future__ import annotations
 
 import uuid
 from typing import Optional
 
 import pytest
-import httpx
-from httpx import ASGITransport, AsyncClient
-from sqlmodel import Session, select
 
-# VoiceVC app and DB (run from voicevc project root)
-from app.main import app
-from app.database import get_session
-from app.models import Lead, Tenant
+# Skip entire module if VoiceVC app is not available (e.g. running in pi-triage only)
+try:
+    from app.main import app
+    from app.database import get_session
+    from app.models import Lead, Tenant
+    import httpx
+    from httpx import ASGITransport, AsyncClient
+    from sqlmodel import Session, select
+    _VOICEVC_AVAILABLE = True
+except ImportError:
+    _VOICEVC_AVAILABLE = False
+    Lead = Tenant = Session = select = get_session = app = None  # type: ignore[misc, assignment]
+    AsyncClient = ASGITransport = httpx = None  # type: ignore[assignment]
+
+pytestmark = pytest.mark.skipif(not _VOICEVC_AVAILABLE, reason="VoiceVC app (app.main, app.database) not available")
 
 
 # =============================================================================
@@ -245,7 +254,10 @@ async def test_final_evaluation_generated_and_saved(
     assert lead.recommendation is not None, "Lead.recommendation should be set after evaluation"
     assert lead.evaluation_result is not None, "Lead.evaluation_result should be set"
     assert lead.evaluation_score is not None
-    # Investment memo fragment (hook, red_flags, verdict)
+    # Investment memo fragment (hook, signal_summary, red_flags, recommendation)
     assert lead.memo_fragment is not None, "Lead.memo_fragment should be set when evaluation completes"
-    assert "hook" in lead.memo_fragment and "verdict" in lead.memo_fragment
-    assert lead.memo_fragment["verdict"] in ("High", "Medium", "Low")
+    assert "hook" in lead.memo_fragment
+    priority = lead.memo_fragment.get("verdict") or (lead.memo_fragment.get("recommendation") or {}).get("priority")
+    assert priority in ("High", "Medium", "Low"), f"Expected priority/verdict in memo_fragment, got {lead.memo_fragment}"
+    if "recommendation" in lead.memo_fragment:
+        assert "next_step" in lead.memo_fragment["recommendation"] or "priority" in lead.memo_fragment["recommendation"]

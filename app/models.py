@@ -37,6 +37,11 @@ class Lead(SQLModel, table=True):
     recommendation: Optional[str] = None
     memo_fragment: Optional[dict] = Field(default=None, sa_column=Column(JSON))
 
+    # Universal intake: Granola / Wispr
+    source_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSON))  # { "source_type", "tool" }
+    blind_spots: Optional[list] = Field(default=None, sa_column=Column(JSON))  # metrics founder dodged
+    conflict_report: Optional[list] = Field(default=None, sa_column=Column(JSON))  # Wispr vs Granola conflicts
+
 
 class TenantSettings(SQLModel, table=True):
     __tablename__ = "tenant_settings"
