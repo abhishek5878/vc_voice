@@ -5,9 +5,9 @@
     { "src": "static/**", "use": "@vercel/static" }
   ],
   "rewrites": [
-    { "source": "/api/health", "destination": "/api/health" },
-    { "source": "/api/intake", "destination": "/api/intake" },
-    { "source": "/api/chat", "destination": "/api/chat" },
+    { "source": "/api/health", "destination": "/api/health.py" },
+    { "source": "/api/intake", "destination": "/api/intake.py" },
+    { "source": "/api/chat", "destination": "/api/chat.py" },
     { "source": "/", "destination": "/static/index.html" },
     { "source": "/styles.css", "destination": "/static/styles.css" },
     { "source": "/app.js", "destination": "/static/app.js" },
