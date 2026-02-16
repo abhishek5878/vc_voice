@@ -1,202 +1,149 @@
-# PI Triage System
+# Robin.ai
 
-Personal Intelligence (PI) Triage System for Sajith Pai - An AI-powered gatekeeper to filter inbound requests.
+**Evidence-first meeting intelligence.** Triage inbound founder requests, analyze meeting transcripts, and keep your pipeline honest—with AI detection, signal extraction, and GRUE-style diligence.
 
-## Overview
+---
 
-This system acts as a first line of defense to filter 85-90% of inbound meeting requests, allowing only high-quality conversations to reach Sajith Pai.
+## What it does
 
-### Key Features
+- **Triage** — Founders (or others) go through a short chat. The system scores authenticity and quality, extracts signals, and recommends **meet / refer out / pass**. Harsh, skeptical persona; 5-layer AI detection and behavioral probes.
+- **Analyze** — Paste a meeting transcript (e.g. Granola) and optionally your notes (e.g. Wispr). Get an Evidence Map, GRUE diligence checklist, conflict report (transcript vs dictation), and conviction score.
+- **Pipeline** — View leads, override decisions, attach Calendly on approval. Optional “your style” memory from overrides.
 
-- **5-Layer AI Detection**: Detects AI-generated or AI-polished content
-- **Behavioral Probes**: Asymmetric questions to test authenticity
-- **Signal Extraction**: Automatically extracts traction and credential signals
-- **Archetype Detection**: Identifies low-signal patterns (AI for X, Uber for Y)
-- **Dual-Axis Scoring**: Separate authenticity and quality scores
-- **Harsh PI Persona**: Direct, skeptical, time-protective
+**BYOK:** You bring your own OpenAI or Anthropic API key; optional Groq for zero-cost analysis. No key is stored on our servers.
 
-## Project Structure
+---
 
-```
-pi-triage/
-├── api/                      # Vercel serverless functions
-│   ├── health.py             # Health check endpoint
-│   ├── intake.py             # Contact intake endpoint
-│   └── chat.py               # Main chat endpoint
-├── lib/                      # Core Python modules
-│   ├── ai_detection.py       # 5-layer AI detection
-│   ├── behavioral_probes.py  # Authenticity probes
-│   ├── signal_extraction.py  # Traction/credential extraction
-│   ├── archetype_similarity.py # Pattern detection
-│   ├── scoring.py            # Dual-axis scoring
-│   ├── evaluation.py         # LLM evaluation
-│   ├── conversation.py       # State management
-│   ├── classification.py     # Email/role classification
-│   ├── prompts.py            # PI persona prompts
-│   └── config.py             # Configuration
-├── data/                     # Knowledge base files
-├── static/                   # Frontend files
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
-├── tests/                    # Test suite
-└── vercel.json               # Vercel configuration
-```
+## Features
 
-## Setup
+| Area | Details |
+|------|--------|
+| **AI detection** | 5-layer (phrases, structure, length, patterns, cumulative); immediate reject or score cap when AI-polished. |
+| **Behavioral probes** | Asymmetric questions to test authenticity; evasion and low-specificity penalties. |
+| **Signals** | Traction, credentials, and red flags extracted from the conversation. |
+| **Scoring** | Dual-axis: authenticity + quality; bands for do-not-recommend / refer-out / recommend. |
+| **Analyze** | Evidence log (verified/unverified), blind spots, conflict report (A/B/C), GRUE verdict, AI polish detector. |
+
+**Product (Phase A):** Sign up / log in (Supabase), Free (5 analyses/month) and Solo ($199/mo, unlimited). Landing at `/`, app at `/app`. Stripe Checkout + webhook for subscriptions.
+
+---
+
+## Quick start
 
 ### Prerequisites
 
 - Python 3.8+
-- OpenAI API key
+- OpenAI API key (or Anthropic `sk-ant-...`, or set `GROQ_API_KEY` for free analysis)
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   cd ~/pi-triage
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Add your knowledge base files to `data/`:
-   - `personal_background.json`
-   - `startup_advice.json`
-   - `india_ecosystem.json`
-   - `portfolio_investments.json`
-   - `pitching_guide.json`
-
-### Local Development
-
-Run the local development server:
+### Run locally
 
 ```bash
+git clone https://github.com/abhishek5878/vc_voice.git
+cd vc_voice
+pip install -r requirements.txt
 python run_local.py
 ```
 
-Open http://localhost:3000 in your browser.
+Open **http://localhost:3000**. You’ll get the landing page; open **/app** for the triage + analyze app. Enter your API key and (optional) workspace in the app.
 
-### Testing
+### Optional: auth and billing
 
-Run the test suite:
+To enable sign-up, login, and Stripe:
+
+1. **Supabase** — New project → run `supabase/schema.sql` in SQL Editor. Add env: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+2. **Stripe** — Create a Solo product ($199/mo), add webhook `https://<your-domain>/api/stripe_webhook` for `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Add env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_SOLO`.
+
+See **docs/SELL_TO_WORLD_PLAN.md** for full Phase A–D plan and env details.
+
+---
+
+## Project structure
+
+```
+├── api/                    # Vercel serverless
+│   ├── health.py           # Health check
+│   ├── intake.py           # Contact intake
+│   ├── chat.py             # Triage conversation
+│   ├── analyze.py          # Meeting analysis (Evidence Map, GRUE, conflicts)
+│   ├── leads.py            # Pipeline + overrides
+│   ├── stats.py            # Pipeline stats
+│   ├── memory.py           # “Your style” memory
+│   ├── config.py           # Calendly, rate limit
+│   ├── auth.py             # Sign up / log in (Supabase)
+│   ├── me.py               # Current user + workspace
+│   ├── create_checkout_session.py
+│   └── stripe_webhook.py
+├── lib/                    # Core logic
+│   ├── ai_detection.py     # 5-layer AI detection
+│   ├── behavioral_probes.py
+│   ├── signal_extraction.py
+│   ├── archetype_similarity.py
+│   ├── scoring.py
+│   ├── evaluation.py
+│   ├── conversation.py
+│   ├── contacts_store.py
+│   ├── analyze_store.py
+│   ├── supabase_client.py  # Auth + workspaces
+│   ├── plan_limits.py      # Free 5/mo, Solo unlimited
+│   └── config.py
+├── supabase/
+│   └── schema.sql          # workspaces, profiles, analysis_usage
+├── static/
+│   ├── index.html          # App (served at /app)
+│   ├── landing.html        # Marketing (served at /)
+│   ├── auth.html           # Sign up / log in
+│   ├── terms.html, privacy.html
+│   ├── app.js
+│   └── styles.css
+├── data/                   # Knowledge base (e.g. VC persona)
+├── docs/
+│   └── SELL_TO_WORLD_PLAN.md
+├── vercel.json
+└── requirements.txt
+```
+
+---
+
+## Deployment (Vercel)
 
 ```bash
-pytest tests/ -v
+vercel
 ```
 
-Target: 90%+ accuracy on synthetic test cases.
+Set in Vercel (or `.env`):
 
-## Deployment
+- **Required for app:** None (BYOK only).
+- **For auth:** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+- **For billing:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_SOLO`; optionally `FRONTEND_URL`.
 
-### Deploy to Vercel
+Routing: `/` → landing, `/app` → app. API under `/api/*`.
 
-1. Install Vercel CLI:
-   ```bash
-   npm install -g vercel
-   ```
+---
 
-2. Deploy:
-   ```bash
-   vercel
-   ```
+## API (concise)
 
-3. The system uses BYOK (Bring Your Own Key) mode - users provide their OpenAI API key.
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/health` | Status, BYOK mode |
+| POST | `/api/intake` | Record contact, get `conversation_id` |
+| POST | `/api/chat` | Triage message (headers: `X-API-Key`, optional `X-Workspace-Id`) |
+| POST | `/api/analyze` | Transcript ± dictation → Evidence Map, GRUE, conflicts (402 if over Free limit) |
+| GET | `/api/leads` | Pipeline (query: `workspace_id`) |
+| GET | `/api/config` | Calendly URL, rate limit days |
+| POST | `/api/auth/register` | Sign up (body: email, password, name?) |
+| POST | `/api/auth/login` | Log in (body: email, password) |
+| GET | `/api/me` | Current user + workspace (header: `Authorization: Bearer <token>`) |
 
-## API Endpoints
+---
 
-### GET /api/health
+## Pricing (product)
 
-Health check endpoint.
+- **Free** — 5 analyses/month, unlimited triage, BYOK.
+- **Solo** — $199/mo, unlimited analyses.
+- **Partner / Fund / Enterprise** — Contact for invoice or PO.
 
-Response:
-```json
-{
-  "status": "healthy",
-  "version": "1.0.0",
-  "system": "Personal Intelligence Triage",
-  "mode": "byok"
-}
-```
-
-### POST /api/intake
-
-Contact intake and classification.
-
-Request:
-```json
-{
-  "name": "John Doe",
-  "email": "john@startup.com",
-  "current_work": "Building fintech for SMBs"
-}
-```
-
-Response:
-```json
-{
-  "conversation_id": "uuid",
-  "classification": "founder",
-  "country_hint": "India",
-  "message": "Contact information recorded."
-}
-```
-
-### POST /api/chat
-
-Main triage conversation endpoint.
-
-Headers:
-- `X-API-Key`: Your OpenAI API key
-
-Request:
-```json
-{
-  "message": "User message",
-  "conversation_id": "uuid"
-}
-```
-
-Response:
-```json
-{
-  "id": "message-uuid",
-  "message": "PI response",
-  "turn_count": 1,
-  "evaluation_complete": false,
-  "ai_detection_this_turn": {
-    "score": 0.1,
-    "flags": []
-  }
-}
-```
-
-## Configuration
-
-Key thresholds in `lib/config.py`:
-
-- **AI Detection**:
-  - `>= 0.7`: Immediate rejection
-  - `>= 0.5`: Cap score at 2
-  - `>= 0.6` + no signals: Reject
-
-- **Scoring**:
-  - 0-4: Do not recommend
-  - 5-6: Refer out
-  - 7: Recommend if bandwidth
-  - 8-10: Recommend meeting
-
-## Philosophy
-
-This system is designed to be **harsh**, not helpful:
-
-- **DO**: Be direct, skeptical, demand specifics
-- **DON'T**: Be encouraging, offer mentorship, say "interesting!"
-
-The goal is to protect Sajith's time by filtering out low-signal requests.
+---
 
 ## License
 
-Private - Not for redistribution.
+Private — not for redistribution.
