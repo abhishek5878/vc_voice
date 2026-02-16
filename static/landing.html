@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin.ai – Evidence-first meeting intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .landing { max-width: 720px; margin: 0 auto; padding: 2rem 1rem; }
+        .landing h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .landing .tagline { color: var(--text-secondary); margin-bottom: 2rem; }
+        .landing .cta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .landing .cta .btn { padding: 0.75rem 1.5rem; text-decoration: none; border-radius: var(--radius-md); font-weight: 500; }
+        .landing .cta .btn-primary { background: var(--accent); color: #fff; border: none; }
+        .landing .cta .btn-primary:hover { background: var(--accent-hover); }
+        .landing .cta .btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+        .landing .pricing { margin-top: 2rem; }
+        .landing .pricing table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .landing .pricing th, .landing .pricing td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .landing .pricing th { color: var(--text-secondary); font-weight: 500; }
+        .landing .pricing .price { font-family: var(--font-mono); color: var(--accent); }
+        .landing .footer-links { margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted); }
+        .landing .footer-links a { color: var(--text-secondary); text-decoration: none; }
+        .landing .footer-links a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="landing">
+        <h1>Robin.ai</h1>
+        <p class="tagline">Evidence-first meeting intelligence. Triage founders, analyze transcripts, and keep your pipeline honest.</p>
+        <div class="cta">
+            <a href="/app" class="btn btn-primary">Open app</a>
+            <a href="/auth.html" class="btn btn-ghost">Sign up / Log in</a>
+        </div>
+        <section class="pricing">
+            <h2>Pricing</h2>
+            <table>
+                <thead>
+                    <tr><th>Plan</th><th>Price</th><th>Includes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Free</td><td class="price">$0</td><td>5 analyses/month, unlimited triage, BYOK</td></tr>
+                    <tr><td>Solo</td><td class="price">$199/mo</td><td>Unlimited analyses, BYOK, Calendly, pipeline</td></tr>
+                    <tr><td>Partner / Fund / Enterprise</td><td>—</td><td>Contact us for invoice or PO</td></tr>
+                </tbody>
+            </table>
+        </section>
+        <div class="footer-links">
+            <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a>
+        </div>
+    </div>
+</body>
+</html>

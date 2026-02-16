@@ -16,6 +16,26 @@
       "destination": "/api/health.py"
     },
     {
+      "source": "/api/auth/register",
+      "destination": "/api/auth.py"
+    },
+    {
+      "source": "/api/auth/login",
+      "destination": "/api/auth.py"
+    },
+    {
+      "source": "/api/me",
+      "destination": "/api/me.py"
+    },
+    {
+      "source": "/api/create_checkout_session",
+      "destination": "/api/create_checkout_session.py"
+    },
+    {
+      "source": "/api/stripe_webhook",
+      "destination": "/api/stripe_webhook.py"
+    },
+    {
       "source": "/api/intake",
       "destination": "/api/intake.py"
     },
@@ -52,8 +72,12 @@
       "destination": "/api/memory.py"
     },
     {
-      "source": "/",
+      "source": "/app",
       "destination": "/static/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/static/landing.html"
     },
     {
       "source": "/styles.css",
@@ -82,7 +106,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, X-API-Key"
+          "value": "Content-Type, X-API-Key, Authorization, X-Workspace-Id"
         }
       ]
     }

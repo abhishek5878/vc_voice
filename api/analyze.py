@@ -30,6 +30,27 @@ def _get_api_key_from_request(request):
     return ""
 
 
+def _get_bearer_workspace(request, data):
+    """If Authorization: Bearer present, resolve workspace_id from auth; else use body/header."""
+    if not hasattr(request, "headers"):
+        return None
+    h = request.headers
+    auth = h.get("Authorization") if hasattr(h, "get") else ""
+    if isinstance(auth, str) and auth.startswith("Bearer "):
+        token = auth[7:].strip()
+        if token:
+            try:
+                from lib.supabase_client import get_user_from_jwt, get_workspace_by_owner
+                user = get_user_from_jwt(token)
+                if user and user.get("sub"):
+                    w = get_workspace_by_owner(user["sub"])
+                    if w:
+                        return w.get("id")
+            except Exception:
+                pass
+    return data.get("workspace_id") or (h.get("X-Workspace-Id") if hasattr(h, "get") else None) or ""
+
+
 def _handle(request):
     if hasattr(request, "method") and request.method == "OPTIONS":
         return {
@@ -37,7 +58,7 @@ def _handle(request):
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
+                "Access-Control-Allow-Headers": "Content-Type, X-API-Key, Authorization, X-Workspace-Id",
             },
             "body": "",
         }
@@ -96,8 +117,21 @@ def _handle(request):
             }),
         }
 
-    workspace_id = data.get("workspace_id") or (request.headers.get("X-Workspace-Id") if hasattr(request, "headers") else None) or ""
+    workspace_id = _get_bearer_workspace(request, data)
     workspace_id = (workspace_id or "").strip() or None
+
+    # Plan limit: Free tier = 5 analyses/month
+    try:
+        from lib.plan_limits import check_analysis_limit
+        allowed, limit_msg = check_analysis_limit(workspace_id)
+        if not allowed:
+            return {
+                "statusCode": 402,
+                "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({"error": limit_msg}),
+            }
+    except Exception:
+        pass
 
     api_key = _get_api_key_from_request(request)
     if not api_key and not os.environ.get("GROQ_API_KEY"):
@@ -172,13 +206,21 @@ def _handle(request):
     except Exception:
         pass
 
+    # Record usage for plan limits (Free: 5/month)
+    try:
+        from lib.plan_limits import record_analysis
+        if workspace_id:
+            record_analysis(workspace_id)
+    except Exception:
+        pass
+
     return {
         "statusCode": 200,
         "headers": {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
+            "Access-Control-Allow-Headers": "Content-Type, X-API-Key, Authorization, X-Workspace-Id",
         },
         "body": json.dumps(response),
     }

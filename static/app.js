@@ -122,6 +122,8 @@ async function apiRequest(endpoint, method, body = null, queryParams = null) {
     const headers = {
         'Content-Type': 'application/json'
     };
+    const token = localStorage.getItem('robin_token');
+    if (token) headers['Authorization'] = 'Bearer ' + token;
     if (state.apiKey) headers['X-API-Key'] = state.apiKey;
     if (state.workspaceId) headers['X-Workspace-Id'] = state.workspaceId;
 
@@ -1014,8 +1016,18 @@ elements.chatInput.addEventListener('keydown', (e) => {
 // ============================================================================
 
 async function init() {
+    const token = localStorage.getItem('robin_token');
+    if (token) {
+        try {
+            const me = await fetch(API_BASE + '/me', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.ok ? r.json() : null);
+            if (me && me.workspace_id) {
+                state.workspaceId = me.workspace_id;
+                localStorage.setItem('pi_workspace_id', me.workspace_id);
+            }
+        } catch (_) {}
+    }
     const savedWorkspace = localStorage.getItem('pi_workspace_id');
-    state.workspaceId = savedWorkspace || null;
+    state.workspaceId = state.workspaceId || savedWorkspace || null;
     if (elements.workspaceInput) elements.workspaceInput.value = savedWorkspace || '';
 
     const savedKey = localStorage.getItem('pi_api_key');
