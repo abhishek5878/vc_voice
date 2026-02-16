@@ -40,11 +40,6 @@
       "dest": "/static/$1"
     }
   ],
-  "functions": {
-    "api/*.py": {
-      "maxDuration": 20
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
