@@ -10,6 +10,7 @@ import uuid
 import os
 import sys
 from datetime import datetime
+from http.server import BaseHTTPRequestHandler
 
 # Add lib to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -87,8 +88,8 @@ def validate_api_key(api_key: str) -> tuple:
     return True, ""
 
 
-def handler(request):
-    """Chat endpoint handler for Vercel."""
+def _handle(request):
+    """Chat logic; returns dict with statusCode, headers, body."""
 
     # Handle CORS preflight
     if hasattr(request, 'method') and request.method == 'OPTIONS':
@@ -364,6 +365,39 @@ def handler(request):
         }
 
 
+class handler(BaseHTTPRequestHandler):
+    """Vercel Python runtime expects a class subclassing BaseHTTPRequestHandler."""
+
+    def do_OPTIONS(self):
+        result = {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, X-API-Key'
+            },
+            'body': ''
+        }
+        self._send(result)
+
+    def do_POST(self):
+        content_length = int(self.headers.get('Content-Length', 0))
+        body_raw = self.rfile.read(content_length) if content_length else b''
+        body_str = body_raw.decode('utf-8') if body_raw else '{}'
+        req = type('Req', (), {'method': 'POST', 'body': body_str, 'headers': self.headers})()
+        result = _handle(req)
+        self._send(result)
+
+    def _send(self, result):
+        self.send_response(result['statusCode'])
+        for k, v in result.get('headers', {}).items():
+            self.send_header(k, v)
+        self.end_headers()
+        body = result.get('body', '')
+        if body:
+            self.wfile.write(body.encode('utf-8') if isinstance(body, str) else body)
+
+
 # For local testing
 if __name__ == '__main__':
     import os
@@ -383,5 +417,5 @@ if __name__ == '__main__':
             'conversation_id': 'test-123'
         })
 
-    result = handler(MockRequest())
+    result = _handle(MockRequest())
     print(json.dumps(json.loads(result['body']), indent=2))

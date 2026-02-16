@@ -63,17 +63,17 @@ class PIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_health(self):
         """Handle /api/health endpoint."""
-        from api.health import handler
+        from api.health import _handle
 
         class MockRequest:
             method = "GET"
 
-        result = handler(MockRequest())
+        result = _handle(MockRequest())
         self.send_json_response(result)
 
     def handle_intake(self):
         """Handle /api/intake endpoint."""
-        from api.intake import handler
+        from api.intake import _handle
 
         body = self.read_body()
 
@@ -81,12 +81,12 @@ class PIRequestHandler(http.server.SimpleHTTPRequestHandler):
             method = "POST"
 
         MockRequest.body = body
-        result = handler(MockRequest())
+        result = _handle(MockRequest())
         self.send_json_response(result)
 
     def handle_chat(self):
         """Handle /api/chat endpoint."""
-        from api.chat import handler
+        from api.chat import _handle
 
         body = self.read_body()
         api_key = self.headers.get("X-API-Key", "")
@@ -102,7 +102,7 @@ class PIRequestHandler(http.server.SimpleHTTPRequestHandler):
             headers = MockHeaders()
 
         MockRequest.body = body
-        result = handler(MockRequest())
+        result = _handle(MockRequest())
         self.send_json_response(result)
 
     def read_body(self):
