@@ -79,8 +79,14 @@ async function apiRequest(endpoint, method, body = null) {
         options.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`${API_BASE}/${endpoint}`, options);
-    const data = await response.json();
+    const url = `${API_BASE}/${endpoint}`;
+    const response = await fetch(url, options);
+    let data;
+    try {
+        data = await response.json();
+    } catch (_) {
+        throw new Error(`Server returned non-JSON (${response.status})`);
+    }
 
     if (!response.ok) {
         throw new Error(data.error || `HTTP ${response.status}`);
@@ -98,6 +104,8 @@ async function checkHealth() {
     } catch (error) {
         elements.statusIndicator.textContent = 'Offline';
         elements.statusIndicator.style.color = '#ef4444';
+        // Store for UI to show a specific message
+        state.lastHealthError = error.message || 'Network error';
         return false;
     }
 }
@@ -307,7 +315,8 @@ elements.apiKeyForm.addEventListener('submit', async (e) => {
     if (healthy) {
         showSection('intake-section');
     } else {
-        showError('Could not connect to the server. Please try again.');
+        const msg = state.lastHealthError || 'Could not connect to the server.';
+        showError(msg + ' Make sure you\'re opening this app from the same URL as the server (e.g. your Vercel deployment).');
     }
 });
 
