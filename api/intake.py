@@ -16,27 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.classification import classify_contact, get_classification_context
 from lib.conversation import create_conversation, save_conversation
 from lib.config import get_data_path
-
-
-def save_contact(contact_data: dict) -> None:
-    """Save contact to contacts.json."""
-    path = get_data_path("contacts.json")
-
-    # Load existing contacts
-    contacts = []
-    try:
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                contacts = json.load(f)
-    except Exception:
-        contacts = []
-
-    contacts.append(contact_data)
-
-    # Save back
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w") as f:
-        json.dump(contacts, f, indent=2)
+from lib.contacts_store import append_contact
 
 
 def _handle(request):
@@ -78,6 +58,8 @@ def _handle(request):
         name = body.get('name', '').strip()
         email = body.get('email', '').strip()
         current_work = body.get('current_work', '').strip()
+        raising_status = (body.get('raising_status') or '').strip() or None   # raising | not_raising | exploring
+        segment = (body.get('segment') or '').strip() or None   # B2B SMB | B2C | B2B enterprise | partnership | other
 
         if not name:
             return {
@@ -115,12 +97,14 @@ def _handle(request):
         # Generate conversation ID
         conversation_id = str(uuid.uuid4())
 
-        # Create contact record
+        # Create contact record (include raising_status, segment for thesis/fit gating)
         contact_data = {
             'conversation_id': conversation_id,
             'name': name,
             'email': email,
             'current_work': current_work,
+            'raising_status': raising_status,
+            'segment': segment,
             'classification': classification['combined_classification'],
             'email_domain': email.split('@')[1] if '@' in email else '',
             'country_hint': classification['country_hint'],
@@ -129,9 +113,8 @@ def _handle(request):
             'status': 'pending'
         }
 
-        # Save contact (optional - for logging)
         try:
-            save_contact(contact_data)
+            append_contact(contact_data)
         except Exception:
             pass  # Don't fail if storage fails
 

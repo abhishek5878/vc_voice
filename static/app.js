@@ -36,6 +36,9 @@ const elements = {
     // Inputs
     apiKeyInput: document.getElementById('api-key'),
     chatInput: document.getElementById('chat-input'),
+    micBtn: document.getElementById('mic-btn'),
+    micIcon: document.getElementById('mic-icon'),
+    micStatus: document.getElementById('mic-status'),
 
     // Display elements
     chatMessages: document.getElementById('chat-messages'),
@@ -110,12 +113,11 @@ async function checkHealth() {
     }
 }
 
-async function submitIntake(name, email, currentWork) {
-    return apiRequest('intake', 'POST', {
-        name,
-        email,
-        current_work: currentWork
-    });
+async function submitIntake(name, email, currentWork, raisingStatus = '', segment = '') {
+    const body = { name, email, current_work: currentWork };
+    if (raisingStatus) body.raising_status = raisingStatus;
+    if (segment) body.segment = segment;
+    return apiRequest('intake', 'POST', body);
 }
 
 async function sendMessage(message) {
@@ -154,8 +156,10 @@ function showLoading(show = true, text = 'Processing...') {
     }
 }
 
+const MAX_TURNS = 7;
+
 function updateTurnCounter() {
-    elements.turnCounter.textContent = `Turn ${state.turnCount}/5`;
+    elements.turnCounter.textContent = `Turn ${state.turnCount}/${MAX_TURNS}`;
 }
 
 function updateSignalCount() {
@@ -327,11 +331,13 @@ elements.intakeForm.addEventListener('submit', async (e) => {
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const currentWork = document.getElementById('current-work').value.trim();
+    const raisingStatus = (document.getElementById('raising-status') && document.getElementById('raising-status').value) || '';
+    const segment = (document.getElementById('segment') && document.getElementById('segment').value) || '';
 
     showLoading(true, 'Processing intake...');
 
     try {
-        const result = await submitIntake(name, email, currentWork);
+        const result = await submitIntake(name, email, currentWork, raisingStatus, segment);
 
         state.conversationId = result.conversation_id;
 
@@ -343,9 +349,9 @@ elements.intakeForm.addEventListener('submit', async (e) => {
         // Switch to chat
         showSection('chat-section');
 
-        // Add initial PI message
+        // Add initial PI message (open so founder can describe startup first)
         addMessage(
-            "Why do you want to talk to Sajith specifically? Be direct and concrete.",
+            "What are you building and why Sajith? Give a quick picture of what you're working on and any traction so far.",
             'assistant'
         );
 
@@ -356,14 +362,86 @@ elements.intakeForm.addEventListener('submit', async (e) => {
     }
 });
 
+// Voice input (Web Speech API)
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
+
+    recognition.onresult = (event) => {
+        let final = '';
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                final += transcript;
+            } else {
+                interim += transcript;
+            }
+        }
+        const current = elements.chatInput.value;
+        const suffix = ' [listening]';
+        const beforeInterim = current.endsWith(suffix) ? current.slice(0, -suffix.length).trim() : current;
+        if (final) {
+            elements.chatInput.value = (beforeInterim ? beforeInterim + ' ' : '') + final + (interim ? suffix : '');
+        } else if (interim) {
+            elements.chatInput.value = (beforeInterim ? beforeInterim + ' ' : '') + interim + suffix;
+        }
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        elements.micBtn.classList.remove('listening');
+        elements.micIcon.classList.remove('hidden');
+        elements.micStatus.classList.add('hidden');
+        const suffix = ' [listening]';
+        if (elements.chatInput.value.endsWith(suffix)) {
+            elements.chatInput.value = elements.chatInput.value.slice(0, -suffix.length).trim();
+        }
+    };
+
+    recognition.onerror = (event) => {
+        if (event.error !== 'aborted') {
+            console.warn('Speech recognition error:', event.error);
+        }
+        isListening = false;
+        elements.micBtn.classList.remove('listening');
+        elements.micIcon.classList.remove('hidden');
+        elements.micStatus.classList.add('hidden');
+    };
+
+    elements.micBtn.addEventListener('click', () => {
+        if (state.isLoading || state.evaluationComplete) return;
+        if (isListening) {
+            recognition.stop();
+            return;
+        }
+        isListening = true;
+        elements.micBtn.classList.add('listening');
+        elements.micIcon.classList.add('hidden');
+        elements.micStatus.classList.remove('hidden');
+        elements.micStatus.textContent = 'Listening...';
+        recognition.start();
+    });
+} else {
+    elements.micBtn.style.display = 'none';
+}
+
 // Chat Form
 elements.chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     if (state.isLoading || state.evaluationComplete) return;
 
-    const message = elements.chatInput.value.trim();
+    const message = elements.chatInput.value.replace(/\s*\[listening\]\s*$/, '').trim();
     if (!message) return;
+
+    if (recognition && isListening) recognition.stop();
 
     // Add user message
     addMessage(message, 'user', { timestamp: new Date().toLocaleTimeString() });

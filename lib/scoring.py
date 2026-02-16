@@ -15,15 +15,14 @@ def calculate_authenticity_score(
     cumulative_ai_score: float,
     evasion_count: int,
     avg_specificity: float,
-    behavioral_red_flags: int = 0
+    behavioral_red_flags: int = 0,
+    concrete_signal_count: int = 0,
 ) -> Tuple[int, List[str]]:
     """
     Calculate authenticity score based on AI detection and behavioral analysis.
 
     Measures: Is this a real human with genuine experiences?
-
-    Returns:
-        (score 0-10, list of factors affecting score)
+    When concrete_signal_count >= 2, we relax low-specificity penalty (early-stage / brief but substantive).
     """
     score = 10
     factors = []
@@ -58,8 +57,10 @@ def calculate_authenticity_score(
         factors.append("Very low specificity combined with AI signals")
 
     elif avg_specificity < 0.2:
-        score = min(score, 6)
-        factors.append(f"Low specificity in responses ({avg_specificity:.2f})")
+        # Early-stage path: 2+ concrete signals but brief answers – don't over-penalize
+        cap = 6 if concrete_signal_count < 2 else 7
+        score = min(score, cap)
+        factors.append(f"Low specificity in responses ({avg_specificity:.2f})" + ("; relaxed (concrete signals present)" if concrete_signal_count >= 2 else ""))
 
     # Behavioral red flags
     if behavioral_red_flags >= 5:
@@ -234,12 +235,13 @@ def run_full_scoring(
             "combined_factors": List[str]
         }
     """
-    # Calculate authenticity score
+    # Calculate authenticity score (pass concrete_signal_count for early-stage / brief-but-substantive path)
     auth_score, auth_factors = calculate_authenticity_score(
         cumulative_ai_score,
         evasion_count,
         avg_specificity,
-        behavioral_red_flags
+        behavioral_red_flags,
+        concrete_signal_count=concrete_signal_count,
     )
 
     # Calculate quality score
@@ -321,12 +323,12 @@ def should_force_evaluation(
     if cumulative_ai_score >= 0.8:
         return True, "Very high AI probability - early termination"
 
-    # Force if strong signals and turn 3+
-    if turn_count >= 3 and concrete_signal_count >= 4:
+    # Force if strong signals and turn 4+
+    if turn_count >= 4 and concrete_signal_count >= 4:
         return True, "Strong signals detected - proceeding to evaluation"
 
-    # Force if no signals and high AI by turn 3
-    if turn_count >= 3 and concrete_signal_count == 0 and cumulative_ai_score >= 0.5:
+    # Force if no signals and high AI by turn 4
+    if turn_count >= 4 and concrete_signal_count == 0 and cumulative_ai_score >= 0.5:
         return True, "No signals + high AI probability"
 
     return False, ""

@@ -35,7 +35,7 @@ class TestAuthenticityScore:
             evasion_count=0,
             avg_specificity=0.5
         )
-        assert score <= 2
+        assert score <= 3  # auth_cap_score (relaxed from 2)
 
     def test_many_evasions_caps_score(self):
         score, factors = calculate_authenticity_score(
@@ -208,9 +208,9 @@ class TestFullScoringPipeline:
             archetype_similarity=0.5,
             classification="founder"
         )
-        # Authenticity should cap the score
-        assert result["authenticity_score"] <= 2
-        assert result["final_score"] <= 2
+        # Authenticity should cap the score (cap relaxed to 3)
+        assert result["authenticity_score"] <= 3
+        assert result["final_score"] <= 3
 
     def test_partnership_always_low(self):
         result = run_full_scoring(

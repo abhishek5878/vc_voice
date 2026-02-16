@@ -13,7 +13,7 @@ from .prompts import (
     get_evaluation_prompt,
     build_chat_messages
 )
-from .scoring import run_full_scoring, should_force_evaluation
+from .scoring import run_full_scoring, should_force_evaluation, get_recommendation_text
 
 
 # ============================================================================
@@ -231,7 +231,8 @@ def run_llm_evaluation(
     ai_detection_results: Dict[str, Any],
     behavioral_analysis: Dict[str, Any],
     concrete_signals: Dict[str, Any],
-    archetype_analysis: Dict[str, Any]
+    archetype_analysis: Dict[str, Any],
+    intake_metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Run LLM-based final evaluation.
@@ -243,7 +244,8 @@ def run_llm_evaluation(
             "rationale": List[str],
             "suggested_meeting_focus": str,
             "key_claims_to_verify": List[str],
-            "ai_detection": Dict
+            "ai_detection": Dict,
+            "thesis_fit": str
         }
     """
     prompt = get_evaluation_prompt(
@@ -251,7 +253,8 @@ def run_llm_evaluation(
         ai_detection_results,
         behavioral_analysis,
         concrete_signals,
-        archetype_analysis
+        archetype_analysis,
+        intake_metadata=intake_metadata,
     )
 
     messages = [
@@ -340,16 +343,25 @@ def post_process_evaluation(
         has_strong_credentials=has_strong_credentials
     )
 
+    # Thesis/fit cap: wrong fit caps at refer_out
+    final_score = scoring_result["final_score"]
+    recommendation = scoring_result["recommendation"]
+    thesis_fit = llm_evaluation.get("thesis_fit") or ""
+    if thesis_fit == "wrong_fit" and final_score > 4:
+        final_score = min(4, final_score)
+        recommendation = "refer_out" if final_score <= 6 else recommendation
+        scoring_result["combined_factors"].append("Thesis/stage fit: wrong fit – capped")
+
     # Merge with LLM evaluation
     final_evaluation = {
         **llm_evaluation,
-        "score": scoring_result["final_score"],
-        "recommendation": scoring_result["recommendation"],
+        "score": final_score,
+        "recommendation": recommendation,
         "authenticity_score": scoring_result["authenticity_score"],
         "quality_score": scoring_result["quality_score"],
         "scoring_factors": scoring_result["combined_factors"],
-        "recommendation_text": scoring_result["recommendation_text"],
-        "hardcoded_override": scoring_result["final_score"] != llm_score,
+        "recommendation_text": get_recommendation_text(recommendation, final_score) if thesis_fit == "wrong_fit" else scoring_result["recommendation_text"],
+        "hardcoded_override": scoring_result["final_score"] != llm_score or thesis_fit == "wrong_fit",
         "original_llm_score": llm_score
     }
 
@@ -363,7 +375,8 @@ def post_process_evaluation(
 def run_full_evaluation(
     api_key: str,
     conversation_state: Any,  # ConversationState
-    classification: str = "unknown"
+    classification: str = "unknown",
+    contact_metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Run the complete evaluation pipeline.
@@ -371,7 +384,8 @@ def run_full_evaluation(
     Args:
         api_key: OpenAI API key
         conversation_state: Full conversation state object
-        classification: Contact classification
+        classification: Contact classification (founder, student, partnership, etc.)
+        contact_metadata: Optional intake data (raising_status, segment) for thesis/fit cap
 
     Returns:
         Complete evaluation result
@@ -409,14 +423,21 @@ def run_full_evaluation(
         "matched_archetype": None
     }
 
-    # Run LLM evaluation
+    # Run LLM evaluation (with optional intake metadata for thesis/fit)
+    intake_metadata = None
+    if contact_metadata:
+        intake_metadata = {
+            "raising_status": contact_metadata.get("raising_status"),
+            "segment": contact_metadata.get("segment"),
+        }
     llm_evaluation = run_llm_evaluation(
         api_key,
         transcript,
         ai_detection_summary,
         behavioral_summary,
         conversation_state.concrete_signals,
-        archetype_summary
+        archetype_summary,
+        intake_metadata=intake_metadata,
     )
 
     # Post-process with hardcoded rules

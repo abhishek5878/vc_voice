@@ -19,9 +19,9 @@ OPENAI_MAX_RETRIES = 2
 # Conversation Settings
 # ============================================================================
 
-MIN_TURNS_FOR_EVALUATION = 3
-MAX_TURNS = 5
-FORCE_EVALUATION_TURN = 5
+MIN_TURNS_FOR_EVALUATION = 4
+MAX_TURNS = 7
+FORCE_EVALUATION_TURN = 7
 
 # ============================================================================
 # AI Detection Thresholds
@@ -96,13 +96,13 @@ ARCHETYPE = {
 # ============================================================================
 
 SCORING = {
-    # Authenticity score thresholds
-    "auth_immediate_reject_ai": 0.7,
+    # Authenticity score thresholds (slightly relaxed so founders can describe startup before harsh cap)
+    "auth_immediate_reject_ai": 0.75,
     "auth_immediate_reject_score": 1,
-    "auth_cap_ai": 0.5,
-    "auth_cap_score": 2,
-    "auth_warn_ai": 0.3,
-    "auth_warn_score": 4,
+    "auth_cap_ai": 0.55,
+    "auth_cap_score": 3,
+    "auth_warn_ai": 0.35,
+    "auth_warn_score": 5,
 
     # Quality score adjustments
     "signal_boost_count": 3,

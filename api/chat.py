@@ -60,6 +60,7 @@ from lib.config import (
     MAX_TURNS,
     AI_DETECTION
 )
+from lib.contacts_store import get_contact_by_conversation_id, update_contact
 
 
 def get_api_key(request) -> str:
@@ -258,16 +259,34 @@ def _handle(request):
         }
 
         if should_evaluate:
-            # Run full evaluation
+            # Run full evaluation (load contact for classification + thesis/fit)
             try:
+                contact = get_contact_by_conversation_id(state.conversation_id)
+                classification = (contact.get("classification") or "unknown") if contact else "unknown"
+                contact_metadata = None
+                if contact:
+                    contact_metadata = {
+                        "raising_status": contact.get("raising_status"),
+                        "segment": contact.get("segment"),
+                    }
                 evaluation = run_full_evaluation(
                     api_key,
                     state,
-                    classification="unknown"  # Would come from intake
+                    classification=classification,
+                    contact_metadata=contact_metadata,
                 )
                 state.evaluation = evaluation
                 response_data['evaluation_complete'] = True
                 response_data['evaluation'] = evaluation
+
+                # Persist evaluation and claims for verification/override (data & learning)
+                claims = evaluation.get("key_claims_to_verify") or []
+                update_contact(state.conversation_id, {
+                    "evaluation_result": evaluation,
+                    "key_claims_to_verify": claims,
+                    "claims_verification": [{"claim": c, "verified": None} for c in claims],
+                    "status": "evaluated",
+                })
 
                 # Generate final PI message based on evaluation
                 if evaluation['score'] <= 4:

@@ -8,6 +8,7 @@
     { "source": "/api/health", "destination": "/api/health.py" },
     { "source": "/api/intake", "destination": "/api/intake.py" },
     { "source": "/api/chat", "destination": "/api/chat.py" },
+    { "source": "/api/leads", "destination": "/api/leads.py" },
     { "source": "/", "destination": "/static/index.html" },
     { "source": "/styles.css", "destination": "/static/styles.css" },
     { "source": "/app.js", "destination": "/static/app.js" },

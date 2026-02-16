@@ -73,6 +73,26 @@
                         ></textarea>
                         <span class="form-hint">Be specific. Include your role, company/startup, and what you're doing.</span>
                     </div>
+                    <div class="form-group">
+                        <label for="raising-status">Are you raising funding?</label>
+                        <select id="raising-status" name="raising_status">
+                            <option value="">— Select —</option>
+                            <option value="raising">Yes, raising</option>
+                            <option value="exploring">Exploring / not sure</option>
+                            <option value="not_raising">No (e.g. partnership, advice)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="segment">Segment</label>
+                        <select id="segment" name="segment">
+                            <option value="">— Select —</option>
+                            <option value="B2B SMB">B2B SMB</option>
+                            <option value="B2C">B2C</option>
+                            <option value="B2B enterprise">B2B enterprise</option>
+                            <option value="partnership">Partnership / sales outreach</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary">Start Conversation</button>
                 </form>
             </section>
@@ -82,7 +102,7 @@
                 <div class="chat-header">
                     <div class="chat-info">
                         <span class="chat-title">Triage Conversation</span>
-                        <span class="turn-counter" id="turn-counter">Turn 0/5</span>
+                        <span class="turn-counter" id="turn-counter">Turn 0/7</span>
                     </div>
                     <div class="signal-indicator" id="signal-indicator">
                         <span class="signal-label">Signals:</span>
@@ -96,13 +116,19 @@
 
                 <div class="chat-input-container" id="chat-input-container">
                     <form class="chat-form" id="chat-form">
-                        <textarea
-                            id="chat-input"
-                            name="message"
-                            placeholder="Type your response..."
-                            rows="3"
-                            required
-                        ></textarea>
+                        <div class="chat-input-row">
+                            <textarea
+                                id="chat-input"
+                                name="message"
+                                placeholder="Type or use the mic to speak..."
+                                rows="3"
+                                required
+                            ></textarea>
+                            <button type="button" class="btn btn-mic" id="mic-btn" title="Voice input" aria-label="Voice input">
+                                <span class="mic-icon" id="mic-icon">🎤</span>
+                                <span class="mic-status hidden" id="mic-status">Listening...</span>
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-send" id="send-btn">
                             <span class="btn-text">Send</span>
                             <span class="btn-loading hidden">Sending...</span>
