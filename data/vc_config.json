@@ -1,0 +1,4 @@
+{
+  "calendly_url": "",
+  "description": "Optional: set calendly_url for Schedule intro button. Or set env CALENDLY_URL."
+}

@@ -17,6 +17,8 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.1-8b-instant"
 OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 OPENAI_MODEL = "gpt-3.5-turbo"
+ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
+ANTHROPIC_MODEL = "claude-3-5-sonnet-20241022"
 LLM_TIMEOUT = 30
 LLM_MAX_RETRIES = 2
 
@@ -24,13 +26,25 @@ LLM_MAX_RETRIES = 2
 GRUE_CORE_METRICS = ["retention", "arr", "mrr", "revenue", "cac", "ltv", "ltv_cac", "churn", "growth", "customers", "users"]
 
 
+def _run_ai_polish_detection(text: str) -> Optional[Dict[str, Any]]:
+    """Run AI polish / narrative authenticity detection on transcript. Returns None if lib not available."""
+    try:
+        from lib.ai_detection import run_ai_detection
+        return run_ai_detection(text or "", previous_cumulative=0.0)
+    except Exception:
+        return None
+
+
 def _get_llm_config(openai_api_key: Optional[str] = None) -> Tuple[Optional[str], str, str]:
-    """Zero-Cost: Prefer Groq/Llama 3 when GROQ_API_KEY is set; else OpenAI. Returns (api_key, url, model)."""
+    """Zero-Cost: Prefer Groq when GROQ_API_KEY set; else Anthropic (sk-ant-); else OpenAI. Returns (api_key, url, model)."""
     groq_key = os.environ.get("GROQ_API_KEY", "").strip()
     if groq_key:
         return groq_key, GROQ_API_URL, GROQ_MODEL
-    if openai_api_key and openai_api_key.strip().startswith("sk-"):
-        return openai_api_key.strip(), OPENAI_API_URL, OPENAI_MODEL
+    key = (openai_api_key or os.environ.get("ANTHROPIC_API_KEY") or "").strip()
+    if key.startswith("sk-ant-"):
+        return key, ANTHROPIC_API_URL, ANTHROPIC_MODEL
+    if key.startswith("sk-"):
+        return key, OPENAI_API_URL, OPENAI_MODEL
     return None, OPENAI_API_URL, OPENAI_MODEL
 
 
@@ -40,10 +54,37 @@ def _llm_chat(
     temperature: float = 0.2,
     max_tokens: int = 600,
 ) -> str:
-    """Single LLM call: Groq (Llama 3) when GROQ_API_KEY set (zero-cost), else OpenAI."""
+    """Single LLM call: Groq, OpenAI, or Anthropic (BYOK)."""
     key, url, model = _get_llm_config(openai_api_key)
     if not key:
-        raise ValueError("No LLM API key: set GROQ_API_KEY (zero-cost) or pass OpenAI api_key")
+        raise ValueError("No LLM API key: set GROQ_API_KEY, or pass OpenAI (sk-) / Anthropic (sk-ant-) api_key")
+
+    # Anthropic Messages API (different request/response shape)
+    if "api.anthropic.com" in url:
+        payload = {
+            "model": model,
+            "max_tokens": max_tokens,
+            "messages": [{"role": m.get("role", "user"), "content": m.get("content", "")} for m in messages],
+        }
+        if temperature is not None:
+            payload["temperature"] = temperature
+        headers = {"x-api-key": key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"}
+        with httpx.Client(timeout=LLM_TIMEOUT) as client:
+            for attempt in range(LLM_MAX_RETRIES + 1):
+                try:
+                    r = client.post(url, json=payload, headers=headers)
+                    r.raise_for_status()
+                    data = r.json()
+                    content = data.get("content") or []
+                    if isinstance(content, list) and content and isinstance(content[0], dict):
+                        return (content[0].get("text") or "").strip()
+                    return ""
+                except (httpx.TimeoutException, httpx.HTTPStatusError):
+                    if attempt == LLM_MAX_RETRIES:
+                        raise
+        raise RuntimeError("Anthropic LLM request failed")
+
+    # OpenAI-compatible (OpenAI, Groq)
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     payload = {"model": model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens}
     with httpx.Client(timeout=LLM_TIMEOUT) as client:
@@ -463,6 +504,11 @@ def _immediate_appraisal_from_signals(
     if conflicts:
         grue_verdict = "Low" if grue_verdict != "High" else "Medium"
 
+    # Conviction score 0–1 for API / Phase 3
+    verdict_score = {"High": 0.8, "Medium": 0.5, "Low": 0.2}.get(grue_verdict, 0.2)
+    signal_boost = min(0.15, len(verified) * 0.03)  # cap boost from verified count
+    conviction_score = round(min(1.0, verdict_score + signal_boost), 2)
+
     appraisal = {
         "hook": hook[:300],
         "signal_count": len(evidence_log),
@@ -471,6 +517,7 @@ def _immediate_appraisal_from_signals(
         "questions_for_next_meeting": questions,
         "conflict_report": conflicts,
         "grue_verdict": grue_verdict,
+        "conviction_score": conviction_score,
         "pedigree": pedigree,
     }
     appraisal["immediate_appraisal_markdown"] = _build_appraisal_markdown(
@@ -559,10 +606,14 @@ def _grue_verdict_rationale(verdict: str, pedigree: Optional[Dict[str, Any]]) ->
 def generate_conflict_report(
     transcript_result: Dict[str, Any],
     dictation_result: Dict[str, Any],
+    transcript_text: Optional[str] = None,
+    dictation_text: Optional[str] = None,
+    api_key: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Compare Wispr (self-reported dictation) vs Granola (fact-based transcript).
-    If founder said one thing in meeting but dictation notes a different reality, highlight in ConflictReport.
+    Type A/B: factual/tonal conflicts (same metric, different value).
+    Type C: omission conflicts — topic/concern in dictation that was absent from transcript.
     """
     conflicts: List[Dict[str, Any]] = []
     t_log = {e.get("signal"): e for e in (transcript_result.get("evidence_log") or [])}
@@ -577,12 +628,64 @@ def generate_conflict_report(
         dv = (d_e.get("value") or "").strip()
         if tv and dv and tv != dv:
             conflicts.append({
+                "conflict_type": "factual",
                 "metric": sig,
                 "transcript_value": tv,
                 "dictation_value": dv,
                 "summary": f"{sig}: meeting said \"{tv}\" but dictation says \"{dv}\"",
             })
+
+    # Type C: Omission — concerns/topics in dictation not addressed in transcript
+    if transcript_text and dictation_text and _get_llm_config(api_key)[0]:
+        omission_conflicts = _detect_omission_conflicts(transcript_text, dictation_text, api_key)
+        conflicts.extend(omission_conflicts)
+
     return conflicts
+
+
+def _detect_omission_conflicts(
+    transcript_text: str,
+    dictation_text: str,
+    api_key: Optional[str],
+) -> List[Dict[str, Any]]:
+    """Type C: Topics or concerns mentioned in dictation that were notably absent from transcript."""
+    out: List[Dict[str, Any]] = []
+    prompt = """You are a diligence analyst. Given:
+1) MEETING TRANSCRIPT (what was said in the formal meeting):
+"""
+    prompt += transcript_text[:4000] + "\n\n2) VC'S PRIVATE NOTES/DICTATION (post-meeting):\n"
+    prompt += dictation_text[:3000]
+    prompt += """
+
+List any TOPICS or CONCERNS that appear in the private notes/dictation but were NOT meaningfully addressed in the meeting transcript. (E.g. "concern about unit economics", "founder credibility doubt", "churn not discussed".)
+Reply with a JSON array of short strings only, one per omission. If none, reply: []
+Example: ["churn never mentioned", "founder seemed evasive on retention"]
+"""
+    try:
+        key, url, model = _get_llm_config(api_key)
+        if not key:
+            return out
+        messages = [{"role": "user", "content": prompt}]
+        raw = _llm_chat(messages, api_key, temperature=0.1, max_tokens=400)
+        raw = raw.strip()
+        if raw.startswith("["):
+            # Find the array (in case of markdown)
+            start = raw.find("[")
+            end = raw.rfind("]") + 1
+            if end > start:
+                arr = json.loads(raw[start:end])
+                for item in (arr or [])[:10]:
+                    if isinstance(item, str) and item.strip():
+                        out.append({
+                            "conflict_type": "omission",
+                            "metric": "omission",
+                            "transcript_value": "",
+                            "dictation_value": item.strip(),
+                            "summary": f"Not in transcript: {item.strip()}",
+                        })
+    except (json.JSONDecodeError, ValueError, KeyError):
+        pass
+    return out
 
 
 # =============================================================================
@@ -700,7 +803,12 @@ def distill(
     if (transcript_text or "").strip() and (dictation_text or "").strip():
         granola = process_granola_transcript(transcript_text.strip(), api_key, persona_name)
         wispr = process_wispr_dictation(dictation_text.strip(), api_key, persona_name)
-        conflict_report = generate_conflict_report(granola, wispr)
+        conflict_report = generate_conflict_report(
+            granola, wispr,
+            transcript_text=transcript_text.strip(),
+            dictation_text=dictation_text.strip(),
+            api_key=api_key,
+        )
         # Use transcript as primary evidence; merge blind spots and questions
         evidence_log = granola.get("evidence_log") or []
         blind_spots = list(set((granola.get("blind_spots") or []) + (wispr.get("blind_spots") or [])))
@@ -710,6 +818,7 @@ def distill(
             evidence_log, blind_spots, questions, "Granola + Wispr (with conflict check)",
             conflict_report=conflict_report, pedigree=pedigree,
         )
+        ai_polish = _run_ai_polish_detection(transcript_text.strip())
         return {
             "source_type": "transcript",
             "tool": "granola+wispr",
@@ -721,6 +830,7 @@ def distill(
             "conflict_report": conflict_report,
             "immediate_appraisal": immediate_appraisal,
             "pedigree": pedigree,
+            "ai_polish": ai_polish,
             "granola_preview": granola.get("cleaned_preview", ""),
             "wispr_thesis_fragment": wispr.get("investment_thesis_fragment"),
         }
@@ -764,6 +874,7 @@ def distill(
 
     out["source_metadata"] = {"source_type": out["source_type"], "tool": out.get("tool", "unknown")}
     out["conflict_report"] = []
+    out["ai_polish"] = _run_ai_polish_detection(text)
     if "immediate_appraisal" in out and "immediate_appraisal_markdown" not in out.get("immediate_appraisal", {}):
         appr = out["immediate_appraisal"]
         appr["immediate_appraisal_markdown"] = _build_appraisal_markdown(

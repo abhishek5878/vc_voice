@@ -11,7 +11,7 @@ from http.server import BaseHTTPRequestHandler
 # Add lib to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from lib.config import SYSTEM_VERSION, SYSTEM_NAME
+from lib.config import SYSTEM_VERSION, SYSTEM_NAME, get_calendly_url
 
 
 def _handle(request):
@@ -32,7 +32,8 @@ def _handle(request):
         'system': SYSTEM_NAME,
         'openai_configured': False,
         'mode': 'byok',
-        'message': 'System operational. Provide your OpenAI API key to use the triage system.'
+        'message': 'System operational. Provide your OpenAI API key to use the triage system.',
+        'calendly_url': get_calendly_url() or None,
     }
 
     return {

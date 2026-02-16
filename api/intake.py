@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.classification import classify_contact, get_classification_context
 from lib.conversation import create_conversation, save_conversation
-from lib.config import get_data_path
-from lib.contacts_store import append_contact
+from lib.config import get_data_path, TRIAGE_RATE_LIMIT_DAYS
+from lib.contacts_store import append_contact, email_already_triaged_recently
 
 
 def _handle(request):
@@ -91,15 +91,33 @@ def _handle(request):
                 'body': json.dumps({'error': 'Current work description is required'})
             }
 
+        workspace_id = (body.get('workspace_id') or '').strip() or None
+
+        # Rate limit: 1 triage per email per workspace per N days (anti-gaming)
+        if email_already_triaged_recently(email, workspace_id, within_days=TRIAGE_RATE_LIMIT_DAYS):
+            return {
+                'statusCode': 429,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Retry-After': '604800',
+                },
+                'body': json.dumps({
+                    'error': 'already_triaged',
+                    'message': f'This email has already completed triage in the last {TRIAGE_RATE_LIMIT_DAYS} days. One triage per email per week.',
+                })
+            }
+
         # Classify contact
         classification = classify_contact(email, current_work)
 
         # Generate conversation ID
         conversation_id = str(uuid.uuid4())
 
-        # Create contact record (include raising_status, segment for thesis/fit gating)
+        # Create contact record (include workspace_id, raising_status, segment)
         contact_data = {
             'conversation_id': conversation_id,
+            'workspace_id': workspace_id or 'default',
             'name': name,
             'email': email,
             'current_work': current_work,

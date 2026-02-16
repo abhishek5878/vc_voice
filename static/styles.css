@@ -757,6 +757,206 @@ body {
     color: var(--accent);
 }
 
+/* Analyze section (Robin.ai SPA) */
+.section-footer {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+}
+
+.analyze-form .form-group {
+    margin-bottom: var(--space-md);
+}
+
+.analyze-results {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+}
+
+.analyze-results h3 {
+    font-size: 1rem;
+    margin: var(--space-lg) 0 var(--space-sm);
+    color: var(--accent);
+}
+
+.analyze-results h3:first-child {
+    margin-top: 0;
+}
+
+.analyze-verdict .appraisal-markdown {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-sm);
+    line-height: 1.5;
+}
+
+.evidence-list,
+.conflict-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.evidence-list li,
+.conflict-list li {
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.evidence-list li:last-child,
+.conflict-list li:last-child {
+    border-bottom: none;
+}
+
+.evidence-list blockquote {
+    margin: var(--space-xs) 0 0;
+    padding-left: var(--space-md);
+    border-left: 3px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.evidence-list .counter-q {
+    margin-top: var(--space-xs);
+    font-size: 0.85rem;
+    color: var(--warning);
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-sm);
+}
+
+.badge.verified {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+}
+
+.badge.unverified {
+    background: rgba(234, 179, 8, 0.2);
+    color: var(--warning);
+}
+
+.analyze-results .muted {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.optional {
+    font-weight: normal;
+    color: var(--text-muted);
+}
+
+.conviction-score,
+.ai-polish {
+    font-size: 0.9rem;
+    margin-top: var(--space-sm);
+    color: var(--text-secondary);
+}
+
+.analyze-export {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+}
+
+.analyze-export .btn {
+    margin-right: var(--space-sm);
+}
+
+.analyze-history-list {
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.analyze-history-list li {
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border);
+}
+.analyze-history-list .date {
+    margin-right: var(--space-sm);
+    color: var(--text-muted);
+}
+
+.pipeline-stats {
+    margin-bottom: var(--space-md);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+.pipeline-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.pipeline-table th,
+.pipeline-table td {
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.pipeline-table th {
+    color: var(--accent);
+    font-weight: 600;
+}
+.override-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-xs);
+}
+.override-badge.override-approved { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+.override-badge.override-rejected { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+.evaluation-cta {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+}
+.evaluation-cta .btn {
+    display: inline-block;
+}
+
+.chat-fit-banner {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-tertiary);
+    border-left: 3px solid var(--accent);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.pipeline-insight {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: var(--space-sm);
+    font-style: italic;
+}
+
+.pipeline-memory {
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--accent);
+}
+.pipeline-memory h3 {
+    font-size: 0.95rem;
+    margin-bottom: var(--space-sm);
+    color: var(--accent);
+}
+.pipeline-memory .memory-summary {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.pipeline-memory .memory-empty {
+    font-size: 0.9rem;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;

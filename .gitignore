@@ -38,6 +38,8 @@ Thumbs.db
 
 # Project specific
 data/contacts.json
+data/analyses.json
+data/memory.json
 data/rejected_archetypes.json
 
 # Vercel

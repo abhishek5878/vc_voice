@@ -172,3 +172,27 @@ DATA_FILES = {
 
 SYSTEM_VERSION = "1.0.0"
 SYSTEM_NAME = "Personal Intelligence Triage"
+
+# ============================================================================
+# VC / Workspace (loophole fixes: identity, Calendly, rate limit)
+# ============================================================================
+
+# One triage per email per workspace within this many days (anti-gaming)
+TRIAGE_RATE_LIMIT_DAYS = 7
+
+
+def get_calendly_url() -> str:
+    """Calendly or meeting link from env or data/vc_config.json. Empty = no button."""
+    url = (os.environ.get("CALENDLY_URL") or "").strip()
+    if url:
+        return url
+    try:
+        import json
+        path = get_data_path("vc_config.json")
+        if os.path.isfile(path):
+            with open(path, "r") as f:
+                data = json.load(f)
+            return (data.get("calendly_url") or "").strip()
+    except Exception:
+        pass
+    return ""

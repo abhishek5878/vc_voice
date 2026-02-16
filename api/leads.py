@@ -11,7 +11,8 @@ from http.server import BaseHTTPRequestHandler
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from lib.contacts_store import get_all_leads, get_contact_by_conversation_id, update_contact
+from lib.contacts_store import get_all_leads, get_contact_by_conversation_id, update_contact, get_override_summary
+from lib.memory_store import append_override_memory
 
 
 def _handle(request):
@@ -27,16 +28,46 @@ def _handle(request):
             "body": "",
         }
     if method == "GET":
-        # List leads (for export / tuning)
+        # Optional: ?conversation_id= for single lead; ?workspace_id= to filter pipeline
+        path = getattr(request, "path", "") or ""
+        params = {}
+        if "?" in path:
+            qs = path.split("?", 1)[1]
+            for part in qs.split("&"):
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    params[k.strip()] = v.strip()
+        conv_id = params.get("conversation_id", "").strip()
+        workspace_id = params.get("workspace_id", "").strip() or None
+        if conv_id:
+            lead = get_contact_by_conversation_id(conv_id)
+            if not lead:
+                return {
+                    "statusCode": 404,
+                    "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
+                    "body": json.dumps({"error": "Lead not found"}),
+                }
+            return {
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({
+                    "lead": lead,
+                    "claim_history": {
+                        "key_claims_to_verify": lead.get("key_claims_to_verify") or [],
+                        "claims_verification": lead.get("claims_verification") or [],
+                    },
+                }),
+            }
         include_pending = True
-        leads = get_all_leads(include_pending=include_pending)
+        leads = get_all_leads(include_pending=include_pending, workspace_id=workspace_id)
+        summary = get_override_summary(workspace_id, within_days=30)
         return {
             "statusCode": 200,
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
-            "body": json.dumps({"leads": leads}),
+            "body": json.dumps({"leads": leads, "override_summary": summary}),
         }
     if method == "POST":
         # Body: { action: "override" | "verify_claim", ... }
@@ -75,7 +106,18 @@ def _handle(request):
                     "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
                     "body": json.dumps({"error": "override must be 'approved' or 'rejected'"}),
                 }
-            update_contact(conversation_id, {"override": override, "override_reason": reason})
+            from datetime import datetime
+            update_contact(conversation_id, {
+                "override": override,
+                "override_reason": reason,
+                "override_at": datetime.utcnow().isoformat(),
+            })
+            append_override_memory(
+                contact.get("workspace_id"),
+                outcome=override,
+                reason=reason,
+                contact=contact,
+            )
             return {
                 "statusCode": 200,
                 "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},

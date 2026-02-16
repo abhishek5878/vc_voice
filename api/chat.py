@@ -281,8 +281,10 @@ def _handle(request):
 
                 # Persist evaluation and claims for verification/override (data & learning)
                 claims = evaluation.get("key_claims_to_verify") or []
+                from datetime import datetime
                 update_contact(state.conversation_id, {
                     "evaluation_result": evaluation,
+                    "evaluated_at": datetime.utcnow().isoformat(),
                     "key_claims_to_verify": claims,
                     "claims_verification": [{"claim": c, "verified": None} for c in claims],
                     "status": "evaluated",

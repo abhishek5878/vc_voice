@@ -41,17 +41,67 @@
                             required
                             autocomplete="off"
                         >
-                        <span class="form-hint">Your API key starts with 'sk-' and is available at platform.openai.com</span>
+                        <span class="form-hint">OpenAI (sk-...) or Anthropic (sk-ant-...). Stored locally, never sent to our servers.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="workspace-id">Workspace <span class="optional">(optional)</span></label>
+                        <input type="text" id="workspace-id" name="workspace_id" placeholder="e.g. sajith or blume" autocomplete="off">
+                        <span class="form-hint">Scopes your pipeline and analyses. Leave blank for default.</span>
                     </div>
                     <button type="submit" class="btn btn-primary">Continue</button>
                 </form>
+                <p class="section-footer">
+                    <button type="button" class="btn btn-ghost" id="go-to-analyze">Analyze a meeting (paste transcript)</button>
+                    <button type="button" class="btn btn-ghost" id="go-to-pipeline">View pipeline</button>
+                </p>
+            </section>
+
+            <!-- Analyze a meeting (Robin.ai SPA) -->
+            <section class="section analyze-section hidden" id="analyze-section">
+                <div class="section-header">
+                    <h2>Analyze a meeting</h2>
+                    <p class="section-desc">Paste a meeting transcript (e.g. Granola) and optionally your notes (e.g. Wispr) for Evidence Map, GRUE checklist, and Conflict Report.</p>
+                </div>
+                <form class="analyze-form" id="analyze-form">
+                    <div class="form-group">
+                        <label for="analyze-transcript">Meeting transcript</label>
+                        <textarea id="analyze-transcript" name="transcript" rows="6" placeholder="Paste Granola (or other) meeting transcript here..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="analyze-dictation">Your notes / dictation <span class="optional">(optional)</span></label>
+                        <textarea id="analyze-dictation" name="dictation" rows="4" placeholder="Paste Wispr or your post-meeting notes for conflict check..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="analyze-submit">Analyze</button>
+                </form>
+                <div class="analyze-results hidden" id="analyze-results">
+                    <div class="analyze-verdict" id="analyze-verdict"></div>
+                    <div class="analyze-evidence" id="analyze-evidence"></div>
+                    <div class="analyze-grue" id="analyze-grue"></div>
+                    <div class="analyze-conflicts" id="analyze-conflicts"></div>
+                </div>
+                <div class="analyze-history hidden" id="analyze-history"></div>
+                <p class="section-footer"><button type="button" class="btn btn-ghost" id="go-to-intake">Start triage conversation</button></p>
+            </section>
+
+            <!-- Pipeline (VC dashboard) -->
+            <section class="section pipeline-section hidden" id="pipeline-section">
+                <div class="section-header">
+                    <h2>Your pipeline</h2>
+                    <p class="section-desc">Leads and overrides for this workspace. Use workspace in Setup to scope.</p>
+                </div>
+                <div class="pipeline-memory" id="pipeline-memory" aria-live="polite"></div>
+                <div class="pipeline-stats" id="pipeline-stats"></div>
+                <div class="pipeline-table-wrap" id="pipeline-table-wrap"></div>
+                <p class="section-footer">
+                    <button type="button" class="btn btn-ghost" id="pipeline-back">Back</button>
+                </p>
             </section>
 
             <!-- Contact Intake (Step 1) -->
             <section class="section intake-section hidden" id="intake-section">
                 <div class="section-header">
                     <h2>Before we begin</h2>
-                    <p class="section-desc">This is a triage system for Sajith Pai. Provide your information to start.</p>
+                    <p class="section-desc">This is a triage system for Sajith Pai. Provide your information to start. One triage per email per week (per workspace).</p>
                 </div>
                 <form class="intake-form" id="intake-form">
                     <div class="form-group">
@@ -99,6 +149,7 @@
 
             <!-- Chat Interface (Step 2) -->
             <section class="section chat-section hidden" id="chat-section">
+                <div class="chat-fit-banner hidden" id="chat-fit-banner" role="status"></div>
                 <div class="chat-header">
                     <div class="chat-info">
                         <span class="chat-title">Triage Conversation</span>

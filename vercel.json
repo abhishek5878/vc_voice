@@ -1,26 +1,89 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/*.py", "use": "@vercel/python" },
-    { "src": "static/**", "use": "@vercel/static" }
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
+    }
   ],
   "rewrites": [
-    { "source": "/api/health", "destination": "/api/health.py" },
-    { "source": "/api/intake", "destination": "/api/intake.py" },
-    { "source": "/api/chat", "destination": "/api/chat.py" },
-    { "source": "/api/leads", "destination": "/api/leads.py" },
-    { "source": "/", "destination": "/static/index.html" },
-    { "source": "/styles.css", "destination": "/static/styles.css" },
-    { "source": "/app.js", "destination": "/static/app.js" },
-    { "source": "/(.*)", "destination": "/static/$1" }
+    {
+      "source": "/api/health",
+      "destination": "/api/health.py"
+    },
+    {
+      "source": "/api/intake",
+      "destination": "/api/intake.py"
+    },
+    {
+      "source": "/api/chat",
+      "destination": "/api/chat.py"
+    },
+    {
+      "source": "/api/leads",
+      "destination": "/api/leads.py"
+    },
+    {
+      "source": "/api/analyze",
+      "destination": "/api/analyze.py"
+    },
+    {
+      "source": "/api/conviction",
+      "destination": "/api/conviction.py"
+    },
+    {
+      "source": "/api/analyze/history",
+      "destination": "/api/analyze_history.py"
+    },
+    {
+      "source": "/api/stats",
+      "destination": "/api/stats.py"
+    },
+    {
+      "source": "/api/config",
+      "destination": "/api/config.py"
+    },
+    {
+      "source": "/api/memory",
+      "destination": "/api/memory.py"
+    },
+    {
+      "source": "/",
+      "destination": "/static/index.html"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "/static/styles.css"
+    },
+    {
+      "source": "/app.js",
+      "destination": "/static/app.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/static/$1"
+    }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, X-API-Key" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, X-API-Key"
+        }
       ]
     }
   ]
