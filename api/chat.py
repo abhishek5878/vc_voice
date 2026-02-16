@@ -14,6 +14,13 @@ from datetime import datetime
 # Add lib to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Load .env so OPENAI_API_KEY (and GROQ_API_KEY) are available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from lib.conversation import (
     ConversationState,
     get_conversation,

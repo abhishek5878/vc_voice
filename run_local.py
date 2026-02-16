@@ -14,6 +14,13 @@ from urllib.parse import parse_qs, urlparse
 # Add lib to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Load .env for OPENAI_API_KEY / GROQ_API_KEY
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 PORT = 3000
 
 
