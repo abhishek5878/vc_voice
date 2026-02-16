@@ -1,44 +1,17 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "api/*.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "static/**",
-      "use": "@vercel/static"
-    }
+    { "src": "api/*.py", "use": "@vercel/python" },
+    { "src": "static/**", "use": "@vercel/static" }
   ],
-  "routes": [
-    {
-      "src": "/api/health",
-      "dest": "/api/health.py"
-    },
-    {
-      "src": "/api/intake",
-      "dest": "/api/intake.py"
-    },
-    {
-      "src": "/api/chat",
-      "dest": "/api/chat.py"
-    },
-    {
-      "src": "/",
-      "dest": "/static/index.html"
-    },
-    {
-      "src": "/styles.css",
-      "dest": "/static/styles.css"
-    },
-    {
-      "src": "/app.js",
-      "dest": "/static/app.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/static/$1"
-    }
+  "rewrites": [
+    { "source": "/api/health", "destination": "/api/health.py" },
+    { "source": "/api/intake", "destination": "/api/intake.py" },
+    { "source": "/api/chat", "destination": "/api/chat.py" },
+    { "source": "/", "destination": "/static/index.html" },
+    { "source": "/styles.css", "destination": "/static/styles.css" },
+    { "source": "/app.js", "destination": "/static/app.js" },
+    { "source": "/(.*)", "destination": "/static/$1" }
   ],
   "headers": [
     {
