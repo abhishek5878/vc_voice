@@ -248,10 +248,38 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
     padding: var(--space-md);
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.btn-ghost:hover {
+    color: var(--text-primary);
+    border-color: var(--border-focus);
+}
+
+.btn-context::before {
+    content: '? ';
+    opacity: 0.8;
 }
 
 .chat-info {
@@ -288,6 +316,122 @@ body {
     font-family: var(--font-mono);
     color: var(--accent);
     font-weight: 600;
+}
+
+/* Context panel – key terms when founder doesn't understand */
+.chat-section {
+    position: relative;
+}
+
+.context-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 280px;
+    max-width: 100%;
+    height: 100%;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+}
+
+.context-panel.open {
+    transform: translateX(0);
+}
+
+.context-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+}
+
+.context-panel-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.context-panel-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 var(--space-xs);
+}
+
+.context-panel-close:hover {
+    color: var(--text-primary);
+}
+
+.context-panel-desc {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border);
+}
+
+.context-panel-list {
+    padding: var(--space-md);
+}
+
+.context-term {
+    margin-bottom: var(--space-md);
+}
+
+.context-term strong {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--accent);
+    margin-bottom: var(--space-xs);
+}
+
+.context-term span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Term hints in messages – click/hover for definition */
+.message-content .term-hint {
+    border-bottom: 1px dotted var(--accent);
+    cursor: help;
+    text-decoration: none;
+}
+
+.message-content .term-hint:hover,
+.message-content .term-hint:focus {
+    outline: none;
+    border-bottom-style: solid;
+}
+
+/* Global tooltip for term hint */
+.term-tooltip {
+    position: fixed;
+    max-width: 260px;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: var(--shadow-md);
+}
+
+.term-tooltip.hidden {
+    display: none;
 }
 
 /* Chat Messages */

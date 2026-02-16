@@ -4,6 +4,35 @@
  */
 
 // ============================================================================
+// Glossary – Sajith's key terms (show context when founder doesn't understand)
+// ============================================================================
+
+const GLOSSARY = {
+    'PMF': 'Product-Market Fit. PMF = PPF + MMF. Before you go big, you need to get it right.',
+    'PPF': 'Product-to-Problem Fit. Does the pain go away when customers use your product?',
+    'MMF': 'Motion-to-Market Fit. Can you reliably, affordably acquire lookalike customers?',
+    'GRUE': 'Growth with Retention and Unit Economics – a shorthand for PMF.',
+    'CM2+': 'Contribution margin after acquisition costs, positive. A good shorthand for PMF.',
+    'Congruent Square': 'Product, Market, GTM, and Team must align. Loose alignment hurts PMF.',
+    'India1': '~10% of India – urban, English-speaking, 40% of consumer spends.',
+    'India2': '100–200M – vernacular, emerging middle class. Not the same as India1.',
+    'India3': 'Rural, low income, hard to serve profitably.',
+    'hero channel': 'The one acquisition channel that works. Uncomfortably narrow is good.',
+    'GTM': 'Go-to-market. Pouring GTM fuel before PMF = premature scaling.',
+    'ICP': 'Ideal Customer Profile. Uncomfortably narrow personas.',
+    'Sean Ellis test': '40%+ say "very disappointed" if product disappeared = strong PPF signal.',
+    'nailing before scaling': 'PMF is the nailing before the scaling. Get it right first.',
+    'LTV/CAC': 'Lifetime value to customer acquisition cost. Aim for 3:1.',
+    'retention curve': 'B2C: flatline at ~10% at D90 is a PPF signal.',
+    'pre-PMF': 'PrePMF startups are a learning machine, not an earning machine.',
+    'Believe what they do': 'Trust customer behaviour, not what they say in interviews.',
+    'Focus on the monkey': 'Solve the hardest thing first – focus on the monkey, not the pedestal.',
+};
+
+// Term order for wrapping: longest first so "Congruent Square" matches before "Square"
+const GLOSSARY_TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+
+// ============================================================================
 // State Management
 // ============================================================================
 
@@ -53,7 +82,12 @@ const elements = {
     clearKeyLink: document.getElementById('clear-key-link'),
 
     // Loading
-    loadingOverlay: document.getElementById('loading-overlay')
+    loadingOverlay: document.getElementById('loading-overlay'),
+    contextToggle: document.getElementById('context-toggle'),
+    contextPanel: document.getElementById('context-panel'),
+    contextPanelClose: document.getElementById('context-panel-close'),
+    contextPanelList: document.getElementById('context-panel-list'),
+    termTooltip: document.getElementById('term-tooltip')
 };
 
 // ============================================================================
@@ -166,13 +200,35 @@ function updateSignalCount() {
     elements.signalCount.textContent = state.signalCount;
 }
 
+/** Escape string for use inside RegExp */
+function regexEscape(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Wrap glossary terms in assistant messages with hint spans for tooltips */
+function wrapTermsForHints(text) {
+    if (!text || typeof text !== 'string') return '';
+    let out = escapeHtml(text);
+    GLOSSARY_TERMS.forEach(term => {
+        const pattern = regexEscape(escapeHtml(term));
+        const re = new RegExp(`(${pattern})`, 'gi');
+        out = out.replace(re, `<span class="term-hint" data-term="${escapeHtml(term)}" tabindex="0">$1</span>`);
+    });
+    return out;
+}
+
 function addMessage(content, role, meta = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${role}`;
 
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    contentDiv.textContent = content;
+    if (role === 'assistant') {
+        contentDiv.innerHTML = wrapTermsForHints(content);
+        bindTermHints(contentDiv);
+    } else {
+        contentDiv.textContent = content;
+    }
 
     messageDiv.appendChild(contentDiv);
 
@@ -288,6 +344,57 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+/** Show tooltip for a term hint */
+function showTermTooltip(term, el) {
+    const def = GLOSSARY[term];
+    if (!def || !elements.termTooltip) return;
+    elements.termTooltip.textContent = def;
+    elements.termTooltip.classList.remove('hidden');
+    const rect = el.getBoundingClientRect();
+    elements.termTooltip.style.left = `${rect.left}px`;
+    elements.termTooltip.style.top = `${rect.top - 6}px`;
+    elements.termTooltip.style.transform = 'translateY(-100%)';
+}
+
+function hideTermTooltip() {
+    if (elements.termTooltip) {
+        elements.termTooltip.classList.add('hidden');
+    }
+}
+
+/** Bind hover/focus to term hints inside a container */
+function bindTermHints(container) {
+    if (!container) return;
+    container.querySelectorAll('.term-hint').forEach(span => {
+        const term = span.getAttribute('data-term');
+        if (!term || !GLOSSARY[term]) return;
+        span.addEventListener('mouseenter', () => showTermTooltip(term, span));
+        span.addEventListener('mouseleave', hideTermTooltip);
+        span.addEventListener('focus', () => showTermTooltip(term, span));
+        span.addEventListener('blur', hideTermTooltip);
+    });
+}
+
+/** Populate and toggle the Key terms context panel */
+function renderContextPanel() {
+    if (!elements.contextPanelList) return;
+    elements.contextPanelList.innerHTML = GLOSSARY_TERMS.map(term => {
+        const def = GLOSSARY[term];
+        return `<div class="context-term"><strong>${escapeHtml(term)}</strong><span>${escapeHtml(def)}</span></div>`;
+    }).join('');
+}
+
+function toggleContextPanel() {
+    if (!elements.contextPanel) return;
+    elements.contextPanel.classList.toggle('open');
+    elements.contextToggle?.setAttribute('aria-expanded', elements.contextPanel.classList.contains('open'));
+}
+
+function closeContextPanel() {
+    elements.contextPanel?.classList.remove('open');
+    elements.contextToggle?.setAttribute('aria-expanded', 'false');
+}
+
 function showError(message) {
     alert(message);  // Simple error handling - could be improved
 }
@@ -349,9 +456,9 @@ elements.intakeForm.addEventListener('submit', async (e) => {
         // Switch to chat
         showSection('chat-section');
 
-        // Add initial PI message (open so founder can describe startup first)
+        // Add initial PI message in Sajith's voice
         addMessage(
-            "What are you building and why Sajith? Give a quick picture of what you're working on and any traction so far.",
+            "What are you building, and what's the one PMF challenge you're stuck on?",
             'assistant'
         );
 
@@ -362,47 +469,64 @@ elements.intakeForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Voice input (Web Speech API)
+// Voice input (Web Speech API) – committed text + latest interim only, no repetition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let isListening = false;
+const voiceState = { baseText: '', finalSegments: [], lastInterim: '' };
+
+function getVoiceDisplayText() {
+    const parts = [voiceState.baseText, ...voiceState.finalSegments].filter(Boolean);
+    let out = parts.join(' ').replace(/\s+/g, ' ').trim();
+    if (voiceState.lastInterim.trim()) {
+        out = (out ? out + ' ' : '') + voiceState.lastInterim.trim();
+    }
+    return out;
+}
+
+function updateVoiceInput() {
+    const text = getVoiceDisplayText();
+    elements.chatInput.value = text + (isListening ? ' [listening]' : '');
+}
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-IN';
+    recognition.maxAlternatives = 1;
 
     recognition.onresult = (event) => {
-        let final = '';
-        let interim = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                final += transcript;
+            const result = event.results[i];
+            const transcript = (result[0] && result[0].transcript) ? result[0].transcript.trim() : '';
+            if (!transcript) continue;
+
+            if (result.isFinal) {
+                // Avoid duplicate or overlapping final segments
+                const last = voiceState.finalSegments[voiceState.finalSegments.length - 1];
+                if (last === transcript) continue;
+                if (last && transcript.indexOf(last) === 0) {
+                    voiceState.finalSegments[voiceState.finalSegments.length - 1] = transcript;
+                    continue;
+                }
+                if (last && last.indexOf(transcript) === 0) continue;
+                voiceState.finalSegments.push(transcript);
+                voiceState.lastInterim = '';
             } else {
-                interim += transcript;
+                voiceState.lastInterim = transcript;
             }
         }
-        const current = elements.chatInput.value;
-        const suffix = ' [listening]';
-        const beforeInterim = current.endsWith(suffix) ? current.slice(0, -suffix.length).trim() : current;
-        if (final) {
-            elements.chatInput.value = (beforeInterim ? beforeInterim + ' ' : '') + final + (interim ? suffix : '');
-        } else if (interim) {
-            elements.chatInput.value = (beforeInterim ? beforeInterim + ' ' : '') + interim + suffix;
-        }
+        updateVoiceInput();
     };
 
     recognition.onend = () => {
         isListening = false;
+        voiceState.lastInterim = '';
+        elements.chatInput.value = getVoiceDisplayText();
         elements.micBtn.classList.remove('listening');
         elements.micIcon.classList.remove('hidden');
         elements.micStatus.classList.add('hidden');
-        const suffix = ' [listening]';
-        if (elements.chatInput.value.endsWith(suffix)) {
-            elements.chatInput.value = elements.chatInput.value.slice(0, -suffix.length).trim();
-        }
     };
 
     recognition.onerror = (event) => {
@@ -421,6 +545,10 @@ if (SpeechRecognition) {
             recognition.stop();
             return;
         }
+        const current = elements.chatInput.value.replace(/\s*\[listening\]\s*$/, '').trim();
+        voiceState.baseText = current;
+        voiceState.finalSegments = [];
+        voiceState.lastInterim = '';
         isListening = true;
         elements.micBtn.classList.add('listening');
         elements.micIcon.classList.add('hidden');
@@ -494,6 +622,17 @@ elements.chatForm.addEventListener('submit', async (e) => {
         elements.sendBtn.disabled = false;
     }
 });
+
+// Key terms context panel
+if (elements.contextToggle) {
+    elements.contextToggle.addEventListener('click', () => {
+        renderContextPanel();
+        toggleContextPanel();
+    });
+}
+if (elements.contextPanelClose) {
+    elements.contextPanelClose.addEventListener('click', closeContextPanel);
+}
 
 // Start Over Button
 elements.startOverBtn.addEventListener('click', () => {

@@ -57,6 +57,11 @@ def get_bot_qa_samples() -> Dict[str, Any]:
     return load_json_file("bot_qa_samples.json")
 
 
+def get_sajith_voice() -> Dict[str, Any]:
+    """Get Sajith voice & style guide (phrases to use/avoid, rhythm)."""
+    return load_json_file("sajith_voice.json")
+
+
 # ============================================================================
 # Knowledge Extraction Helpers
 # ============================================================================
