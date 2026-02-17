@@ -5,16 +5,24 @@ import ModeSelect from "@/components/ModeSelect";
 import InputInterface from "@/components/InputInterface";
 import PipelineProgress from "@/components/PipelineProgress";
 import AnalysisReport from "@/components/AnalysisReport";
+import FounderChat from "@/components/FounderChat";
 import type { PipelineResult } from "@/lib/pipeline/types";
 import type { StreamContext } from "@/lib/ingest/types";
 
-type View = "mode" | "input" | "progress" | "report";
+type View = "mode" | "input" | "progress" | "report" | "chat";
+
+interface ChatSession {
+  streamContext: StreamContext;
+  apiKey: string;
+  provider: "openai" | "anthropic" | "groq";
+}
 
 export default function AppPage() {
   const [view, setView] = useState<View>("mode");
   const [mode, setMode] = useState<1 | 2 | 3>(1);
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [progressStep, setProgressStep] = useState(0);
+  const [chatSession, setChatSession] = useState<ChatSession | null>(null);
 
   const handleStartMode = useCallback((m: 1 | 2 | 3) => {
     setMode(m);
@@ -24,10 +32,18 @@ export default function AppPage() {
   const handleBackToMode = useCallback(() => {
     setView("mode");
     setResult(null);
+    setChatSession(null);
   }, []);
 
   const handleRun = useCallback(
     async (streamContext: StreamContext, apiKey: string, provider: "openai" | "anthropic" | "groq") => {
+      if (mode === 3) {
+        // Founder chat mode: skip static report, go straight into live VC-style chat.
+        setChatSession({ streamContext, apiKey, provider });
+        setView("chat");
+        return;
+      }
+
       setView("progress");
       setProgressStep(0);
       const interval = setInterval(() => {
@@ -83,5 +99,20 @@ export default function AppPage() {
     );
   }
 
+  if (view === "chat" && chatSession) {
+    return (
+      <FounderChat
+        initialStreamContext={chatSession.streamContext}
+        apiKey={chatSession.apiKey}
+        provider={chatSession.provider}
+        onBack={() => {
+          setView("input");
+          setChatSession(null);
+        }}
+      />
+    );
+  }
+
   return null;
 }
+
