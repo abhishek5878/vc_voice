@@ -70,7 +70,6 @@ export async function POST(request: NextRequest) {
           content: m.content,
         })),
         stream,
-        response_format: !stream ? { type: "json_object" as const } : undefined,
       });
 
       if (stream) {
