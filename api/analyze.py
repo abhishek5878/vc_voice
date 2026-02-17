@@ -172,7 +172,7 @@ def _handle(request):
         }
 
     try:
-        from app.services.universal_intake import distill
+        from backend.services.universal_intake import distill
     except ImportError:
         return {
             "statusCode": 500,

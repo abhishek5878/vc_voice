@@ -15,9 +15,9 @@ import pytest
 
 # Skip entire module if VoiceVC app is not available (e.g. running in pi-triage only)
 try:
-    from app.main import app
-    from app.database import get_session
-    from app.models import Lead, Tenant
+    from backend.main import app
+    from backend.database import get_session
+    from backend.models import Lead, Tenant
     import httpx
     from httpx import ASGITransport, AsyncClient
     from sqlmodel import Session, select
@@ -27,7 +27,7 @@ except ImportError:
     Lead = Tenant = Session = select = get_session = app = None  # type: ignore[misc, assignment]
     AsyncClient = ASGITransport = httpx = None  # type: ignore[assignment]
 
-pytestmark = pytest.mark.skipif(not _VOICEVC_AVAILABLE, reason="VoiceVC app (app.main, app.database) not available")
+pytestmark = pytest.mark.skipif(not _VOICEVC_AVAILABLE, reason="VoiceVC app (backend.main, backend.database) not available")
 
 
 # =============================================================================

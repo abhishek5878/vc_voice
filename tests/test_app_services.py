@@ -7,7 +7,7 @@ import pytest
 
 # Memo fragment (no DB)
 try:
-    from app.services.memo_fragment import (
+    from backend.services.memo_fragment import (
         build_memo_fragment,
         build_memo_fragment_rule_based,
         score_to_priority,
@@ -21,7 +21,7 @@ except ImportError:
 
 # Universal intake (no DB)
 try:
-    from app.services.universal_intake import (
+    from backend.services.universal_intake import (
         distill,
         detect_source_type,
         _extract_signals_with_evidence,
@@ -32,7 +32,7 @@ except ImportError:
     _INTAKE_AVAILABLE = False
 
 
-@pytest.mark.skipif(not _MEMO_AVAILABLE, reason="app.services.memo_fragment not available")
+@pytest.mark.skipif(not _MEMO_AVAILABLE, reason="backend.services.memo_fragment not available")
 class TestMemoFragment:
     def test_score_to_priority(self):
         assert score_to_priority(8, "recommend_meeting") == "High"

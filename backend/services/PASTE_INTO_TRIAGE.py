@@ -3,7 +3,7 @@
 # Automated Analyst Memo Generator: tenant-aware LLM memo when api_key + persona_name provided.
 
 # 1) At top with other imports:
-from app.services.memo_fragment import build_memo_fragment
+from backend.services.memo_fragment import build_memo_fragment
 
 # 2) In _run_full_evaluation, REPLACE the final "return { ... }" with:
 #    (Build result, then generate memo using Tenant's API key and persona name for tenant-aware prompt.)

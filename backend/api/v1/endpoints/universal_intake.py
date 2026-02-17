@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
-from app.database import get_session
-from app.models import Lead, Tenant
-from app.services.universal_intake import distill
+from backend.database import get_session
+from backend.models import Lead, Tenant
+from backend.services.universal_intake import distill
 
 router = APIRouter(tags=["universal_intake"])
 
