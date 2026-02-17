@@ -1,10 +1,10 @@
 /**
- * PI Triage System - Frontend Application
- * Handles API key setup, contact intake, and chat interface
+ * Robin.ai - Frontend
+ * Setup, triage intake, chat, stress-test (analyze), pipeline.
  */
 
 // ============================================================================
-// Glossary – Sajith's key terms (show context when founder doesn't understand)
+// Glossary – key terms (show context when founder doesn't understand)
 // ============================================================================
 
 const GLOSSARY = {

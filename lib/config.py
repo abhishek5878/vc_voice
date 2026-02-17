@@ -171,7 +171,7 @@ DATA_FILES = {
 # ============================================================================
 
 SYSTEM_VERSION = "1.0.0"
-SYSTEM_NAME = "Personal Intelligence Triage"
+SYSTEM_NAME = "Robin.ai"
 
 # ============================================================================
 # VC / Workspace (loophole fixes: identity, Calendly, rate limit)

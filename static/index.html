@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PI Triage - Sajith Pai</title>
+    <title>Robin.ai – Your calendar, filtered.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,8 +14,8 @@
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <span class="logo-pi">PI</span>
-                <span class="logo-text">Personal Intelligence</span>
+                <span class="logo-pi">Robin</span>
+                <span class="logo-text">Calendar filter</span>
             </div>
             <div class="header-info">
                 <span class="header-status" id="status-indicator">Ready</span>
@@ -28,7 +28,7 @@
             <section class="section api-key-section" id="api-key-section">
                 <div class="section-header">
                     <h2>Setup</h2>
-                    <p class="section-desc">Enter your OpenAI API key to begin. Your key is stored locally and never sent to our servers.</p>
+                    <p class="section-desc">Enter your API key to use Robin. Your key is stored locally and never sent to our servers (BYOK).</p>
                 </div>
                 <form class="api-key-form" id="api-key-form">
                     <div class="form-group">
@@ -51,7 +51,7 @@
                     <button type="submit" class="btn btn-primary">Continue</button>
                 </form>
                 <p class="section-footer">
-                    <button type="button" class="btn btn-ghost" id="go-to-analyze">Analyze a meeting (paste transcript)</button>
+                    <button type="button" class="btn btn-ghost" id="go-to-analyze">Stress-test a meeting (paste transcript)</button>
                     <button type="button" class="btn btn-ghost" id="go-to-pipeline">View pipeline</button>
                 </p>
             </section>
@@ -59,8 +59,8 @@
             <!-- Analyze a meeting (Robin.ai SPA) -->
             <section class="section analyze-section hidden" id="analyze-section">
                 <div class="section-header">
-                    <h2>Analyze a meeting</h2>
-                    <p class="section-desc">Paste a meeting transcript (e.g. Granola) and optionally your notes (e.g. Wispr) for Evidence Map, GRUE checklist, and Conflict Report.</p>
+                    <h2>Stress-test a meeting</h2>
+                    <p class="section-desc">Paste a transcript (e.g. Granola) and optionally your notes (e.g. Wispr). Get an evidence map, conflict report, and GRUE-style checklist.</p>
                 </div>
                 <form class="analyze-form" id="analyze-form">
                     <div class="form-group">
@@ -101,7 +101,7 @@
             <section class="section intake-section hidden" id="intake-section">
                 <div class="section-header">
                     <h2>Before we begin</h2>
-                    <p class="section-desc">This is a triage system for Sajith Pai. Provide your information to start. One triage per email per week (per workspace).</p>
+                    <p class="section-desc">Triage for this pipeline. Enter your details to start the screening conversation. One triage per email per week (per workspace).</p>
                 </div>
                 <form class="intake-form" id="intake-form">
                     <div class="form-group">
@@ -156,7 +156,7 @@
                         <span class="turn-counter" id="turn-counter">Turn 0/7</span>
                     </div>
                     <div class="chat-header-actions">
-                        <button type="button" class="btn btn-ghost btn-context" id="context-toggle" title="Key terms Sajith uses">Key terms</button>
+                        <button type="button" class="btn btn-ghost btn-context" id="context-toggle" title="Key terms">Key terms</button>
                         <div class="signal-indicator" id="signal-indicator">
                             <span class="signal-label">Signals:</span>
                             <span class="signal-value" id="signal-count">0</span>
@@ -170,7 +170,7 @@
                         <h3>Key terms</h3>
                         <button type="button" class="context-panel-close" id="context-panel-close" aria-label="Close">×</button>
                     </div>
-                    <p class="context-panel-desc">Sajith’s frameworks in one place. Tap a term in the chat to see a quick definition.</p>
+                    <p class="context-panel-desc">Frameworks and terms used in this triage. Tap a term in the chat for a quick definition.</p>
                     <div class="context-panel-list" id="context-panel-list"></div>
                 </aside>
 
@@ -217,7 +217,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>PI Triage System v1.0 | <a href="#" id="clear-key-link">Clear API Key</a></p>
+            <p>Robin.ai | <a href="/">Home</a> · <a href="javascript:void(0)" id="clear-key-link" role="button">Clear API key</a></p>
         </footer>
     </div>
 

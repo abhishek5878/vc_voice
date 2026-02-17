@@ -32,7 +32,7 @@ def _handle(request):
         'system': SYSTEM_NAME,
         'openai_configured': False,
         'mode': 'byok',
-        'message': 'System operational. Provide your OpenAI API key to use the triage system.',
+        'message': 'System operational. Provide your API key to use Robin.',
         'calendly_url': get_calendly_url() or None,
     }
 

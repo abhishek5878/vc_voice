@@ -3,38 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robin.ai – Evidence-first meeting intelligence</title>
+    <title>Robin.ai – Your calendar, filtered.</title>
+    <meta name="description" content="Screen inbound founder requests and stress-test meeting transcripts. Built for solo GPs and small-fund partners.">
+    <meta name="theme-color" content="#0a0a0a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
-        .landing { max-width: 720px; margin: 0 auto; padding: 2rem 1rem; }
-        .landing h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
-        .landing .tagline { color: var(--text-secondary); margin-bottom: 2rem; }
-        .landing .cta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
-        .landing .cta .btn { padding: 0.75rem 1.5rem; text-decoration: none; border-radius: var(--radius-md); font-weight: 500; }
+        .landing { max-width: 680px; margin: 0 auto; padding: 2.5rem 1rem; }
+        .landing .hero { margin-bottom: 2.5rem; }
+        .landing .hero h1 { font-size: 1.75rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .landing .hero .pitch { font-size: 1.125rem; color: var(--text-primary); line-height: 1.5; margin-bottom: 0.5rem; }
+        .landing .hero .who { color: var(--text-muted); font-size: 0.9375rem; }
+        .landing .cta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.5rem 0 2rem; }
+        .landing .cta .btn { padding: 0.75rem 1.5rem; text-decoration: none; border-radius: var(--radius-md); font-weight: 500; font-size: 0.9375rem; }
         .landing .cta .btn-primary { background: var(--accent); color: #fff; border: none; }
         .landing .cta .btn-primary:hover { background: var(--accent-hover); }
         .landing .cta .btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-        .landing .pricing { margin-top: 2rem; }
-        .landing .pricing table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        .landing .pricing th, .landing .pricing td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
-        .landing .pricing th { color: var(--text-secondary); font-weight: 500; }
+        .landing .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.75rem; }
+        .landing h2 { font-size: 1.125rem; margin-bottom: 1rem; font-weight: 600; }
+        .landing .two-moments { display: grid; gap: 1.5rem; margin-bottom: 2rem; }
+        .landing .moment { padding: 1.25rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); }
+        .landing .moment .label { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--accent); margin-bottom: 0.35rem; }
+        .landing .moment p { color: var(--text-secondary); font-size: 0.9375rem; line-height: 1.5; margin: 0; }
+        .landing .outcome { margin-bottom: 2rem; }
+        .landing .outcome ul { list-style: none; padding: 0; margin: 0; }
+        .landing .outcome li { color: var(--text-secondary); font-size: 0.9375rem; padding: 0.4rem 0; padding-left: 1.25rem; position: relative; }
+        .landing .outcome li::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+        .landing .anti { margin-bottom: 2rem; padding: 1rem 1.25rem; background: var(--bg-tertiary); border-radius: var(--radius-sm); border-left: 3px solid var(--border); }
+        .landing .anti p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; margin: 0; }
+        .landing .pricing { margin-top: 2rem; margin-bottom: 2rem; }
+        .landing .pricing table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+        .landing .pricing th, .landing .pricing td { padding: 0.65rem 0; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9375rem; }
+        .landing .pricing th { color: var(--text-muted); font-weight: 500; }
         .landing .pricing .price { font-family: var(--font-mono); color: var(--accent); }
-        .landing .footer-links { margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted); }
+        .landing .footer-links { margin-top: 2rem; font-size: 0.8125rem; color: var(--text-muted); }
         .landing .footer-links a { color: var(--text-secondary); text-decoration: none; }
         .landing .footer-links a:hover { color: var(--accent); }
+        .landing .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .landing a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     </style>
 </head>
 <body>
     <div class="landing">
-        <h1>Robin.ai</h1>
-        <p class="tagline">Evidence-first meeting intelligence. Triage founders, analyze transcripts, and keep your pipeline honest.</p>
-        <div class="cta">
-            <a href="/app" class="btn btn-primary">Open app</a>
-            <a href="/auth.html" class="btn btn-ghost">Sign up / Log in</a>
+        <header class="hero">
+            <h1>Robin.ai</h1>
+            <p class="pitch">Screen inbound founder requests so only high-signal conversations reach your calendar—without you writing a single screening email.</p>
+            <p class="who">Built for solo GPs and small-fund partners who don’t have a team to filter for them.</p>
+            <div class="cta">
+                <a href="/app" class="btn btn-primary">Open Robin</a>
+                <a href="/auth.html" class="btn btn-ghost">Sign up / Log in</a>
+            </div>
+        </header>
+
+        <p class="section-title">Two moments</p>
+        <h2>Request → Triage. Meeting done → Stress-test.</h2>
+        <div class="two-moments">
+            <div class="moment">
+                <span class="label">Meeting request</span>
+                <p>Inbound wants a meeting. Robin runs a short, skeptical conversation: extracts signals, checks authenticity, and recommends <strong>meet</strong>, <strong>refer out</strong>, or <strong>pass</strong>. You get a pipeline and one place to override. The system says no so you don’t have to.</p>
+            </div>
+            <div class="moment">
+                <span class="label">Post-meeting</span>
+                <p>You have a transcript (and optionally your notes). Robin stress-tests it: evidence map (claim + source), conflict report (transcript vs your notes), blind spots, GRUE-style checklist. So you see what held up—and what didn’t—before the next call.</p>
+            </div>
         </div>
+
+        <div class="outcome">
+            <h2>What you get</h2>
+            <ul>
+                <li>Fewer bad meetings. Your calendar becomes the moat, not the bottleneck.</li>
+                <li>One workflow: triage state, pipeline, overrides, and post-meeting analysis in one place.</li>
+                <li>Your bar, not a generic chatbot. Robin uses your thesis and config (harshness, turn count, rejection message).</li>
+            </ul>
+        </div>
+
+        <div class="anti">
+            <p><strong>Why not just use ChatGPT?</strong> ChatGPT doesn’t know your bar or your pipeline. Robin is wired to your workspace: structured triage, evidence-backed recommendations, and a stateful workflow your team can act on. The filter sits in how you work.</p>
+        </div>
+
         <section class="pricing">
             <h2>Pricing</h2>
             <table>
@@ -42,12 +90,18 @@
                     <tr><th>Plan</th><th>Price</th><th>Includes</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Free</td><td class="price">$0</td><td>5 analyses/month, unlimited triage, BYOK</td></tr>
-                    <tr><td>Solo</td><td class="price">$199/mo</td><td>Unlimited analyses, BYOK, Calendly, pipeline</td></tr>
+                    <tr><td>Free</td><td class="price">$0</td><td>5 stress-tests/month, unlimited triage, BYOK</td></tr>
+                    <tr><td>Solo</td><td class="price">$199/mo</td><td>Unlimited stress-tests, BYOK, Calendly, pipeline</td></tr>
                     <tr><td>Partner / Fund / Enterprise</td><td>—</td><td>Contact us for invoice or PO</td></tr>
                 </tbody>
             </table>
         </section>
+
+        <div class="cta">
+            <a href="/app" class="btn btn-primary">Open Robin</a>
+            <a href="/auth.html" class="btn btn-ghost">Sign up</a>
+        </div>
+
         <div class="footer-links">
             <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a>
         </div>
