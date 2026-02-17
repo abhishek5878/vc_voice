@@ -1,7 +1,7 @@
 /**
  * Parse PDF and DOCX to plain text. Used by ingestion API.
+ * Mammoth is imported dynamically so DOCX parsing only loads when needed (avoids Vercel cold-start issues).
  */
-import mammoth from "mammoth";
 
 const PDF_UNSUPPORTED_MSG =
   "PDF upload is not supported in this environment (e.g. Vercel serverless). Please paste your pitch text into the box or upload a .txt or .docx file.";
@@ -33,6 +33,7 @@ export async function extractPdfText(buffer: Buffer): Promise<string> {
 }
 
 export async function extractDocxText(buffer: Buffer): Promise<string> {
+  const mammoth = await import("mammoth");
   const result = await mammoth.extractRawText({ buffer });
   return (result?.value ?? "").trim();
 }

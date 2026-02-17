@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const message = e instanceof Error ? e.message : String(e);
     if (message.includes("401") || message.includes("Incorrect API key")) {
       return NextResponse.json(
-        { error: "Invalid OpenAI API key. Check Settings." },
+        { error: "Invalid OPENAI_API_KEY. Set a valid key in the server environment." },
         { status: 401 }
       );
     }

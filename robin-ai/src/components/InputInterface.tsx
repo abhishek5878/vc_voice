@@ -85,7 +85,15 @@ export default function InputInterface({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ images: dataUrls }),
           });
-          const data = await res.json();
+          const raw = await res.text();
+          let data: { text?: string; error?: string; detail?: string };
+          try {
+            data = raw ? JSON.parse(raw) : {};
+          } catch {
+            throw new Error(res.status === 503
+              ? "PDF parsing not configured. Add OPENAI_API_KEY to the server environment."
+              : `Server error (${res.status}). Try again or use .txt / .docx.`);
+          }
           if (!res.ok) throw new Error(data.detail || data.error || "Parse failed");
           const text = (data.text ?? "").trim();
           if (stream === "PUBLIC_TRANSCRIPT")
@@ -116,8 +124,14 @@ export default function InputInterface({
         );
         try {
           const res = await fetch("/api/ingest", { method: "POST", body: form });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || data.error || "Upload failed");
+          const raw = await res.text();
+          let data: { streamContext?: Record<string, string>; error?: string; detail?: string };
+          try {
+            data = raw ? JSON.parse(raw) : {};
+          } catch {
+            throw new Error(res.ok ? "Invalid response" : `Server error (${res.status}). Check console or try a smaller file.`);
+          }
+          if (!res.ok) throw new Error(data.detail || data.error || `Upload failed (${res.status})`);
           const text = data.streamContext?.[stream] ?? "";
           if (stream === "PUBLIC_TRANSCRIPT")
             setPublicTranscript((prev) => (prev ? prev + "\n\n" + text : text));

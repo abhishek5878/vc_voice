@@ -11,7 +11,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { extractPdfText, extractDocxText, truncate, MAX_STREAM_CHARS, MIN_INPUT_CHARS } from "@/lib/ingest/parse";
 import type { StreamContext, StreamLabel } from "@/lib/ingest/types";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
+  try {
+    return await handleIngest(request);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.error("[ingest] Unhandled error:", message, e instanceof Error ? e.stack : "");
+    return NextResponse.json(
+      { error: "Ingestion failed", detail: message.slice(0, 500) },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleIngest(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
   const streamContext: StreamContext = {};
   const present: StreamLabel[] = [];
@@ -108,6 +123,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ streamContext, present });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
+    console.error("[ingest] Error:", message, e instanceof Error ? e.stack : "");
     const isPdfEnvError =
       /Path2D|canvas|polyfill|pdf|PDF/.test(message) || message.includes("not supported in this environment");
     if (isPdfEnvError) {
@@ -118,6 +134,14 @@ export async function POST(request: NextRequest) {
             "PDF upload is not supported in this environment. Please paste your pitch text into the box or upload a .txt or .docx file.",
         },
         { status: 400 }
+      );
+    }
+    const isBodyTooLarge =
+      /body|payload|size|limit|413|too large/i.test(message);
+    if (isBodyTooLarge) {
+      return NextResponse.json(
+        { error: "File too large", detail: "Use a smaller file (under ~4 MB) or paste text into the box." },
+        { status: 413 }
       );
     }
     return NextResponse.json({ error: "Ingestion failed", detail: message }, { status: 500 });
