@@ -633,14 +633,66 @@ def generate_conflict_report(
                 "transcript_value": tv,
                 "dictation_value": dv,
                 "summary": f"{sig}: meeting said \"{tv}\" but dictation says \"{dv}\"",
+                "severity": "High" if sig in ("retention", "arr", "mrr", "cac", "ltv", "churn") else "Medium",
+                "why_it_matters": "Factual discrepancy between meeting and your notes undermines conviction.",
             })
+
+    # Type B: Tonal — emotional register of private dictation diverges from public transcript
+    if transcript_text and dictation_text and _get_llm_config(api_key)[0]:
+        tonal_conflicts = _detect_tonal_conflicts(transcript_text, dictation_text, api_key)
+        conflicts.extend(tonal_conflicts)
 
     # Type C: Omission — concerns/topics in dictation not addressed in transcript
     if transcript_text and dictation_text and _get_llm_config(api_key)[0]:
         omission_conflicts = _detect_omission_conflicts(transcript_text, dictation_text, api_key)
+        for o in omission_conflicts:
+            o["severity"] = o.get("severity") or "Medium"
+            o["why_it_matters"] = o.get("why_it_matters") or "Concern in your notes was not addressed in the meeting."
         conflicts.extend(omission_conflicts)
 
     return conflicts
+
+
+def _detect_tonal_conflicts(
+    transcript_text: str,
+    dictation_text: str,
+    api_key: Optional[str],
+) -> List[Dict[str, Any]]:
+    """Type B: Emotional register of private dictation sharply diverges from public transcript."""
+    out: List[Dict[str, Any]] = []
+    prompt = """You are a diligence analyst. Compare:
+1) MEETING TRANSCRIPT (how the meeting sounded on the record):
+"""
+    prompt += transcript_text[:3500] + "\n\n2) VC'S PRIVATE DICTATION (post-meeting reaction):\n"
+    prompt += dictation_text[:2500]
+    prompt += """
+
+Identify any place where the VC's private note expresses a different EMOTIONAL or TRUST take than the transcript suggests. E.g. transcript sounded confident → dictation says "felt evasive on unit economics"; transcript was positive → dictation says "not sure I believe the retention number".
+Reply with a JSON array of objects: [{"stream_1": "short quote or paraphrase from transcript", "stream_2": "short quote from dictation", "severity": "Low|Medium|High"}]
+If none, reply: []
+"""
+    try:
+        key, url, model = _get_llm_config(api_key)
+        if not key:
+            return out
+        raw = _llm_chat([{"role": "user", "content": prompt}], openai_api_key=api_key, temperature=0.1, max_tokens=500)
+        start, end = raw.find("["), raw.rfind("]") + 1
+        if start >= 0 and end > start:
+            arr = json.loads(raw[start:end])
+            for item in (arr or [])[:5]:
+                if isinstance(item, dict) and (item.get("stream_1") or item.get("stream_2")):
+                    out.append({
+                        "conflict_type": "tonal",
+                        "metric": "tonal",
+                        "transcript_value": item.get("stream_1", ""),
+                        "dictation_value": item.get("stream_2", ""),
+                        "summary": f"Tonal: {item.get('stream_1', '')[:60]} vs {item.get('stream_2', '')[:60]}",
+                        "severity": item.get("severity") or "Medium",
+                        "why_it_matters": "Emotional divergence between meeting and your private note may signal unstated concerns.",
+                    })
+    except (json.JSONDecodeError, ValueError, KeyError, TypeError):
+        pass
+    return out
 
 
 def _detect_omission_conflicts(

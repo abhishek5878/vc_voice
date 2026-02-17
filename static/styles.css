@@ -768,11 +768,44 @@ body {
     margin-bottom: var(--space-md);
 }
 
+.robin-start-protocol {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--accent);
+}
+
+.robin-start-protocol p {
+    margin-bottom: var(--space-sm);
+}
+
 .analyze-results {
     margin-top: var(--space-xl);
     padding-top: var(--space-lg);
     border-top: 1px solid var(--border);
 }
+
+.analyze-spa-layer1, .analyze-spa-layer2, .analyze-spa-layer3, .analyze-spa-layer4 {
+    margin-top: var(--space-lg);
+}
+
+.spa-sel, .spa-conflicts, .red-list, .yellow-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.spa-sel li, .spa-conflicts li, .red-list li, .yellow-list li {
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.red-list li { border-left: 3px solid var(--error); padding-left: var(--space-sm); }
+.yellow-list li { border-left: 3px solid var(--warning); padding-left: var(--space-sm); }
 
 .analyze-results h3 {
     font-size: 1rem;

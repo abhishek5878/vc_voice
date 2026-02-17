@@ -203,11 +203,29 @@ def _handle(request):
             }),
         }
 
-    # Shape response for frontend (Phase 2/3: ai_polish, conviction_score)
+    # SPA (Skeptical Principal Architecture) 4-layer formatted output
+    mode = int(data.get("mode") or 1)
+    if mode not in (1, 2, 3):
+        mode = 1
+    include_conviction = bool(data.get("include_conviction"))
+    try:
+        from lib.spa_pipeline import run_spa_formatter
+        spa = run_spa_formatter(
+            result,
+            mode=mode,
+            transcript_text=transcript_text or None,
+            dictation_text=dictation_text or None,
+            include_conviction=include_conviction,
+        )
+    except Exception:
+        spa = {}
+
+    # Shape response for frontend (Phase 2/3: ai_polish, conviction_score) + SPA layers
     appraisal = result.get("immediate_appraisal") or {}
     response = {
         "source_type": result.get("source_type", "note"),
         "tool": result.get("tool", "unknown"),
+        "mode": mode,
         "evidence_log": result.get("evidence_log", []),
         "unverified_signals": result.get("unverified_signals", []),
         "blind_spots": result.get("blind_spots", []),
@@ -224,7 +242,17 @@ def _handle(request):
         },
         "ai_polish": result.get("ai_polish"),
         "pedigree": result.get("pedigree"),
+        "layer_1_sel": spa.get("layer_1_sel", []),
+        "layer_2_conflict_report": spa.get("layer_2_conflict_report", []),
+        "layer_3_grue_stress_test": spa.get("layer_3_grue_stress_test", []),
+        "layer_4_red_list": spa.get("layer_4_red_list", []),
+        "layer_4_yellow_list": spa.get("layer_4_yellow_list", []),
+        "layer_4_pedigree_check": spa.get("layer_4_pedigree_check", []),
     }
+    if spa.get("pre_meeting_attack_brief"):
+        response["pre_meeting_attack_brief"] = spa["pre_meeting_attack_brief"]
+    if spa.get("conviction"):
+        response["conviction"] = spa["conviction"]
 
     # Persist to analyze history (stickiness) when workspace_id present
     try:

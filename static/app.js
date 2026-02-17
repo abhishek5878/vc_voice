@@ -440,6 +440,9 @@ async function submitAnalyze(transcriptText, dictationText) {
         throw new Error('Enter transcript and/or dictation');
     }
     if (state.workspaceId) body.workspace_id = state.workspaceId;
+    const modeEl = document.getElementById('analyze-mode');
+    body.mode = modeEl ? parseInt(modeEl.value, 10) || 1 : 1;
+    body.include_conviction = document.getElementById('analyze-include-conviction')?.checked || false;
     return apiRequest('analyze', 'POST', body);
 }
 
@@ -463,9 +466,22 @@ function renderAnalyzeResults(data) {
     if (appraisal.immediate_appraisal_markdown) {
         verdictHtml += '<div class="appraisal-markdown">' + escapeHtml(appraisal.immediate_appraisal_markdown).replace(/\n/g, '<br>') + '</div>';
     }
-    elements.analyzeVerdict.innerHTML = verdictHtml;
+    if (elements.analyzeVerdict) elements.analyzeVerdict.innerHTML = verdictHtml;
 
-    // Evidence Map
+    // Layer 1 — SEL (Semantic Evidence Logs)
+    const layer1 = data.layer_1_sel || [];
+    const selEl = document.getElementById('analyze-spa-layer1');
+    if (selEl) {
+        if (layer1.length) {
+            selEl.classList.remove('hidden');
+            selEl.innerHTML = '<h3>Layer 1 — Semantic Evidence Logs (SEL)</h3><ul class="spa-sel">' +
+                layer1.map(e => '<li><strong>CLAIM:</strong> ' + escapeHtml(e.claim || '') + '<br><strong>SOURCE:</strong> "' + escapeHtml(e.source || '') + '"<br><strong>STATUS:</strong> ' + escapeHtml(e.status || '') + '</li>').join('') + '</ul>';
+        } else {
+            selEl.classList.add('hidden');
+        }
+    }
+
+    // Evidence Map (legacy)
     const evidenceLog = data.evidence_log || [];
     let evidenceHtml = '<h3>Evidence Map</h3>';
     if (evidenceLog.length === 0) {
@@ -483,7 +499,7 @@ function renderAnalyzeResults(data) {
         });
         evidenceHtml += '</ul>';
     }
-    elements.analyzeEvidence.innerHTML = evidenceHtml;
+    if (elements.analyzeEvidence) elements.analyzeEvidence.innerHTML = evidenceHtml;
 
     // GRUE checklist: blind spots + questions for next meeting
     const blindSpots = data.blind_spots || [];
@@ -502,9 +518,20 @@ function renderAnalyzeResults(data) {
     if (!blindSpots.length && !questions.length) {
         grueHtml += '<p class="muted">No blind spots or follow-up questions.</p>';
     }
-    elements.analyzeGrue.innerHTML = grueHtml;
+    if (elements.analyzeGrue) elements.analyzeGrue.innerHTML = grueHtml;
 
-    // Conflict Report (Type A/B factual + Type C omission)
+    // Layer 2 — Conflict Report (SPA format if present)
+    const layer2 = data.layer_2_conflict_report || [];
+    const layer2El = document.getElementById('analyze-spa-layer2');
+    if (layer2El && layer2.length) {
+        layer2El.classList.remove('hidden');
+        layer2El.innerHTML = '<h3>Layer 2 — Conflict Reporter</h3><ul class="spa-conflicts">' +
+            layer2.map(c => '<li><strong>CONFLICT TYPE:</strong> ' + escapeHtml(c.conflict_type || '') + '<br><strong>STREAM 1:</strong> "' + escapeHtml(c.stream_1 || '') + '"<br><strong>STREAM 2:</strong> "' + escapeHtml(c.stream_2 || '') + '"<br><strong>SEVERITY:</strong> ' + escapeHtml(c.severity || '') + '<br><strong>WHY IT MATTERS:</strong> ' + escapeHtml(c.why_it_matters || '') + '</li>').join('') + '</ul>';
+    } else if (layer2El) {
+        layer2El.classList.add('hidden');
+    }
+
+    // Conflict Report (legacy)
     const conflicts = data.conflict_report || [];
     let conflictHtml = '<h3>Conflict Report</h3>';
     if (conflicts.length === 0) {
@@ -512,16 +539,128 @@ function renderAnalyzeResults(data) {
     } else {
         conflictHtml += '<ul class="conflict-list">';
         conflicts.forEach(c => {
-            const typeLabel = c.conflict_type === 'omission' ? ' [Omission]' : '';
+            const typeLabel = c.conflict_type === 'omission' ? ' [Omission]' : (c.conflict_type === 'tonal' ? ' [Tonal]' : '');
             if (c.conflict_type === 'omission') {
                 conflictHtml += '<li><strong>Omission</strong>: ' + escapeHtml(c.dictation_value || c.summary || '') + '</li>';
+            } else if (c.conflict_type === 'tonal') {
+                conflictHtml += '<li><strong>Tonal</strong>: ' + escapeHtml(c.summary || c.dictation_value || '') + '</li>';
             } else {
                 conflictHtml += '<li><strong>' + escapeHtml(c.metric || '') + '</strong>' + escapeHtml(typeLabel) + ': meeting said &ldquo;' + escapeHtml(c.transcript_value || '') + '&rdquo; but notes say &ldquo;' + escapeHtml(c.dictation_value || '') + '&rdquo;</li>';
             }
         });
         conflictHtml += '</ul>';
     }
-    elements.analyzeConflicts.innerHTML = conflictHtml;
+    if (elements.analyzeConflicts) elements.analyzeConflicts.innerHTML = conflictHtml;
+
+    // Layer 3 — GRUE Stress-Test (✓ / ⚠ / ✗)
+    const layer3 = data.layer_3_grue_stress_test || [];
+    const layer3El = document.getElementById('analyze-spa-layer3');
+    if (layer3El && layer3.length) {
+        layer3El.classList.remove('hidden');
+        const mentioned = layer3.filter(x => x.status === 'MENTIONED');
+        const under = layer3.filter(x => x.status === 'UNDERSPECIFIED');
+        const missing = layer3.filter(x => x.status === 'MISSING');
+        let l3 = '<h3>Layer 3 — GRUE Stress-Test</h3>';
+        if (mentioned.length) {
+            l3 += '<p><strong>MENTIONED ✓</strong></p><ul>';
+            mentioned.forEach(m => { l3 += '<li>' + escapeHtml(m.metric) + ' — "' + escapeHtml(m.quote || '') + '"</li>'; });
+            l3 += '</ul>';
+        }
+        if (under.length) {
+            l3 += '<p><strong>UNDERSPECIFIED ⚠</strong></p><ul>';
+            under.forEach(m => { l3 += '<li>' + escapeHtml(m.metric) + ' — ' + escapeHtml(m.quote || 'mentioned vaguely') + '</li>'; });
+            l3 += '</ul>';
+        }
+        if (missing.length) {
+            l3 += '<p><strong>MISSING ✗ (blind spots)</strong></p><ul>';
+            missing.forEach(m => { l3 += '<li>' + escapeHtml(m.metric) + '</li>'; });
+            l3 += '</ul>';
+        }
+        layer3El.innerHTML = l3;
+    } else if (layer3El) {
+        layer3El.classList.add('hidden');
+    }
+
+    // Layer 4 — Red List, Yellow List, Pedigree Check
+    const redList = data.layer_4_red_list || [];
+    const yellowList = data.layer_4_yellow_list || [];
+    const pedigreeCheck = data.layer_4_pedigree_check || [];
+    const layer4El = document.getElementById('analyze-spa-layer4');
+    if (layer4El && (redList.length || yellowList.length || pedigreeCheck.length)) {
+        layer4El.classList.remove('hidden');
+        let l4 = '<h3>Layer 4 — Conviction Interrogation</h3>';
+        if (redList.length) {
+            l4 += '<p><strong>🔴 RED LIST (existential)</strong></p><ul class="red-list">';
+            redList.forEach(r => {
+                l4 += '<li><strong>Q:</strong> ' + escapeHtml(r.question || '') + '<br><em>SOURCE FINDING:</em> ' + escapeHtml(r.source_finding || '') + '<br><em>WHY EXISTENTIAL:</em> ' + escapeHtml(r.why_existential || '') + '</li>';
+            });
+            l4 += '</ul>';
+        }
+        if (yellowList.length) {
+            l4 += '<p><strong>🟡 YELLOW LIST (depth)</strong></p><ul class="yellow-list">';
+            yellowList.forEach(y => {
+                l4 += '<li><strong>Q:</strong> ' + escapeHtml(y.question || '') + '<br><em>SOURCE FINDING:</em> ' + escapeHtml(y.source_finding || '') + '</li>';
+            });
+            l4 += '</ul>';
+        }
+        if (pedigreeCheck.length) {
+            l4 += '<p><strong>🔵 PEDIGREE CHECK</strong></p><ul>';
+            pedigreeCheck.forEach(p => {
+                l4 += '<li>' + escapeHtml(p.pedigree_flag || '') + ' — SEVERITY: ' + escapeHtml(p.severity || '') + '</li>';
+            });
+            l4 += '</ul>';
+        }
+        layer4El.innerHTML = l4;
+    } else if (layer4El) {
+        layer4El.classList.add('hidden');
+    }
+
+    // Mode 2 — Pre-Meeting Attack Brief
+    const attackBrief = data.pre_meeting_attack_brief;
+    const attackBriefEl = document.getElementById('analyze-attack-brief');
+    if (attackBriefEl) {
+        if (attackBrief && ((attackBrief.red_list_framed && attackBrief.red_list_framed.length) || (attackBrief.yellow_list_framed && attackBrief.yellow_list_framed.length))) {
+            attackBriefEl.classList.remove('hidden');
+            let ab = '<h3>Pre-Meeting Attack Brief</h3>';
+            if ((attackBrief.red_list_framed || []).length) {
+                ab += '<p><strong>They will not have a good answer to this. Probe hard.</strong></p><ul class="red-list">';
+                attackBrief.red_list_framed.forEach(r => {
+                    ab += '<li>' + escapeHtml(r.question || '') + '<br><em>' + escapeHtml(r.source_finding || '') + '</em></li>';
+                });
+                ab += '</ul>';
+            }
+            if ((attackBrief.yellow_list_framed || []).length) {
+                ab += '<p><strong>This is where you separate polish from preparation.</strong></p><ul class="yellow-list">';
+                attackBrief.yellow_list_framed.forEach(y => {
+                    ab += '<li>' + escapeHtml(y.question || '') + '<br><em>' + escapeHtml(y.source_finding || '') + '</em></li>';
+                });
+                ab += '</ul>';
+            }
+            if ((attackBrief.recommended_sequence || []).length) {
+                ab += '<p><strong>Recommended sequence:</strong></p><ol class="recommended-sequence">';
+                attackBrief.recommended_sequence.forEach(s => { ab += '<li>' + escapeHtml(s) + '</li>'; });
+                ab += '</ol>';
+            }
+            attackBriefEl.innerHTML = ab;
+        } else {
+            attackBriefEl.classList.add('hidden');
+        }
+    }
+
+    // Conviction (only when requested)
+    const conviction = data.conviction;
+    const convEl = document.getElementById('analyze-conviction');
+    if (convEl) {
+        if (conviction) {
+            convEl.classList.remove('hidden');
+            convEl.innerHTML = '<h3>Conviction Score</h3><p><strong>CONVICTION SCORE:</strong> ' + escapeHtml(String(conviction.conviction_score)) + '/10</p>' +
+                '<p><strong>RATIONALE:</strong> ' + escapeHtml(conviction.score_rationale || '') + '</p>' +
+                '<p><strong>CRITICAL BLOCKERS:</strong></p><ul>' + (conviction.critical_blockers || []).map(b => '<li>' + escapeHtml(b) + '</li>').join('') + '</ul>' +
+                '<p><strong>CURRENT INVESTABILITY:</strong> ' + escapeHtml(conviction.current_investability || '') + '</p>';
+        } else {
+            convEl.classList.add('hidden');
+        }
+    }
 
     // Export buttons (Phase 2)
     if (!document.getElementById('analyze-export')) {
