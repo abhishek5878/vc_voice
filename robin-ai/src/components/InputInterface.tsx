@@ -175,10 +175,27 @@ export default function InputInterface({
           </button>
           <h1 className="text-xl font-semibold">Robin.ai</h1>
         </div>
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">Mode {mode}</span>
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">
+          {mode === 1 ? "Post-Meeting" : mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"}
+        </span>
       </header>
 
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 max-w-6xl mx-auto w-full">
+        {mode === 1 && (
+          <p className="lg:col-span-2 text-sm text-zinc-500">
+            Paste meeting transcript and optional private notes. Robin will extract claims, find conflicts, run GRUE, and build the interrogation.
+          </p>
+        )}
+        {mode === 2 && (
+          <p className="lg:col-span-2 text-sm text-zinc-500">
+            Paste or upload pitch deck / memo. You&apos;ll get the attack brief: red list, yellow list, and recommended question order.
+          </p>
+        )}
+        {mode === 3 && (
+          <p className="lg:col-span-2 text-sm text-zinc-500">
+            Paste pitch material to run the pipeline. Same evidence map and interrogation—use this to stress-test before the meeting.
+          </p>
+        )}
         <div className="space-y-6">
           <section>
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Public Transcript</h2>
@@ -188,7 +205,7 @@ export default function InputInterface({
                 setPublicTranscript(e.target.value);
                 setError(null);
               }}
-              placeholder="Paste meeting transcript (Granola-style) or .txt/.md content"
+              placeholder={mode === 1 ? "Paste meeting transcript or .txt/.md" : mode === 2 ? "Optional: any shared context" : "Paste transcript or pitch narrative"}
               className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
             />
             <div className="flex items-center gap-2 mt-1">
@@ -220,7 +237,7 @@ export default function InputInterface({
                 setPrivateDictation(e.target.value);
                 setError(null);
               }}
-              placeholder="Paste voice note (Wispr-style) or upload .txt/.md/.pdf/.docx"
+              placeholder={mode === 1 ? "Paste private notes or voice note" : "Optional: private notes or .txt/.md/.pdf/.docx"}
               className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
             />
             <div className="flex items-center gap-2 mt-1">
@@ -252,7 +269,7 @@ export default function InputInterface({
                 setPitchMaterial(e.target.value);
                 setError(null);
               }}
-              placeholder="Paste deck narrative or upload PDF/DOCX"
+              placeholder={mode === 2 ? "Paste pitch deck / memo or upload PDF/DOCX (required)" : "Paste deck narrative or upload PDF/DOCX"}
               className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
             />
             <div className="flex items-center gap-2 mt-1">

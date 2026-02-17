@@ -65,7 +65,9 @@ export default function AnalysisReport({
           <button type="button" onClick={onBack} className="text-zinc-400 hover:text-zinc-200 text-sm">
             ← New analysis
           </button>
-          <h1 className="text-lg font-semibold">Robin.ai — Report</h1>
+          <h1 className="text-lg font-semibold">
+            Robin.ai — {result.mode === 1 ? "Post-Meeting" : result.mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"} Report
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -90,6 +92,45 @@ export default function AnalysisReport({
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
             {result.error}
           </div>
+        )}
+
+        {/* Mode 2 — Pre-Meeting Attack Brief (show first for Pre-Meeting Prep) */}
+        {result.mode === 2 && brief && (brief.red_list_framed?.length > 0 || brief.yellow_list_framed?.length > 0) && (
+          <section className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+            <h2 className="text-xl font-semibold text-zinc-200 mb-4">Pre-Meeting Attack Brief</h2>
+            <p className="text-sm font-medium text-red-400/90 mb-2">
+              They will not have a good answer to this. Probe hard.
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-zinc-300 text-sm mb-4">
+              {(brief.red_list_framed ?? []).map((r) => (
+                <li key={r.question.slice(0, 40)}>
+                  {escapeHtml(r.question)}
+                  <span className="text-zinc-500 block ml-4">{r.source_finding}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm font-medium text-amber-400/90 mb-2">
+              This is where you separate polish from preparation.
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-zinc-300 text-sm mb-4">
+              {(brief.yellow_list_framed ?? []).map((y) => (
+                <li key={y.question.slice(0, 40)}>
+                  {escapeHtml(y.question)}
+                  <span className="text-zinc-500 block ml-4">{y.source_finding}</span>
+                </li>
+              ))}
+            </ul>
+            {(brief.recommended_sequence ?? []).length > 0 && (
+              <>
+                <p className="text-sm font-medium text-zinc-400 mb-2">Recommended sequence</p>
+                <ol className="list-decimal list-inside space-y-1 text-zinc-400 text-sm">
+                  {brief.recommended_sequence.map((s, i) => (
+                    <li key={i}>{escapeHtml(s)}</li>
+                  ))}
+                </ol>
+              </>
+            )}
+          </section>
         )}
 
         {/* Evidence Map */}
@@ -273,8 +314,8 @@ export default function AnalysisReport({
           )}
         </section>
 
-        {/* Mode 2 — Pre-Meeting Attack Brief */}
-        {brief && (brief.red_list_framed?.length > 0 || brief.yellow_list_framed?.length > 0) && (
+        {/* Mode 2 Attack Brief (bottom only when not already shown at top) */}
+        {result.mode !== 2 && brief && (brief.red_list_framed?.length > 0 || brief.yellow_list_framed?.length > 0) && (
           <section className="p-4 rounded-xl border border-zinc-700 bg-zinc-900/60">
             <h2 className="text-xl font-semibold text-zinc-200 mb-4">Pre-Meeting Attack Brief</h2>
             <p className="text-sm font-medium text-red-400/90 mb-2">
