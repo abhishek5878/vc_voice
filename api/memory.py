@@ -10,6 +10,18 @@ from http.server import BaseHTTPRequestHandler
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.memory_store import get_memory
+from lib.contacts_store import get_all_leads, get_override_summary
+from lib.analyze_store import get_analyses
+
+
+def _parse_query(path):
+    params = {}
+    if "?" in path:
+        for part in path.split("?", 1)[1].split("&"):
+            if "=" in part:
+                k, v = part.split("=", 1)
+                params[k.strip()] = v.strip()
+    return params
 
 
 def _handle(request):
@@ -30,14 +42,22 @@ def _handle(request):
             "body": json.dumps({"error": "Method not allowed"}),
         }
     path = getattr(request, "path", "") or ""
-    params = {}
-    if "?" in path:
-        for part in path.split("?", 1)[1].split("&"):
-            if "=" in part:
-                k, v = part.split("=", 1)
-                params[k.strip()] = v.strip()
+    params = _parse_query(path)
     workspace_id = params.get("workspace_id", "").strip() or None
-    out = get_memory(workspace_id)
+
+    if "/stats" in path:
+        leads = get_all_leads(include_pending=True, workspace_id=workspace_id)
+        analyses = get_analyses(workspace_id, limit=1000)
+        override_summary = get_override_summary(workspace_id, within_days=30)
+        out = {
+            "triage_count": len(leads),
+            "triage_completed_count": len([c for c in leads if c.get("evaluation_result")]),
+            "analyses_count": len(analyses),
+            "override_summary": override_summary,
+        }
+    else:
+        out = get_memory(workspace_id)
+
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},

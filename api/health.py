@@ -11,30 +11,44 @@ from http.server import BaseHTTPRequestHandler
 # Add lib to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from lib.config import SYSTEM_VERSION, SYSTEM_NAME, get_calendly_url
+from lib.config import SYSTEM_VERSION, SYSTEM_NAME, get_calendly_url, TRIAGE_RATE_LIMIT_DAYS
 
 
 def _handle(request):
-    """Health check logic; returns dict with statusCode, headers, body."""
+    """Health or config: GET /api/health or GET /api/config (same handler, path decides)."""
+    if hasattr(request, 'method') and request.method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, X-API-Key'
+            },
+            'body': ''
+        }
     if hasattr(request, 'method') and request.method != 'GET':
         return {
             'statusCode': 405,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({'error': 'Method not allowed'})
         }
 
-    response_data = {
-        'status': 'healthy',
-        'version': SYSTEM_VERSION,
-        'system': SYSTEM_NAME,
-        'openai_configured': False,
-        'mode': 'byok',
-        'message': 'System operational. Provide your API key to use Robin.',
-        'calendly_url': get_calendly_url() or None,
-    }
+    path = getattr(request, 'path', '') or ''
+    if '/config' in path:
+        response_data = {
+            'calendly_url': get_calendly_url() or None,
+            'triage_rate_limit_days': TRIAGE_RATE_LIMIT_DAYS,
+        }
+    else:
+        response_data = {
+            'status': 'healthy',
+            'version': SYSTEM_VERSION,
+            'system': SYSTEM_NAME,
+            'openai_configured': False,
+            'mode': 'byok',
+            'message': 'System operational. Provide your API key to use Robin.',
+            'calendly_url': get_calendly_url() or None,
+        }
 
     return {
         'statusCode': 200,
@@ -52,7 +66,7 @@ class handler(BaseHTTPRequestHandler):
     """Vercel Python runtime expects a class subclassing BaseHTTPRequestHandler."""
 
     def do_GET(self):
-        req = type('Req', (), {'method': 'GET', 'body': None, 'headers': self.headers})()
+        req = type('Req', (), {'method': 'GET', 'body': None, 'headers': self.headers, 'path': self.path})()
         result = _handle(req)
         self._send(result)
 

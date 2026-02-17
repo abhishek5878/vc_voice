@@ -57,15 +57,15 @@
     },
     {
       "source": "/api/analyze/history",
-      "destination": "/api/analyze_history.py"
+      "destination": "/api/analyze.py"
     },
     {
       "source": "/api/stats",
-      "destination": "/api/stats.py"
+      "destination": "/api/memory.py"
     },
     {
       "source": "/api/config",
-      "destination": "/api/config.py"
+      "destination": "/api/health.py"
     },
     {
       "source": "/api/memory",

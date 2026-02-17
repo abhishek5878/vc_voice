@@ -30,6 +30,31 @@ def _get_api_key_from_request(request):
     return ""
 
 
+def _handle_analyze_history(request):
+    """GET /api/analyze/history — list analyses for workspace."""
+    path = getattr(request, "path", "") or ""
+    params = {}
+    if "?" in path:
+        for part in path.split("?", 1)[1].split("&"):
+            if "=" in part:
+                k, v = part.split("=", 1)
+                params[k.strip()] = v.strip()
+    workspace_id = params.get("workspace_id", "").strip() or None
+    limit = min(50, max(1, int(params.get("limit", 20))))
+    from lib.analyze_store import get_analyses
+    analyses = get_analyses(workspace_id, limit=limit)
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, X-API-Key, X-Workspace-Id",
+        },
+        "body": json.dumps({"analyses": analyses}),
+    }
+
+
 def _get_bearer_workspace(request, data):
     """If Authorization: Bearer present, resolve workspace_id from auth; else use body/header."""
     if not hasattr(request, "headers"):
@@ -52,6 +77,9 @@ def _get_bearer_workspace(request, data):
 
 
 def _handle(request):
+    path = getattr(request, "path", "") or ""
+    if hasattr(request, "method") and request.method == "GET" and "/history" in path:
+        return _handle_analyze_history(request)
     if hasattr(request, "method") and request.method == "OPTIONS":
         return {
             "statusCode": 200,
@@ -228,14 +256,19 @@ def _handle(request):
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
-        result = _handle(type("Req", (), {"method": "OPTIONS", "headers": self.headers})())
+        result = _handle(type("Req", (), {"method": "OPTIONS", "path": self.path, "headers": self.headers})())
+        self._send(result)
+
+    def do_GET(self):
+        req = type("Req", (), {"method": "GET", "path": self.path, "headers": self.headers})()
+        result = _handle(req)
         self._send(result)
 
     def do_POST(self):
         content_length = int(self.headers.get("Content-Length", 0))
         body_raw = self.rfile.read(content_length) if content_length else b""
         body_str = body_raw.decode("utf-8") if body_raw else "{}"
-        req = type("Req", (), {"method": "POST", "body": body_str, "headers": self.headers})()
+        req = type("Req", (), {"method": "POST", "body": body_str, "path": self.path, "headers": self.headers})()
         result = _handle(req)
         self._send(result)
 
