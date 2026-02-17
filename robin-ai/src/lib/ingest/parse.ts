@@ -3,17 +3,31 @@
  */
 import mammoth from "mammoth";
 
-/** PDF: use pdf-parse Node API (PDFParse class, getText()) */
+const PDF_UNSUPPORTED_MSG =
+  "PDF upload is not supported in this environment (e.g. Vercel serverless). Please paste your pitch text into the box or upload a .txt or .docx file.";
+
+/** PDF: use pdf-parse only when not on Vercel (Path2D/canvas unavailable in serverless). */
 export async function extractPdfText(buffer: Buffer): Promise<string> {
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  if (process.env.VERCEL) {
+    throw new Error(PDF_UNSUPPORTED_MSG);
+  }
   try {
-    const textResult = await parser.getText();
-    const text = (textResult as { text?: string }).text ?? "";
-    await parser.destroy();
-    return text.trim();
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+    try {
+      const textResult = await parser.getText();
+      const text = (textResult as { text?: string }).text ?? "";
+      await parser.destroy();
+      return text.trim();
+    } catch (e) {
+      await parser.destroy().catch(() => {});
+      throw e;
+    }
   } catch (e) {
-    await parser.destroy().catch(() => {});
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes("Path2D") || msg.includes("canvas") || msg.includes("polyfill")) {
+      throw new Error(PDF_UNSUPPORTED_MSG);
+    }
     throw e;
   }
 }

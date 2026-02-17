@@ -40,9 +40,12 @@ export default function Home() {
           body: JSON.stringify({ streamContext, mode, provider }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || data.detail || "Analysis failed");
+        if (!res.ok) throw new Error(data.detail || data.error || "Analysis failed");
         setResult(data as PipelineResult);
         setView("report");
+      } catch (e) {
+        setView("input");
+        throw e;
       } finally {
         clearInterval(interval);
       }

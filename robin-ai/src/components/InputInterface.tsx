@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { StreamContext } from "@/lib/ingest/types";
+import { pdfFileToImageDataUrls } from "@/lib/pdfToImages";
 
 type Mode = 1 | 2 | 3;
 
@@ -74,7 +75,35 @@ export default function InputInterface({
         setFileStatus((s) => ({ ...s, [stream]: `Loaded ${file.name}` }));
         return;
       }
-      if (name.endsWith(".pdf") || name.endsWith(".docx")) {
+      if (name.endsWith(".pdf")) {
+        setFileStatus((s) => ({ ...s, [stream]: "Parsing with OpenAI…" }));
+        try {
+          const dataUrls = await pdfFileToImageDataUrls(file);
+          if (dataUrls.length === 0) throw new Error("Could not read PDF pages.");
+          const res = await fetch("/api/parse-pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ images: dataUrls }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || data.error || "Parse failed");
+          const text = (data.text ?? "").trim();
+          if (stream === "PUBLIC_TRANSCRIPT")
+            setPublicTranscript((prev) => (prev ? prev + "\n\n" + text : text));
+          if (stream === "PRIVATE_DICTATION")
+            setPrivateDictation((prev) => (prev ? prev + "\n\n" + text : text));
+          if (stream === "PITCH_MATERIAL")
+            setPitchMaterial((prev) => (prev ? prev + "\n\n" + text : text));
+          setFileStatus((s) => ({ ...s, [stream]: `Parsed with OpenAI: ${file.name}` }));
+        } catch (e) {
+          setFileStatus((s) => ({
+            ...s,
+            [stream]: `Error: ${e instanceof Error ? e.message : "Failed"}`,
+          }));
+        }
+        return;
+      }
+      if (name.endsWith(".docx")) {
         setFileStatus((s) => ({ ...s, [stream]: `Uploading ${file.name}…` }));
         const form = new FormData();
         form.set(
@@ -88,7 +117,7 @@ export default function InputInterface({
         try {
           const res = await fetch("/api/ingest", { method: "POST", body: form });
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Upload failed");
+          if (!res.ok) throw new Error(data.detail || data.error || "Upload failed");
           const text = data.streamContext?.[stream] ?? "";
           if (stream === "PUBLIC_TRANSCRIPT")
             setPublicTranscript((prev) => (prev ? prev + "\n\n" + text : text));
@@ -165,7 +194,10 @@ export default function InputInterface({
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Public Transcript</h2>
             <textarea
               value={publicTranscript}
-              onChange={(e) => setPublicTranscript(e.target.value)}
+              onChange={(e) => {
+                setPublicTranscript(e.target.value);
+                setError(null);
+              }}
               placeholder="Paste meeting transcript (Granola-style) or .txt/.md content"
               className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
             />
@@ -177,7 +209,10 @@ export default function InputInterface({
                 className="text-xs text-zinc-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-300"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) handleFile("PUBLIC_TRANSCRIPT", f);
+                  if (f) {
+                    setFileStatus((s) => ({ ...s, PUBLIC_TRANSCRIPT: "" }));
+                    handleFile("PUBLIC_TRANSCRIPT", f);
+                  }
                   e.target.value = "";
                 }}
               />
@@ -191,7 +226,10 @@ export default function InputInterface({
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Private Dictation</h2>
             <textarea
               value={privateDictation}
-              onChange={(e) => setPrivateDictation(e.target.value)}
+              onChange={(e) => {
+                setPrivateDictation(e.target.value);
+                setError(null);
+              }}
               placeholder="Paste voice note (Wispr-style) or upload .txt/.md/.pdf/.docx"
               className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
             />
@@ -203,7 +241,10 @@ export default function InputInterface({
                 className="text-xs text-zinc-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-300"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) handleFile("PRIVATE_DICTATION", f);
+                  if (f) {
+                    setFileStatus((s) => ({ ...s, PRIVATE_DICTATION: "" }));
+                    handleFile("PRIVATE_DICTATION", f);
+                  }
                   e.target.value = "";
                 }}
               />
@@ -217,7 +258,10 @@ export default function InputInterface({
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Pitch Material</h2>
             <textarea
               value={pitchMaterial}
-              onChange={(e) => setPitchMaterial(e.target.value)}
+              onChange={(e) => {
+                setPitchMaterial(e.target.value);
+                setError(null);
+              }}
               placeholder="Paste deck narrative or upload PDF/DOCX"
               className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
             />
@@ -229,7 +273,10 @@ export default function InputInterface({
                 className="text-xs text-zinc-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-300"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) handleFile("PITCH_MATERIAL", f);
+                  if (f) {
+                    setFileStatus((s) => ({ ...s, PITCH_MATERIAL: "" }));
+                    handleFile("PITCH_MATERIAL", f);
+                  }
                   e.target.value = "";
                 }}
               />

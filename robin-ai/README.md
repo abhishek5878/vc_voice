@@ -57,6 +57,8 @@ Multi-mode intelligence system for high-stakes decision-makers (VCs). Finds the 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+# For PDF parsing (POST /api/parse-pdf). Server-side only; not sent from client.
+OPENAI_API_KEY=sk-...
 ```
 
 Run `supabase/schema.sql` in the Supabase SQL editor to create tables.

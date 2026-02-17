@@ -37,23 +37,41 @@ export async function POST(request: NextRequest) {
       const pitchFile = formData.get("pitch_material_file") as File | null;
 
       if (pubFile?.size && !streamContext.PUBLIC_TRANSCRIPT) {
-        const text = await fileToText(pubFile);
-        if (text) {
-          streamContext.PUBLIC_TRANSCRIPT = truncate(text, MAX_STREAM_CHARS);
+        const out = await fileToTextSafe(pubFile);
+        if ("error" in out) {
+          return NextResponse.json(
+            { error: "Public transcript file could not be read", detail: out.error },
+            { status: 400 }
+          );
+        }
+        if (out.text) {
+          streamContext.PUBLIC_TRANSCRIPT = truncate(out.text, MAX_STREAM_CHARS);
           present.push("PUBLIC_TRANSCRIPT");
         }
       }
       if (privFile?.size && !streamContext.PRIVATE_DICTATION) {
-        const text = await fileToText(privFile);
-        if (text) {
-          streamContext.PRIVATE_DICTATION = truncate(text, MAX_STREAM_CHARS);
+        const out = await fileToTextSafe(privFile);
+        if ("error" in out) {
+          return NextResponse.json(
+            { error: "Private dictation file could not be read", detail: out.error },
+            { status: 400 }
+          );
+        }
+        if (out.text) {
+          streamContext.PRIVATE_DICTATION = truncate(out.text, MAX_STREAM_CHARS);
           present.push("PRIVATE_DICTATION");
         }
       }
       if (pitchFile?.size && !streamContext.PITCH_MATERIAL) {
-        const text = await fileToText(pitchFile);
-        if (text) {
-          streamContext.PITCH_MATERIAL = truncate(text, MAX_STREAM_CHARS);
+        const out = await fileToTextSafe(pitchFile);
+        if ("error" in out) {
+          return NextResponse.json(
+            { error: "Pitch deck upload failed", detail: out.error },
+            { status: 400 }
+          );
+        }
+        if (out.text) {
+          streamContext.PITCH_MATERIAL = truncate(out.text, MAX_STREAM_CHARS);
           present.push("PITCH_MATERIAL");
         }
       }
@@ -90,15 +108,57 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ streamContext, present });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
+    const isPdfEnvError =
+      /Path2D|canvas|polyfill|pdf|PDF/.test(message) || message.includes("not supported in this environment");
+    if (isPdfEnvError) {
+      return NextResponse.json(
+        {
+          error: "Pitch deck upload failed",
+          detail:
+            "PDF upload is not supported in this environment. Please paste your pitch text into the box or upload a .txt or .docx file.",
+        },
+        { status: 400 }
+      );
+    }
     return NextResponse.json({ error: "Ingestion failed", detail: message }, { status: 500 });
   }
 }
 
-async function fileToText(file: File): Promise<string> {
+/** Returns { text } on success or { error: userMessage } on failure. */
+async function fileToTextSafe(file: File): Promise<{ text: string } | { error: string }> {
   const name = (file.name || "").toLowerCase();
-  const buf = Buffer.from(await file.arrayBuffer());
-  if (name.endsWith(".pdf")) return extractPdfText(buf);
-  if (name.endsWith(".docx")) return extractDocxText(buf);
-  if (name.endsWith(".txt") || name.endsWith(".md")) return new TextDecoder().decode(buf).trim();
-  return "";
+  try {
+    const buf = Buffer.from(await file.arrayBuffer());
+    if (name.endsWith(".pdf")) {
+      try {
+        const text = await extractPdfText(buf);
+        return { text: text || "" };
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return {
+          error:
+            msg.includes("not supported in this environment")
+              ? msg
+              : "This PDF could not be read (e.g. scanned image or unsupported format). Try pasting the text into the box, or upload a .txt or .docx file.",
+        };
+      }
+    }
+    if (name.endsWith(".docx")) {
+      try {
+        const text = await extractDocxText(buf);
+        return { text: text || "" };
+      } catch {
+        return {
+          error: "This DOCX could not be read. Try saving as .txt or paste the text into the box.",
+        };
+      }
+    }
+    if (name.endsWith(".txt") || name.endsWith(".md")) {
+      return { text: new TextDecoder().decode(buf).trim() };
+    }
+    return { error: "Unsupported format. Use .txt, .md, .pdf, or .docx." };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return { error: message.slice(0, 200) };
+  }
 }
