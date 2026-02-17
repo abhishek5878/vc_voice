@@ -68,6 +68,20 @@ export default function FounderChat({
     }
   }, [messages.length]);
 
+  // Seed an initial assistant message once when we have deck text.
+  useEffect(() => {
+    if (!deckText.trim()) return;
+    if (messages.length > 0) return;
+    setMessages([
+      {
+        role: "assistant",
+        content:
+          "I’ve read your deck. I’m going to be blunt and a little mean on purpose so we can harden this pitch. " +
+          "In one or two sentences, tell me what you’re building and what you want out of this session (e.g. fix seed deck, get ready for partner meeting).",
+      },
+    ]);
+  }, [deckText, messages.length]);
+
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -156,70 +170,110 @@ export default function FounderChat({
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-4 gap-4">
+      <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full p-4 gap-4">
         {!hasDeck && (
           <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
             No pitch material found. Go back and paste or upload your deck first.
           </div>
         )}
-        <div className="text-xs text-zinc-500 mb-1">
-          The VC has read your deck. They will be mean on purpose so you can harden the pitch.
-        </div>
         {error && (
           <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs mb-1">
             {error}
           </div>
         )}
-        <div
-          ref={scrollRef}
-          className="flex-1 min-h-[280px] max-h-[520px] rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 overflow-y-auto space-y-3 text-sm"
-        >
-          {messages.length === 0 ? (
-            <div className="text-zinc-500 text-xs">
-              Start by confirming you&apos;re okay with brutal feedback, or ask what part of your deck to fix
-              first (Problem, Market, Traction, Team, Moat, etc.).
-            </div>
-          ) : (
-            messages.map((m, idx) => (
-              <div
-                key={idx}
-                className={`max-w-[85%] whitespace-pre-wrap leading-relaxed ${
-                  m.role === "user"
-                    ? "ml-auto bg-amber-500 text-zinc-950 rounded-lg px-3 py-2 text-sm"
-                    : "mr-auto bg-zinc-800 text-zinc-100 rounded-lg px-3 py-2 text-sm"
-                }`}
-              >
-                {m.content}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4 flex-1">
+          <section className="hidden lg:flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 text-xs text-zinc-400 overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-zinc-500">Deck snapshot</p>
+                <p className="text-[11px] text-zinc-500">
+                  {deckText.length.toLocaleString()} chars ·{" "}
+                  {Math.max(1, Math.round(deckText.length / 800))} slide-equivalents (rough)
+                </p>
               </div>
-            ))
-          )}
-        </div>
+            </div>
+            <div className="flex-1 rounded-md bg-zinc-950/60 border border-zinc-800/70 p-2 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+              {deckText ? deckText.slice(0, 3000) : "No deck text available."}
+              {deckText.length > 3000 && (
+                <span className="block mt-2 text-[10px] text-zinc-600">
+                  …truncated. The VC still sees the full deck in context.
+                </span>
+              )}
+            </div>
+          </section>
 
-        <div className="mt-2 space-y-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              hasDeck
-                ? "Ask for help on a specific slide, metric, or section. Shift+Enter for newline."
-                : "Paste your question, but note: no deck text was found."
-            }
-            className="w-full h-20 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 resize-y"
-          />
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-500">
-              Provider: <span className="text-zinc-300">{provider}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => void sendMessage()}
-              disabled={loading || !input.trim()}
-              className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none text-sm font-medium text-zinc-950"
+          <section className="flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/60">
+            <div className="px-3 py-2 border-b border-zinc-800 flex items-center justify-between">
+              <div className="text-[11px] text-zinc-500">
+                The VC has your deck loaded. Expect blunt questions and concrete rewrites.
+              </div>
+              <span className="hidden sm:inline text-[11px] text-zinc-600">
+                Press Enter to send · Shift+Enter for newline
+              </span>
+            </div>
+            <div
+              ref={scrollRef}
+              className="flex-1 min-h-[260px] max-h-[520px] p-3 overflow-y-auto space-y-3 text-sm"
             >
-              {loading ? "Thinking…" : "Send"}
-            </button>
-          </div>
+              {messages.map((m, idx) => (
+                <div
+                  key={idx}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className="max-w-[85%] space-y-1">
+                    <div
+                      className={`text-[10px] font-medium tracking-wide ${
+                        m.role === "user" ? "text-amber-400 text-right" : "text-zinc-500"
+                      }`}
+                    >
+                      {m.role === "user" ? "You" : "VC"}
+                    </div>
+                    <div
+                      className={`whitespace-pre-wrap leading-relaxed ${
+                        m.role === "user"
+                          ? "ml-auto bg-amber-500 text-zinc-950 rounded-lg px-3 py-2 text-sm"
+                          : "mr-auto bg-zinc-800 text-zinc-100 rounded-lg px-3 py-2 text-sm"
+                      }`}
+                    >
+                      {m.content}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {messages.length === 0 && (
+                <div className="text-zinc-500 text-xs">
+                  Start by confirming you&apos;re okay with brutal feedback, or ask what part of your deck to
+                  fix first (Problem, Market, Traction, Team, Moat, etc.).
+                </div>
+              )}
+            </div>
+            <div className="border-t border-zinc-800 px-3 py-2 space-y-2">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  hasDeck
+                    ? "Ask for help on a specific slide, metric, or section. Shift+Enter for newline."
+                    : "Paste your question, but note: no deck text was found."
+                }
+                className="w-full h-20 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 resize-y"
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-500">
+                  Provider: <span className="text-zinc-300">{provider}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void sendMessage()}
+                  disabled={loading || !input.trim()}
+                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none text-sm font-medium text-zinc-950"
+                >
+                  {loading ? "Thinking…" : "Send"}
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
     </div>
