@@ -27,7 +27,7 @@ export default function LandingPage() {
               Open Robin
             </Link>
             <Link
-              href="/auth.html"
+              href="/auth"
               className="px-6 py-3 rounded-lg border border-amber-500/60 text-amber-500/90 hover:bg-amber-500/10 font-medium transition-colors"
             >
               Sign up / Log in
@@ -121,7 +121,7 @@ export default function LandingPage() {
             Open Robin
           </Link>
           <Link
-            href="/auth.html"
+            href="/auth"
             className="px-6 py-3 rounded-lg border border-amber-500/60 text-amber-500/90 hover:bg-amber-500/10 font-medium transition-colors"
           >
             Sign up
