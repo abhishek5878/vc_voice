@@ -154,23 +154,23 @@ export default function FounderChat({
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <header className="p-4 border-b border-zinc-800 flex items-center justify-between">
+      <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="text-zinc-400 hover:text-zinc-200 text-sm"
+            className="text-zinc-400 hover:text-zinc-200 text-sm transition-colors"
           >
             ← Back to inputs
           </button>
           <div>
-            <h1 className="text-lg font-semibold">Robin.ai — Founder Chat</h1>
+            <h1 className="text-lg font-semibold tracking-tight">Robin.ai — Founder Chat</h1>
             <p className="text-xs text-zinc-500">Mode 3: Pitch Stress-Test (live VC interrogation)</p>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full p-4 gap-4">
+      <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full p-4 sm:p-6 gap-4">
         {!hasDeck && (
           <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
             No pitch material found. Go back and paste or upload your deck first.
@@ -182,7 +182,7 @@ export default function FounderChat({
           </div>
         )}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4 flex-1">
-          <section className="hidden lg:flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 text-xs text-zinc-400 overflow-hidden">
+          <section className="hidden lg:flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-xs text-zinc-400 overflow-hidden">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-zinc-500">Deck snapshot</p>
@@ -202,7 +202,7 @@ export default function FounderChat({
             </div>
           </section>
 
-          <section className="flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/60">
+          <section className="flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30">
             <div className="px-3 py-2 border-b border-zinc-800 flex items-center justify-between">
               <div className="text-[11px] text-zinc-500">
                 The VC has your deck loaded. Expect blunt questions and concrete rewrites.

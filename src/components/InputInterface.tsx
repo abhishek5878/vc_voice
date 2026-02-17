@@ -164,40 +164,40 @@ export default function InputInterface({
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <header className="p-6 border-b border-zinc-800 flex items-center justify-between">
+      <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={onBack}
-            className="text-zinc-400 hover:text-zinc-200 text-sm"
+            className="text-zinc-400 hover:text-zinc-200 text-sm transition-colors"
           >
             ← Back
           </button>
-          <h1 className="text-xl font-semibold">Robin.ai</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Robin.ai</h1>
         </div>
         <span className="text-xs text-zinc-500 uppercase tracking-wider">
           {mode === 1 ? "Post-Meeting" : mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"}
         </span>
       </header>
 
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 max-w-6xl mx-auto w-full">
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 sm:p-8 max-w-6xl mx-auto w-full">
         {mode === 1 && (
-          <p className="lg:col-span-2 text-sm text-zinc-500">
+          <p className="lg:col-span-2 text-sm text-zinc-500 max-w-2xl">
             Paste meeting transcript and optional private notes. Robin will extract claims, find conflicts, run GRUE, and build the interrogation.
           </p>
         )}
         {mode === 2 && (
-          <p className="lg:col-span-2 text-sm text-zinc-500">
+          <p className="lg:col-span-2 text-sm text-zinc-500 max-w-2xl">
             Paste or upload pitch deck / memo. You&apos;ll get the attack brief: red list, yellow list, and recommended question order.
           </p>
         )}
         {mode === 3 && (
-          <p className="lg:col-span-2 text-sm text-zinc-500">
+          <p className="lg:col-span-2 text-sm text-zinc-500 max-w-2xl">
             Paste pitch material to run the pipeline. Same evidence map and interrogation—use this to stress-test before the meeting.
           </p>
         )}
         <div className="space-y-6">
-          <section>
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Public Transcript</h2>
             <textarea
               value={publicTranscript}
@@ -206,7 +206,7 @@ export default function InputInterface({
                 setError(null);
               }}
               placeholder={mode === 1 ? "Paste meeting transcript or .txt/.md" : mode === 2 ? "Optional: any shared context" : "Paste transcript or pitch narrative"}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 focus:outline-none resize-y transition-colors"
             />
             <div className="flex items-center gap-2 mt-1">
               <span className="text-xs text-zinc-500">{publicTranscript.length} chars</span>
@@ -229,7 +229,7 @@ export default function InputInterface({
             </div>
           </section>
 
-          <section>
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Private Dictation</h2>
             <textarea
               value={privateDictation}
@@ -238,7 +238,7 @@ export default function InputInterface({
                 setError(null);
               }}
               placeholder={mode === 1 ? "Paste private notes or voice note" : "Optional: private notes or .txt/.md/.pdf/.docx"}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 focus:outline-none resize-y transition-colors"
             />
             <div className="flex items-center gap-2 mt-1">
               <span className="text-xs text-zinc-500">{privateDictation.length} chars</span>
@@ -261,7 +261,7 @@ export default function InputInterface({
             </div>
           </section>
 
-          <section>
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Pitch Material</h2>
             <textarea
               value={pitchMaterial}
@@ -270,7 +270,7 @@ export default function InputInterface({
                 setError(null);
               }}
               placeholder={mode === 2 ? "Paste pitch deck / memo or upload PDF/DOCX (required)" : "Paste deck narrative or upload PDF/DOCX"}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-zinc-600 focus:outline-none resize-y"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 focus:outline-none resize-y transition-colors"
             />
             <div className="flex items-center gap-2 mt-1">
               <span className="text-xs text-zinc-500">{pitchMaterial.length} chars</span>
@@ -293,20 +293,22 @@ export default function InputInterface({
             </div>
           </section>
 
-          {error && <p className="text-sm text-red-400/90">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-400/90 px-1">{error}</p>
+          )}
 
           <button
             type="button"
             onClick={runAnalysis}
             disabled={loading || !canRun}
-            className="w-full py-3 px-4 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none font-medium text-zinc-950"
+            className="btn-primary w-full py-3.5 text-base"
           >
             {loading ? "Running…" : "Run Robin"}
           </button>
         </div>
 
         <div className="space-y-6">
-          <section className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h3 className="text-sm font-medium text-zinc-400 mb-3">Session context</h3>
             <p className="text-xs text-zinc-500">
               Founder/company and pedigree will appear here once connected to Supabase.
@@ -319,7 +321,7 @@ export default function InputInterface({
             </p>
           </section>
 
-          <section className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h3 className="text-sm font-medium text-zinc-400 mb-3">AI configuration (BYOK)</h3>
             <label className="block text-xs text-zinc-500 mb-1">Provider</label>
             <select
@@ -327,7 +329,7 @@ export default function InputInterface({
               onChange={(e) =>
                 saveProvider(e.target.value as "openai" | "anthropic" | "groq")
               }
-              className="w-full px-3 py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm mb-3"
+              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm mb-3 focus:border-amber-500/40 focus:outline-none"
             >
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
@@ -340,7 +342,7 @@ export default function InputInterface({
                 value={apiKey}
                 onChange={(e) => saveKey(e.target.value)}
                 placeholder="sk-… or key"
-                className="flex-1 px-3 py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 placeholder-zinc-500 text-sm"
+                className="flex-1 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 placeholder-zinc-500 text-sm focus:border-amber-500/40 focus:outline-none"
               />
               <button
                 type="button"

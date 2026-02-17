@@ -78,20 +78,20 @@ export default function AuthPage() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="auth-page w-full max-w-sm border border-zinc-800 bg-zinc-900/60 rounded-xl p-5 shadow-lg shadow-black/40">
-          <h1 className="text-xl font-semibold mb-1">Robin.ai</h1>
-          <p className="text-xs text-zinc-500 mb-4">Your calendar, filtered.</p>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col hero-mesh">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm border border-zinc-800 bg-zinc-900/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/30">
+          <h1 className="text-xl font-semibold tracking-tight mb-1">Robin.ai</h1>
+          <p className="text-xs text-zinc-500 mb-6">Your calendar, filtered.</p>
 
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-6">
             <button
               type="button"
               onClick={() => switchMode("login")}
-              className={`flex-1 px-3 py-2 rounded-md text-sm border ${
+              className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 mode === "login"
-                  ? "bg-amber-600 border-amber-500 text-zinc-950"
-                  : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-600"
+                  ? "bg-amber-600 text-zinc-950"
+                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-700/50"
               }`}
             >
               Log in
@@ -99,19 +99,19 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => switchMode("register")}
-              className={`flex-1 px-3 py-2 rounded-md text-sm border ${
+              className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 mode === "register"
-                  ? "bg-amber-600 border-amber-500 text-zinc-950"
-                  : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-600"
+                  ? "bg-amber-600 text-zinc-950"
+                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-700/50"
               }`}
             >
               Sign up
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="block text-xs text-zinc-400" htmlFor="name">
                   Name (optional)
                 </label>
@@ -121,13 +121,13 @@ export default function AuthPage() {
                   autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-600"
+                  className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
                   placeholder="My Workspace"
                 />
               </div>
             )}
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="block text-xs text-zinc-400" htmlFor="email">
                 Email
               </label>
@@ -138,12 +138,12 @@ export default function AuthPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-600"
+                className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
                 placeholder="you@company.com"
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="block text-xs text-zinc-400" htmlFor="password">
                 Password {mode === "register" && <span className="text-zinc-500">(min 6)</span>}
               </label>
@@ -155,7 +155,7 @@ export default function AuthPage() {
                 minLength={mode === "register" ? 6 : undefined}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-600"
+                className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
               />
             </div>
 
@@ -164,18 +164,18 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-1 px-3 py-2.5 rounded-md bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-sm font-medium text-zinc-950"
+              className="btn-primary w-full py-2.5 mt-1"
             >
               {loading ? (mode === "login" ? "Logging in…" : "Signing up…") : mode === "login" ? "Log in" : "Sign up"}
             </button>
           </form>
 
-          <p className="mt-4 text-[11px] text-zinc-500">
+          <p className="mt-6 text-[11px] text-zinc-500">
             Back to{" "}
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="underline underline-offset-2 decoration-zinc-600 hover:text-zinc-300"
+              className="underline underline-offset-2 decoration-zinc-600 hover:text-zinc-300 transition-colors"
             >
               home
             </button>

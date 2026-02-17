@@ -60,12 +60,12 @@ export default function AnalysisReport({
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <header className="sticky top-0 z-10 p-4 border-b border-zinc-800 bg-zinc-950/95 flex items-center justify-between">
+      <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <button type="button" onClick={onBack} className="text-zinc-400 hover:text-zinc-200 text-sm">
+          <button type="button" onClick={onBack} className="text-zinc-400 hover:text-zinc-200 text-sm transition-colors">
             ← New analysis
           </button>
-          <h1 className="text-lg font-semibold">
+          <h1 className="text-lg font-semibold tracking-tight">
             Robin.ai — {result.mode === 1 ? "Post-Meeting" : result.mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"} Report
           </h1>
         </div>
@@ -73,21 +73,21 @@ export default function AnalysisReport({
           <button
             type="button"
             onClick={copyMarkdown}
-            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm"
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
           >
             {copied ? "Copied" : "Copy markdown"}
           </button>
           <button
             type="button"
             onClick={downloadMarkdown}
-            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm"
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
           >
             Download .md
           </button>
         </div>
       </header>
 
-      <main className="flex-1 p-8 max-w-4xl mx-auto w-full space-y-10">
+      <main className="flex-1 p-6 sm:p-8 max-w-4xl mx-auto w-full space-y-10">
         {result.error && (
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
             {result.error}
@@ -96,7 +96,7 @@ export default function AnalysisReport({
 
         {/* Mode 2 — Pre-Meeting Attack Brief (show first for Pre-Meeting Prep) */}
         {result.mode === 2 && brief && (brief.red_list_framed?.length > 0 || brief.yellow_list_framed?.length > 0) && (
-          <section className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+          <section className="p-5 sm:p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5">
             <h2 className="text-xl font-semibold text-zinc-200 mb-4">Pre-Meeting Attack Brief</h2>
             <p className="text-sm font-medium text-red-400/90 mb-2">
               They will not have a good answer to this. Probe hard.
@@ -134,7 +134,7 @@ export default function AnalysisReport({
         )}
 
         {/* Evidence Map */}
-        <section>
+        <section className="p-5 sm:p-6 rounded-2xl border border-zinc-800 bg-zinc-900/30">
           <h2 className="text-xl font-semibold text-zinc-200 mb-4">Evidence Map</h2>
           {claims.length === 0 ? (
             <p className="text-zinc-500 text-sm">No claims extracted.</p>
@@ -143,7 +143,7 @@ export default function AnalysisReport({
               {claims.map((c) => (
                 <li
                   key={c.id}
-                  className="p-4 rounded-lg border border-zinc-800 bg-zinc-900/40"
+                  className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/60"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     {statusBadge(c.status)}
@@ -160,7 +160,7 @@ export default function AnalysisReport({
         </section>
 
         {/* Conflict Report */}
-        <section>
+        <section className="p-5 sm:p-6 rounded-2xl border border-zinc-800 bg-zinc-900/30">
           <h2 className="text-xl font-semibold text-zinc-200 mb-4">Conflict Report</h2>
           {layer2Skipped ? (
             <p className="text-zinc-500 text-sm">Skipped — no private stream provided.</p>
@@ -175,7 +175,7 @@ export default function AnalysisReport({
                 {conflicts.map((c) => (
                   <li
                     key={c.id}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/40"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-zinc-800 bg-zinc-950/60"
                   >
                     <div>
                       <p className="text-xs text-zinc-500 mb-1">Stream 1</p>
@@ -210,7 +210,7 @@ export default function AnalysisReport({
         </section>
 
         {/* GRUE Coverage */}
-        <section>
+        <section className="p-5 sm:p-6 rounded-2xl border border-zinc-800 bg-zinc-900/30">
           <h2 className="text-xl font-semibold text-zinc-200 mb-4">GRUE Coverage</h2>
           {grue && (
             <>
@@ -262,7 +262,7 @@ export default function AnalysisReport({
         </section>
 
         {/* Conviction Interrogation */}
-        <section>
+        <section className="p-5 sm:p-6 rounded-2xl border border-zinc-800 bg-zinc-900/30">
           <h2 className="text-xl font-semibold text-zinc-200 mb-4">Conviction Interrogation</h2>
 
           {red.length > 0 && (
@@ -316,7 +316,7 @@ export default function AnalysisReport({
 
         {/* Mode 2 Attack Brief (bottom only when not already shown at top) */}
         {result.mode !== 2 && brief && (brief.red_list_framed?.length > 0 || brief.yellow_list_framed?.length > 0) && (
-          <section className="p-4 rounded-xl border border-zinc-700 bg-zinc-900/60">
+          <section className="p-5 sm:p-6 rounded-2xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-xl font-semibold text-zinc-200 mb-4">Pre-Meeting Attack Brief</h2>
             <p className="text-sm font-medium text-red-400/90 mb-2">
               They will not have a good answer to this. Probe hard.
