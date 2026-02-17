@@ -2,6 +2,14 @@
 
 Multi-mode intelligence system for high-stakes decision-makers (VCs). Finds the truth in a conversation that participants either couldn't see or didn't want to say.
 
+## Deployment (Vercel)
+
+To have the **3-mode app** and landing at your URL (e.g. robin-ai-three.vercel.app):
+
+1. In Vercel → your project → **Settings** → **General** → set **Root Directory** to **`robin-ai`** (this folder).
+2. Save and redeploy. The repo root has a different app (static landing + Python API); this Next.js app lives in `robin-ai/`.
+3. After that: **/** = marketing landing; **/app** = 3-mode flow (Mode Select → Input → Report). Use **Open Robin** to go to `/app`.
+
 ## Stack
 
 - **Frontend:** Next.js 14 (App Router) + Tailwind CSS
