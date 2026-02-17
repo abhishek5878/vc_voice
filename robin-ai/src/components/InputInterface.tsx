@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { StreamContext } from "@/lib/ingest/types";
-import { pdfFileToImageDataUrls } from "@/lib/pdfToImages";
+import { pdfFileToText } from "@/lib/pdfToImages";
 
 type Mode = 1 | 2 | 3;
 
@@ -76,63 +76,16 @@ export default function InputInterface({
         return;
       }
       if (name.endsWith(".pdf")) {
-        setFileStatus((s) => ({ ...s, [stream]: "Parsing with OpenAI…" }));
+        setFileStatus((s) => ({ ...s, [stream]: `Parsing ${file.name}…` }));
         try {
-          const dataUrls = await pdfFileToImageDataUrls(file);
-          if (dataUrls.length === 0) throw new Error("Could not read PDF pages.");
-          const res = await fetch("/api/parse-pdf", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ images: dataUrls }),
-          });
-          const raw = await res.text();
-          let data: { text?: string; error?: string; detail?: string };
-          try {
-            data = raw ? JSON.parse(raw) : {};
-          } catch {
-            throw new Error(res.status === 503
-              ? "PDF parsing not configured. Add OPENAI_API_KEY to the server environment."
-              : `Server error (${res.status}). Try again or use .txt / .docx.`);
+          const text = await pdfFileToText(file);
+          if (!text || text.length < 10) {
+            setFileStatus((s) => ({
+              ...s,
+              [stream]: "No text could be extracted (scanned PDF?). Paste text or use .txt / .docx.",
+            }));
+            return;
           }
-          if (!res.ok) throw new Error(data.detail || data.error || "Parse failed");
-          const text = (data.text ?? "").trim();
-          if (stream === "PUBLIC_TRANSCRIPT")
-            setPublicTranscript((prev) => (prev ? prev + "\n\n" + text : text));
-          if (stream === "PRIVATE_DICTATION")
-            setPrivateDictation((prev) => (prev ? prev + "\n\n" + text : text));
-          if (stream === "PITCH_MATERIAL")
-            setPitchMaterial((prev) => (prev ? prev + "\n\n" + text : text));
-          setFileStatus((s) => ({ ...s, [stream]: `Parsed with OpenAI: ${file.name}` }));
-        } catch (e) {
-          setFileStatus((s) => ({
-            ...s,
-            [stream]: `Error: ${e instanceof Error ? e.message : "Failed"}`,
-          }));
-        }
-        return;
-      }
-      if (name.endsWith(".docx")) {
-        setFileStatus((s) => ({ ...s, [stream]: `Uploading ${file.name}…` }));
-        const form = new FormData();
-        form.set(
-          stream === "PUBLIC_TRANSCRIPT"
-            ? "public_transcript_file"
-            : stream === "PRIVATE_DICTATION"
-              ? "private_dictation_file"
-              : "pitch_material_file",
-          file
-        );
-        try {
-          const res = await fetch("/api/ingest", { method: "POST", body: form });
-          const raw = await res.text();
-          let data: { streamContext?: Record<string, string>; error?: string; detail?: string };
-          try {
-            data = raw ? JSON.parse(raw) : {};
-          } catch {
-            throw new Error(res.ok ? "Invalid response" : `Server error (${res.status}). Check console or try a smaller file.`);
-          }
-          if (!res.ok) throw new Error(data.detail || data.error || `Upload failed (${res.status})`);
-          const text = data.streamContext?.[stream] ?? "";
           if (stream === "PUBLIC_TRANSCRIPT")
             setPublicTranscript((prev) => (prev ? prev + "\n\n" + text : text));
           if (stream === "PRIVATE_DICTATION")
@@ -143,7 +96,30 @@ export default function InputInterface({
         } catch (e) {
           setFileStatus((s) => ({
             ...s,
-            [stream]: `Error: ${e instanceof Error ? e.message : "Failed"}`,
+            [stream]: `Error: ${e instanceof Error ? e.message : "PDF parse failed"}`,
+          }));
+        }
+        return;
+      }
+      if (name.endsWith(".docx")) {
+        setFileStatus((s) => ({ ...s, [stream]: `Parsing ${file.name}…` }));
+        try {
+          const m = await import("mammoth");
+          const mammoth = "default" in m && m.default ? m.default : m;
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          const text = (result?.value ?? "").trim();
+          if (stream === "PUBLIC_TRANSCRIPT")
+            setPublicTranscript((prev) => (prev ? prev + "\n\n" + text : text));
+          if (stream === "PRIVATE_DICTATION")
+            setPrivateDictation((prev) => (prev ? prev + "\n\n" + text : text));
+          if (stream === "PITCH_MATERIAL")
+            setPitchMaterial((prev) => (prev ? prev + "\n\n" + text : text));
+          setFileStatus((s) => ({ ...s, [stream]: `Parsed ${file.name}` }));
+        } catch (e) {
+          setFileStatus((s) => ({
+            ...s,
+            [stream]: `Error: ${e instanceof Error ? e.message : "DOCX parse failed"}`,
           }));
         }
         return;
