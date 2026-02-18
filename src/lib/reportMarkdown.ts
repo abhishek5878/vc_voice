@@ -5,8 +5,42 @@ function esc(s: unknown): string {
   return String(s ?? "").replace(/\*/g, "\\*").replace(/\n/g, " ");
 }
 
-export function pipelineResultToMarkdown(result: PipelineResult): string {
+/** Build plain text for calendar event description (red-list questions, etc.). */
+export function buildCalendarDescription(result: PipelineResult): string {
+  const lines: string[] = ["Robin.ai — Prep / Review", ""];
+  const brief = result?.pre_meeting_attack_brief;
+  if (result?.mode === 2 && brief?.red_list_framed?.length) {
+    lines.push("RED LIST (probe hard):");
+    brief.red_list_framed.forEach((r, i) => {
+      lines.push(`${i + 1}. ${String(r?.question ?? "").replace(/\n/g, " ")}`);
+    });
+    lines.push("");
+  }
+  if (result?.mode === 2 && brief?.yellow_list_framed?.length) {
+    lines.push("YELLOW LIST:");
+    brief.yellow_list_framed.forEach((y, i) => {
+      lines.push(`${i + 1}. ${String(y?.question ?? "").replace(/\n/g, " ")}`);
+    });
+    lines.push("");
+  }
+  if (result?.mode === 1 && result?.layer_4?.red_list?.length) {
+    lines.push("Follow-up (red list):");
+    result.layer_4.red_list.forEach((r, i) => {
+      lines.push(`${i + 1}. ${String(r?.question ?? "").replace(/\n/g, " ")}`);
+    });
+  }
+  return lines.join("\n").trim() || "Robin.ai report — see app for full brief.";
+}
+
+export function pipelineResultToMarkdown(
+  result: PipelineResult,
+  metadata?: { meetingTitle?: string; companyName?: string; calendarEventUrl?: string } | null
+): string {
   const lines: string[] = ["# Robin.ai Analysis Report", "", `Mode: ${result?.mode ?? 1}`, ""];
+  if (metadata?.meetingTitle || metadata?.companyName) {
+    if (metadata.meetingTitle) lines.push(`Meeting: ${String(metadata.meetingTitle).replace(/\n/g, " ")}`, "");
+    if (metadata.companyName) lines.push(`Company: ${String(metadata.companyName).replace(/\n/g, " ")}`, "");
+  }
 
   // Layer 1 — Evidence Map
   lines.push("## Evidence Map", "");

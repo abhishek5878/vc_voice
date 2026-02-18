@@ -2,7 +2,8 @@
 
 import { useCallback, useState } from "react";
 import type { PipelineResult } from "@/lib/pipeline/types";
-import { pipelineResultToMarkdown } from "@/lib/reportMarkdown";
+import type { SessionMetadata } from "@/lib/sessionMetadata";
+import { pipelineResultToMarkdown, buildCalendarDescription } from "@/lib/reportMarkdown";
 
 function escapeHtml(s: string): string {
   const div = document.createElement("div");
@@ -12,23 +13,28 @@ function escapeHtml(s: string): string {
 
 export default function AnalysisReport({
   result,
+  metadata,
   onBack,
+  onDuplicateRun,
 }: {
   result: PipelineResult;
+  metadata?: SessionMetadata | null;
   onBack: () => void;
+  onDuplicateRun?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [calendarCopied, setCalendarCopied] = useState(false);
 
   const copyMarkdown = useCallback(() => {
-    const md = pipelineResultToMarkdown(result);
+    const md = pipelineResultToMarkdown(result, metadata);
     void navigator.clipboard.writeText(md).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [result]);
+  }, [result, metadata]);
 
   const downloadMarkdown = useCallback(() => {
-    const md = pipelineResultToMarkdown(result);
+    const md = pipelineResultToMarkdown(result, metadata);
     const blob = new Blob([md], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -36,7 +42,26 @@ export default function AnalysisReport({
     a.download = `robin-report-mode-${result.mode}-${Date.now()}.md`;
     a.click();
     URL.revokeObjectURL(url);
+  }, [result, metadata]);
+
+  const copyCalendarDescription = useCallback(() => {
+    const text = buildCalendarDescription(result);
+    void navigator.clipboard.writeText(text).then(() => {
+      setCalendarCopied(true);
+      setTimeout(() => setCalendarCopied(false), 2000);
+    });
   }, [result]);
+
+  const emailBrief = useCallback(() => {
+    const md = pipelineResultToMarkdown(result, metadata);
+    const subject = encodeURIComponent(
+      metadata?.meetingTitle || metadata?.companyName
+        ? `Robin brief: ${[metadata.meetingTitle, metadata.companyName].filter(Boolean).join(" — ")}`
+        : "Robin.ai brief"
+    );
+    const body = encodeURIComponent(md.slice(0, 12000));
+    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+  }, [result, metadata]);
 
   const claims = result.layer_1?.claims ?? [];
   const conflicts = result.layer_2?.conflicts ?? [];
@@ -69,7 +94,30 @@ export default function AnalysisReport({
             Robin.ai — {result.mode === 1 ? "Post-Meeting" : result.mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"} Report
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onDuplicateRun && (
+            <button
+              type="button"
+              onClick={onDuplicateRun}
+              className="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-sm border border-amber-500/40"
+            >
+              Duplicate this run
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={copyCalendarDescription}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+          >
+            {calendarCopied ? "Copied" : "Add to calendar (copy)"}
+          </button>
+          <button
+            type="button"
+            onClick={emailBrief}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+          >
+            Email brief
+          </button>
           <button
             type="button"
             onClick={copyMarkdown}
@@ -88,6 +136,12 @@ export default function AnalysisReport({
       </header>
 
       <main className="flex-1 p-6 sm:p-8 max-w-4xl mx-auto w-full space-y-10">
+        {(metadata?.meetingTitle || metadata?.companyName) && (
+          <div className="flex flex-wrap gap-4 text-sm text-zinc-400">
+            {metadata.meetingTitle && <span>Meeting: {escapeHtml(metadata.meetingTitle)}</span>}
+            {metadata.companyName && <span>Company: {escapeHtml(metadata.companyName)}</span>}
+          </div>
+        )}
         {result.error && (
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
             {result.error}

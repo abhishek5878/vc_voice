@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import ModeSelect from "@/components/ModeSelect";
 import InputInterface from "@/components/InputInterface";
 import PipelineProgress from "@/components/PipelineProgress";
@@ -8,6 +9,8 @@ import AnalysisReport from "@/components/AnalysisReport";
 import FounderChat from "@/components/FounderChat";
 import type { PipelineResult } from "@/lib/pipeline/types";
 import type { StreamContext } from "@/lib/ingest/types";
+import type { SessionMetadata } from "@/lib/sessionMetadata";
+import { saveLastRun, loadLastRun } from "@/lib/sessionMetadata";
 
 type View = "mode" | "input" | "progress" | "report" | "chat";
 
@@ -18,14 +21,31 @@ interface ChatSession {
 }
 
 export default function AppPage() {
+  const searchParams = useSearchParams();
   const [view, setView] = useState<View>("mode");
   const [mode, setMode] = useState<1 | 2 | 3>(1);
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [progressStep, setProgressStep] = useState(0);
   const [chatSession, setChatSession] = useState<ChatSession | null>(null);
+  const [reportMetadata, setReportMetadata] = useState<SessionMetadata | null>(null);
+  const [initialRunForInput, setInitialRunForInput] = useState<Awaited<ReturnType<typeof loadLastRun>> | null>(null);
+
+  useEffect(() => {
+    const m = searchParams.get("mode");
+    const prep = searchParams.get("prep");
+    if (m === "1" || m === "2" || m === "3") {
+      setMode(Number(m) as 1 | 2 | 3);
+      setView("input");
+    }
+    if (prep === "1") {
+      setMode(2);
+      setView("input");
+    }
+  }, [searchParams]);
 
   const handleStartMode = useCallback((m: 1 | 2 | 3) => {
     setMode(m);
+    setInitialRunForInput(null);
     setView("input");
   }, []);
 
@@ -33,14 +53,21 @@ export default function AppPage() {
     setView("mode");
     setResult(null);
     setChatSession(null);
+    setReportMetadata(null);
+    setInitialRunForInput(null);
   }, []);
 
   const handleRun = useCallback(
-    async (streamContext: StreamContext, apiKey: string, provider: "openai" | "anthropic" | "groq") => {
+    async (
+      streamContext: StreamContext,
+      apiKey: string,
+      provider: "openai" | "anthropic" | "groq",
+      metadata: SessionMetadata
+    ) => {
       if (mode === 3) {
-        // Founder chat mode: skip static report, go straight into live VC-style chat.
         setChatSession({ streamContext, apiKey, provider });
         setView("chat");
+        saveLastRun({ mode: 3, streamContext, metadata, timestamp: Date.now() });
         return;
       }
 
@@ -58,7 +85,9 @@ export default function AppPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || data.error || "Analysis failed");
         setResult(data as PipelineResult);
+        setReportMetadata(metadata);
         setView("report");
+        saveLastRun({ mode, streamContext, metadata, timestamp: Date.now() });
       } catch (e) {
         setView("input");
         throw e;
@@ -68,6 +97,12 @@ export default function AppPage() {
     },
     [mode]
   );
+
+  const handleBackToInput = useCallback((duplicateRun: boolean) => {
+    setResult(null);
+    setInitialRunForInput(duplicateRun ? loadLastRun() : null);
+    setView("input");
+  }, []);
 
   if (view === "mode") {
     return <ModeSelect onStart={handleStartMode} />;
@@ -79,6 +114,7 @@ export default function AppPage() {
         mode={mode}
         onBack={handleBackToMode}
         onRun={handleRun}
+        initialRun={initialRunForInput ?? undefined}
       />
     );
   }
@@ -91,10 +127,9 @@ export default function AppPage() {
     return (
       <AnalysisReport
         result={result}
-        onBack={() => {
-          setView("input");
-          setResult(null);
-        }}
+        metadata={reportMetadata}
+        onBack={() => handleBackToInput(false)}
+        onDuplicateRun={() => handleBackToInput(true)}
       />
     );
   }

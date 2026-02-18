@@ -167,6 +167,16 @@ export default function FounderChat({
             <h1 className="text-lg font-semibold tracking-tight">Robin.ai — Founder Chat</h1>
             <p className="text-xs text-zinc-500">Mode 3: Pitch Stress-Test (live VC interrogation)</p>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              const url = `${typeof window !== "undefined" ? window.location.origin : ""}/app?mode=3`;
+              void navigator.clipboard.writeText(url);
+            }}
+            className="text-xs text-amber-500/90 hover:text-amber-400"
+          >
+            Copy link for another founder
+          </button>
         </div>
       </header>
 
