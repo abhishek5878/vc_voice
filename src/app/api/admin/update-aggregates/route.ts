@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       sample_size: number;
     }> = [];
 
-    for (const [keyStrVal, g] of groups) {
+    groups.forEach((g, keyStrVal) => {
       const [v, st] = keyStrVal.split("\t");
       const vertical = v || null;
       const stage = st || null;
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           sample_size: g.resistance.length,
         });
       }
-    }
+    });
 
     const { error: delError } = await supabase.from("aggregated_patterns").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     if (delError) throw delError;
