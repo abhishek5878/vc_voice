@@ -13,9 +13,6 @@ import {
 
 type Mode = 1 | 2 | 3;
 
-const STORAGE_KEY = "robin_api_key";
-const STORAGE_PROVIDER = "robin_provider";
-
 function pasteFromClipboard(
   current: string,
   setter: (v: string) => void,
@@ -51,8 +48,6 @@ export default function InputInterface({
   const [meetingTitle, setMeetingTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [calendarEventUrl, setCalendarEventUrl] = useState("");
-  const [apiKey] = useState("");
-  const [provider] = useState<"openai" | "anthropic" | "groq">("openai");
   const [loading, setLoading] = useState(false);
   const [fetchUrlLoading, setFetchUrlLoading] = useState(false);
   const [fetchUrlTarget, setFetchUrlTarget] = useState<"PITCH_MATERIAL" | "PUBLIC_TRANSCRIPT">("PITCH_MATERIAL");
@@ -247,7 +242,7 @@ export default function InputInterface({
     } finally {
       setLoading(false);
     }
-  }, [buildStreamContext, apiKey, provider, onRun, meetingTitle, companyName, calendarEventUrl, persistMetadata]);
+  }, [buildStreamContext, onRun, meetingTitle, companyName, calendarEventUrl, persistMetadata]);
 
   const totalChars =
     publicTranscript.length + privateDictation.length + pitchMaterial.length;

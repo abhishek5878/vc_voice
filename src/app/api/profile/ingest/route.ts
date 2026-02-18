@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       extras.forEach((u) => push(u));
     }
 
-    const started = await upsertRobinProfile(userId, {
+    await upsertRobinProfile(userId, {
       scrape_status: "running",
       scrape_error: null,
     });
