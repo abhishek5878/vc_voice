@@ -335,9 +335,12 @@ export default function InputInterface({
         )}
         {mode === 3 && (
           <>
-            <p className="lg:col-span-2 text-sm text-zinc-500 max-w-2xl">
-              Paste pitch material to run the pipeline. Same evidence map and interrogation—use this to stress-test before the meeting.
-            </p>
+            <div className="lg:col-span-2 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+              <p className="text-sm font-medium text-zinc-200 mb-1">For founders: stress-test your pitch</p>
+              <p className="text-sm text-zinc-500 max-w-2xl">
+                Paste your deck or one-liner. You&apos;ll get a blunt, skeptical VC—short answers, real numbers, no fluff. Then chat to harden the pitch before the real meeting.
+              </p>
+            </div>
             <div className="lg:col-span-2">
               <button
                 type="button"

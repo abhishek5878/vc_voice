@@ -16,6 +16,9 @@ export default function LandingPage() {
             Robin.ai
           </Link>
           <div className="flex items-center gap-3">
+            <Link href="/app?mode=3" className="text-sm text-zinc-400 hover:text-amber-400 transition-colors">
+              For founders
+            </Link>
             <Link href="/app" className="btn-primary text-sm">
               Open Robin
             </Link>
@@ -74,6 +77,43 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* For Founders — Lennybot / Mean VC style: one clear entry */}
+      <section className="py-16 sm:py-20 border-t border-zinc-800/60 bg-gradient-to-b from-amber-500/5 to-transparent">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <p className="text-xs uppercase tracking-wider text-amber-500/90 mb-2">For founders</p>
+          <h2 className="text-2xl font-semibold text-zinc-200 mb-3">
+            Stress-test your pitch before the real meeting
+          </h2>
+          <p className="text-zinc-400 text-[0.9375rem] max-w-2xl mb-8">
+            Paste your deck or one-liner. Get interrogated by a blunt, skeptical VC—short answers, real numbers, no fluff. 
+            The kind of pushback that makes your pitch stronger. Used by founders prepping for partner meetings and fundraising.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="text-xs font-mono text-amber-500/90">1</span>
+              <p className="text-sm text-zinc-300 mt-1">Paste your deck or pitch</p>
+              <p className="text-xs text-zinc-500 mt-0.5">PDF, doc, or raw text. No signup required.</p>
+            </div>
+            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="text-xs font-mono text-amber-500/90">2</span>
+              <p className="text-sm text-zinc-300 mt-1">Get interrogated</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Blunt questions. Demand for specifics. Concrete rewrites.</p>
+            </div>
+            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="text-xs font-mono text-amber-500/90">3</span>
+              <p className="text-sm text-zinc-300 mt-1">Tighten before the call</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Walk in ready for the hard questions.</p>
+            </div>
+          </div>
+          <Link
+            href="/app?mode=3"
+            className="btn-primary inline-flex px-6 py-3 text-base"
+          >
+            Start stress-test →
+          </Link>
         </div>
       </section>
 
