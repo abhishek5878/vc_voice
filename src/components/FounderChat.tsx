@@ -49,14 +49,10 @@ You are summarizing a founder pitch stress-test conversation into 3 concrete act
 
 export default function FounderChat({
   initialStreamContext,
-  apiKey,
-  provider,
   onBack,
   onToast,
 }: {
   initialStreamContext: StreamContext;
-  apiKey: string;
-  provider: "openai" | "anthropic" | "groq";
   onBack: () => void;
   onToast?: (message: string) => void;
 }) {
@@ -97,10 +93,6 @@ export default function FounderChat({
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
-    if (!apiKey.trim()) {
-      setError("Add your API key in Settings first.");
-      return;
-    }
 
     setError(null);
     setLoading(true);
@@ -118,10 +110,9 @@ export default function FounderChat({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          provider,
+          provider: "openai",
           messages: [
             { role: "system", content: systemWithDeck },
             ...nextMessages.map((m) => ({ role: m.role, content: m.content })),
@@ -153,7 +144,7 @@ export default function FounderChat({
     } finally {
       setLoading(false);
     }
-  }, [apiKey, deckText, messages, provider, input, loading]);
+  }, [deckText, messages, input, loading]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -163,16 +154,16 @@ export default function FounderChat({
   };
 
   const copyForPartner = useCallback(async () => {
-    if (messages.length < 2 || !apiKey.trim() || vibeCheckLoading) return;
+    if (messages.length < 2 || vibeCheckLoading) return;
     setError(null);
     setVibeCheckLoading(true);
     try {
       const conversation = messages.map((m) => ({ role: m.role, content: m.content }));
       const res = await fetch("/api/llm", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          provider,
+          provider: "openai",
           messages: [
             { role: "system", content: VIBE_CHECK_SYSTEM },
             ...conversation,
@@ -197,19 +188,19 @@ export default function FounderChat({
     } finally {
       setVibeCheckLoading(false);
     }
-  }, [apiKey, provider, messages, vibeCheckLoading, onToast]);
+  }, [messages, vibeCheckLoading, onToast]);
 
   const copyActionItems = useCallback(async () => {
-    if (messages.length < 2 || !apiKey.trim() || actionItemsLoading) return;
+    if (messages.length < 2 || actionItemsLoading) return;
     setError(null);
     setActionItemsLoading(true);
     try {
       const conversation = messages.map((m) => ({ role: m.role, content: m.content }));
       const res = await fetch("/api/llm", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          provider,
+          provider: "openai",
           messages: [
             { role: "system", content: ACTION_ITEMS_SYSTEM },
             ...conversation,
@@ -234,7 +225,7 @@ export default function FounderChat({
     } finally {
       setActionItemsLoading(false);
     }
-  }, [apiKey, provider, messages, actionItemsLoading, onToast]);
+  }, [messages, actionItemsLoading, onToast]);
 
   const hasDeck = deckText.trim().length > 0;
 

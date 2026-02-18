@@ -21,8 +21,6 @@ type View = "mode" | "input" | "progress" | "report" | "chat";
 
 interface ChatSession {
   streamContext: StreamContext;
-  apiKey: string;
-  provider: "openai" | "anthropic" | "groq";
 }
 
 export type ClipboardFillTarget = "PUBLIC_TRANSCRIPT" | "PITCH_MATERIAL";
@@ -123,14 +121,14 @@ export default function AppPage() {
   const handleRun = useCallback(
     async (
       streamContext: StreamContext,
-      apiKey: string,
-      provider: "openai" | "anthropic" | "groq",
+      _apiKey: string,
+      _provider: "openai" | "anthropic" | "groq",
       metadata: SessionMetadata
     ) => {
       if (mode === 3) {
-        setChatSession({ streamContext, apiKey, provider });
+        setChatSession({ streamContext });
         setView("chat");
-        saveLastRun({ mode: 3, streamContext, metadata, timestamp: Date.now(), provider });
+        saveLastRun({ mode: 3, streamContext, metadata, timestamp: Date.now(), provider: "openai" });
         return;
       }
 
@@ -143,11 +141,11 @@ export default function AppPage() {
         const supabaseToken = await getSupabaseAccessToken();
         const res = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             streamContext,
             mode,
-            provider,
+            provider: "openai",
             companyName: metadata.companyName || undefined,
             supabaseAccessToken: supabaseToken || undefined,
           }),
@@ -159,7 +157,7 @@ export default function AppPage() {
         setLastDealId(pipelineResult.dealId ?? null);
         setReportMetadata(metadata);
         setView("report");
-        saveLastRun({ mode, streamContext, metadata, timestamp: Date.now(), provider });
+        saveLastRun({ mode, streamContext, metadata, timestamp: Date.now(), provider: "openai" });
         pushRecentRun({
           mode,
           meetingTitle: metadata.meetingTitle ?? "",
@@ -269,8 +267,6 @@ export default function AppPage() {
       {view === "chat" && chatSession && (
         <FounderChat
           initialStreamContext={chatSession.streamContext}
-          apiKey={chatSession.apiKey}
-          provider={chatSession.provider}
           onBack={() => {
             setView("input");
             setChatSession(null);

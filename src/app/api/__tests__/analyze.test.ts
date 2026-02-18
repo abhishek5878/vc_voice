@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { beforeAll, describe, it, expect } from "vitest";
 import { POST } from "../analyze/route";
 
 function nextRequest(
@@ -16,32 +16,14 @@ function nextRequest(
 }
 
 describe("POST /api/analyze", () => {
-  it("returns 401 when Authorization header is missing", async () => {
-    const res = await POST(
-      nextRequest({
-        streamContext: { PITCH_MATERIAL: "x".repeat(300) },
-        mode: 1,
-      })
-    );
-    expect(res.status).toBe(401);
-    const data = await res.json();
-    expect(data.error).toMatch(/API key|Authorization/);
+  beforeAll(() => {
+    // Ensure server-side OPENAI_API_KEY check passes for these lightweight handler tests.
+    process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || "sk-test";
   });
-
-  it("returns 401 when Bearer token is empty", async () => {
-    const res = await POST(
-      nextRequest(
-        { streamContext: { PITCH_MATERIAL: "x".repeat(300) }, mode: 1 },
-        { auth: "" }
-      )
-    );
-    expect(res.status).toBe(401);
-  });
-
   it("returns 400 for invalid JSON body", async () => {
     const req = new Request("https://localhost/api/analyze", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Bearer sk-test" },
+      headers: { "Content-Type": "application/json" },
       body: "not json {",
     }) as unknown as import("next/server").NextRequest;
     const res = await POST(req);
@@ -57,7 +39,6 @@ describe("POST /api/analyze", () => {
           streamContext: { PITCH_MATERIAL: "short" },
           mode: 1,
         },
-        { auth: "sk-test" }
       )
     );
     expect(res.status).toBe(400);
@@ -74,8 +55,7 @@ describe("POST /api/analyze", () => {
             PITCH_MATERIAL: " ".repeat(400),
           },
           mode: 1,
-        },
-        { auth: "sk-test" }
+        }
       )
     );
     expect(res.status).toBe(400);
@@ -85,7 +65,7 @@ describe("POST /api/analyze", () => {
 
   it("returns 400 for empty streamContext", async () => {
     const res = await POST(
-      nextRequest({ streamContext: {}, mode: 1 }, { auth: "sk-test" })
+      nextRequest({ streamContext: {}, mode: 1 })
     );
     expect(res.status).toBe(400);
   });

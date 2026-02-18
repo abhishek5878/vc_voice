@@ -1,7 +1,7 @@
 /**
  * POST /api/analyze
  * Body: { streamContext, mode: 1|2|3, provider?, model?, companyName?, supabaseAccessToken? }
- * Header: Authorization: Bearer <user API key>
+ * Auth: uses server-side OPENAI_API_KEY for all LLM calls.
  * Runs SPA pipeline and returns full report. If supabaseAccessToken + companyName, persists to deal + deal_runs.
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -12,18 +12,12 @@ import { getUserIdFromRequest, upsertDeal, insertDealRun, insertFounderClaims } 
 import { getRobinProfile } from "@/lib/voice/profile";
 import { extractClaims } from "@/lib/deals/persist";
 
-function getApiKey(request: NextRequest): string | null {
-  const auth = request.headers.get("authorization");
-  if (!auth || !auth.startsWith("Bearer ")) return null;
-  return auth.slice(7).trim() || null;
-}
-
 export async function POST(request: NextRequest) {
-  const apiKey = getApiKey(request);
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json(
-      { error: "Provide your API key in Authorization: Bearer <key>" },
-      { status: 401 }
+      { error: "Server OPENAI_API_KEY is not configured." },
+      { status: 500 }
     );
   }
 
@@ -36,40 +30,6 @@ export async function POST(request: NextRequest) {
     supabaseAccessToken?: string;
   };
   try {
-    let voiceProfile: string | null = null;
-    let userIdForDeals: string | null = null;
-    if (supabaseAccessToken) {
-      userIdForDeals = await getUserIdFromRequest(supabaseAccessToken);
-      if (userIdForDeals) {
-        try {
-          const profile = await getRobinProfile(userIdForDeals);
-          if (profile?.voice_profile) {
-            const vp = profile.voice_profile;
-            const parts: string[] = [];
-            if (vp.tone) parts.push(`Tone: ${vp.tone}`);
-            if (vp.evaluation_heuristics?.length) {
-              parts.push(
-                `How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`
-              );
-            }
-            if (vp.green_flags?.length) {
-              parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
-            }
-            if (vp.red_flags?.length) {
-              parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
-            }
-            if (vp.favorite_phrases?.length) {
-              parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
-            }
-            voiceProfile = parts.join("\n\n");
-          } else if (profile?.bio) {
-            voiceProfile = profile.bio;
-          }
-        } catch {
-          // Voice profile fetch failure should not break analysis
-        }
-      }
-    }
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -77,6 +37,41 @@ export async function POST(request: NextRequest) {
   const companyName = typeof body.companyName === "string" ? body.companyName.trim() : "";
   const supabaseAccessToken =
     typeof body.supabaseAccessToken === "string" ? body.supabaseAccessToken.trim() : null;
+
+  let voiceProfile: string | null = null;
+  let userIdForDeals: string | null = null;
+  if (supabaseAccessToken) {
+    userIdForDeals = await getUserIdFromRequest(supabaseAccessToken);
+    if (userIdForDeals) {
+      try {
+        const profile = await getRobinProfile(userIdForDeals);
+        if (profile?.voice_profile) {
+          const vp = profile.voice_profile;
+          const parts: string[] = [];
+          if (vp.tone) parts.push(`Tone: ${vp.tone}`);
+          if (vp.evaluation_heuristics?.length) {
+            parts.push(
+              `How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`
+            );
+          }
+          if (vp.green_flags?.length) {
+            parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
+          }
+          if (vp.red_flags?.length) {
+            parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
+          }
+          if (vp.favorite_phrases?.length) {
+            parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
+          }
+          voiceProfile = parts.join("\n\n");
+        } else if (profile?.bio) {
+          voiceProfile = profile.bio;
+        }
+      } catch {
+        // Voice profile fetch failure should not break analysis
+      }
+    }
+  }
 
   const streamContext = body.streamContext ?? {};
   const mode = Math.min(3, Math.max(1, Number(body.mode) || 1)) as 1 | 2 | 3;

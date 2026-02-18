@@ -1,5 +1,3 @@
-import "server-only";
-
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 const FIRECRAWL_BASE = "https://api.firecrawl.dev";
 

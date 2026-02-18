@@ -1,5 +1,5 @@
 /**
- * BYOK LLM proxy. Key in Authorization header. Backend never stores or logs it.
+ * LLM proxy using server OPENAI_API_KEY (no BYOK).
  * POST /api/llm — body: { provider, model?, messages, stream? }
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -10,22 +10,16 @@ import { PROVIDER_MODELS, type LLMProvider, type LLMRequest } from "@/lib/llm/ty
 const MIN_INPUT = 200;
 const MAX_INPUT_PER_STREAM = 50_000;
 
-function getApiKey(request: NextRequest): string | null {
-  const auth = request.headers.get("authorization");
-  if (!auth || !auth.startsWith("Bearer ")) return null;
-  return auth.slice(7).trim() || null;
-}
-
 function estimateChars(messages: { content: string }[]): number {
   return messages.reduce((sum, m) => sum + (m.content?.length || 0), 0);
 }
 
 export async function POST(request: NextRequest) {
-  const apiKey = getApiKey(request);
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json(
-      { error: "Your API key appears to be invalid or expired. Update it in Settings." },
-      { status: 401 }
+      { error: "Server OPENAI_API_KEY is not configured." },
+      { status: 500 }
     );
   }
 

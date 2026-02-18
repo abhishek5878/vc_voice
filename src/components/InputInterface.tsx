@@ -39,8 +39,6 @@ export default function InputInterface({
   onBack: () => void;
   onRun: (
     streamContext: StreamContext,
-    apiKey: string,
-    provider: "openai" | "anthropic" | "groq",
     metadata: SessionMetadata
   ) => Promise<void>;
   initialRun?: LastRunSnapshot | null;
@@ -53,17 +51,8 @@ export default function InputInterface({
   const [meetingTitle, setMeetingTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [calendarEventUrl, setCalendarEventUrl] = useState("");
-  const [apiKey, setApiKey] = useState(() =>
-    typeof window !== "undefined" ? sessionStorage.getItem(STORAGE_KEY) ?? "" : ""
-  );
-  const [provider, setProvider] = useState<"openai" | "anthropic" | "groq">(() => {
-    if (typeof window !== "undefined") {
-      const p = sessionStorage.getItem(STORAGE_PROVIDER);
-      if (p === "anthropic" || p === "groq") return p;
-    }
-    return "openai";
-  });
-  const [showKey, setShowKey] = useState(false);
+  const [apiKey] = useState("");
+  const [provider] = useState<"openai" | "anthropic" | "groq">("openai");
   const [loading, setLoading] = useState(false);
   const [fetchUrlLoading, setFetchUrlLoading] = useState(false);
   const [fetchUrlTarget, setFetchUrlTarget] = useState<"PITCH_MATERIAL" | "PUBLIC_TRANSCRIPT">("PITCH_MATERIAL");
@@ -90,7 +79,6 @@ export default function InputInterface({
     setMeetingTitle(initialRun.metadata.meetingTitle ?? "");
     setCompanyName(initialRun.metadata.companyName ?? "");
     setCalendarEventUrl(initialRun.metadata.calendarEventUrl ?? "");
-    if (initialRun.provider) setProvider(initialRun.provider);
     saveSessionMetadata(initialRun.metadata);
   }, [initialRun]);
 
@@ -113,22 +101,8 @@ export default function InputInterface({
     setMeetingTitle(run.metadata.meetingTitle ?? "");
     setCompanyName(run.metadata.companyName ?? "");
     setCalendarEventUrl(run.metadata.calendarEventUrl ?? "");
-    if (run.provider) setProvider(run.provider);
     saveSessionMetadata(run.metadata);
     setLastRunSnapshot(run);
-  }, []);
-
-  const saveKey = useCallback((key: string) => {
-    setApiKey(key);
-    if (typeof window !== "undefined") {
-      if (key) sessionStorage.setItem(STORAGE_KEY, key);
-      else sessionStorage.removeItem(STORAGE_KEY);
-    }
-  }, []);
-
-  const saveProvider = useCallback((p: "openai" | "anthropic" | "groq") => {
-    setProvider(p);
-    if (typeof window !== "undefined") sessionStorage.setItem(STORAGE_PROVIDER, p);
   }, []);
 
   const persistMetadata = useCallback(() => {
@@ -257,10 +231,6 @@ export default function InputInterface({
       setError(`Add ${200 - total} more characters (minimum 200 total).`);
       return;
     }
-    if (!apiKey.trim()) {
-      setError("Add your API key in the panel on the right to run. We don't store it.");
-      return;
-    }
     setError(null);
     setLoading(true);
     const metadata: SessionMetadata = {
@@ -270,10 +240,10 @@ export default function InputInterface({
     };
     persistMetadata();
     try {
-      await onRun(ctx, apiKey.trim(), provider, metadata);
+      await onRun(ctx, "", "openai", metadata);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Analysis failed";
-      setError(msg.includes("API") || msg.includes("key") ? msg : `${msg} Check your API key and try again.`);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -282,7 +252,7 @@ export default function InputInterface({
   const totalChars =
     publicTranscript.length + privateDictation.length + pitchMaterial.length;
   const hasInput = totalChars > 0;
-  const canRun = hasInput && apiKey.trim().length > 0 && totalChars >= 200;
+  const canRun = hasInput && totalChars >= 200;
 
   const rowActions = (
     stream: "PUBLIC_TRANSCRIPT" | "PRIVATE_DICTATION" | "PITCH_MATERIAL",
@@ -456,12 +426,6 @@ export default function InputInterface({
             </div>
           </section>
 
-          {hasInput && totalChars >= 200 && !apiKey.trim() && (
-            <p className="text-sm text-amber-500/90 px-1">
-              Almost there — add your API key in the panel on the right to run. We don&apos;t store it.
-            </p>
-          )}
-
           {hasInput && totalChars > 0 && (
             <p className="text-xs text-zinc-500 px-1">
               This run will use:{" "}
@@ -532,38 +496,7 @@ export default function InputInterface({
             <p className="text-xs text-zinc-600 mt-1">We remember meeting title and company for next time.</p>
           </section>
 
-          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
-            <h3 className="text-sm font-medium text-zinc-400 mb-3">AI configuration (BYOK)</h3>
-            <label className="block text-xs text-zinc-500 mb-1">Provider</label>
-            <select
-              value={provider}
-              onChange={(e) =>
-                saveProvider(e.target.value as "openai" | "anthropic" | "groq")
-              }
-              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm mb-3 focus:border-amber-500/40 focus:outline-none"
-            >
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="groq">Groq</option>
-            </select>
-            <label className="block text-xs text-zinc-500 mb-1">API key (session only)</label>
-            <div className="flex gap-2">
-              <input
-                type={showKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => saveKey(e.target.value)}
-                placeholder="sk-… or key"
-                className="flex-1 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 placeholder-zinc-500 text-sm focus:border-amber-500/40 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey((s) => !s)}
-                className="text-xs text-zinc-500 hover:text-zinc-300 px-2"
-              >
-                {showKey ? "Hide" : "Show"}
-              </button>
-            </div>
-          </section>
+          {/* AI configuration now uses server-side OPENAI_API_KEY; no BYOK controls needed in UI. */}
         </div>
       </main>
     </div>

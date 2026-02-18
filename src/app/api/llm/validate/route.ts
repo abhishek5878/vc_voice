@@ -1,25 +1,18 @@
 /**
- * POST /api/llm/validate — Key validation (test call, single token).
+ * POST /api/llm/validate — Sanity-check server OPENAI_API_KEY (single token call).
  * Body: { provider, model? }
- * Header: Authorization: Bearer <key>
- * Returns: { valid: true } or 401 with message.
+ * Returns: { valid: true } or error.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { callLLMServer } from "@/lib/llm/callServer";
 import { PROVIDER_MODELS, type LLMProvider } from "@/lib/llm/types";
 
-function getApiKey(request: NextRequest): string | null {
-  const auth = request.headers.get("authorization");
-  if (!auth || !auth.startsWith("Bearer ")) return null;
-  return auth.slice(7).trim() || null;
-}
-
 export async function POST(request: NextRequest) {
-  const apiKey = getApiKey(request);
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json(
-      { valid: false, error: "Missing Authorization: Bearer <key>" },
-      { status: 401 }
+      { valid: false, error: "Server OPENAI_API_KEY is not configured." },
+      { status: 500 }
     );
   }
 

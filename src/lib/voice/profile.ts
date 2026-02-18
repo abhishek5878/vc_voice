@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createServerSupabase } from "@/lib/supabase/server";
 import { callLLMServer } from "@/lib/llm/callServer";
 import type { LLMProvider } from "@/lib/llm/types";
