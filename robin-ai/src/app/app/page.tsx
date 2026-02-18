@@ -7,6 +7,7 @@ import PipelineProgress from "@/components/PipelineProgress";
 import AnalysisReport from "@/components/AnalysisReport";
 import type { PipelineResult } from "@/lib/pipeline/types";
 import type { StreamContext } from "@/lib/ingest/types";
+import type { SessionMetadata } from "@/lib/sessionMetadata";
 
 type View = "mode" | "input" | "progress" | "report";
 
@@ -27,7 +28,7 @@ export default function AppPage() {
   }, []);
 
   const handleRun = useCallback(
-    async (streamContext: StreamContext, apiKey: string, provider: "openai" | "anthropic" | "groq") => {
+    async (streamContext: StreamContext, metadata: SessionMetadata) => {
       setView("progress");
       setProgressStep(0);
       const interval = setInterval(() => {
@@ -36,8 +37,13 @@ export default function AppPage() {
       try {
         const res = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ streamContext, mode, provider }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            streamContext,
+            mode,
+            provider: "openai",
+            companyName: metadata.companyName || undefined,
+          }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || data.error || "Analysis failed");
