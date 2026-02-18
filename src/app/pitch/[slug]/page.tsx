@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import FounderChat from "@/components/FounderChat";
-import type { StreamContext } from "@/lib/ingest/types";
+import PitchIntake from "@/components/PitchIntake";
+import { buildVoiceProfileText } from "@/lib/voice/profile";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 
 interface PageProps {
@@ -46,26 +46,6 @@ async function getProfileBySlug(slug: string) {
   };
 }
 
-function buildVoiceProfileText(profile: Awaited<ReturnType<typeof getProfileBySlug>>): string | null {
-  if (!profile?.voice_profile) return profile?.bio ?? null;
-  const vp = profile.voice_profile;
-  const parts: string[] = [];
-  if (vp.tone) parts.push(`Tone: ${vp.tone}`);
-  if (vp.evaluation_heuristics?.length) {
-    parts.push(`How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`);
-  }
-  if (vp.green_flags?.length) {
-    parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
-  }
-  if (vp.red_flags?.length) {
-    parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
-  }
-  if (vp.favorite_phrases?.length) {
-    parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
-  }
-  return parts.join("\n\n");
-}
-
 export default async function PitchPage({ params }: PageProps) {
   const rawSlug = params.slug?.toLowerCase().trim() ?? "";
   if (!rawSlug) notFound();
@@ -73,8 +53,8 @@ export default async function PitchPage({ params }: PageProps) {
   if (!profile) notFound();
 
   const voiceProfileText = buildVoiceProfileText(profile);
-
-  const initialStreamContext: StreamContext = {};
+  const headerSubtitle =
+    "Paste your deck or narrative below, or fetch from a URL. Robin will stress-test it using my evaluation style.";
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -99,12 +79,11 @@ export default async function PitchPage({ params }: PageProps) {
               "Paste your deck or narrative below. Robin will probe like I do in first meetings."}
           </p>
         </section>
-        <FounderChat
-          initialStreamContext={initialStreamContext}
-          onBack={() => {
-            /* no-op on public page */
-          }}
-          onToast={undefined}
+        <PitchIntake
+          voiceProfileText={voiceProfileText}
+          headerSubtitle={headerSubtitle}
+          slug={rawSlug}
+          investorDisplayName={profile.bio ? profile.bio.slice(0, 50).trim() : rawSlug}
         />
       </main>
     </div>

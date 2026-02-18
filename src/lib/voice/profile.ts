@@ -85,6 +85,30 @@ Corpus:
 ${corpus.slice(0, 60_000)}`;
 }
 
+/** Build a single text block for system prompts from profile row (voice_profile + bio). */
+export function buildVoiceProfileText(profile: {
+  voice_profile: RobinVoiceProfile | null;
+  bio: string | null;
+}): string | null {
+  if (!profile?.voice_profile) return profile?.bio ?? null;
+  const vp = profile.voice_profile;
+  const parts: string[] = [];
+  if (vp.tone) parts.push(`Tone: ${vp.tone}`);
+  if (vp.evaluation_heuristics?.length) {
+    parts.push(`How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`);
+  }
+  if (vp.green_flags?.length) {
+    parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
+  }
+  if (vp.red_flags?.length) {
+    parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
+  }
+  if (vp.favorite_phrases?.length) {
+    parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
+  }
+  return parts.length ? parts.join("\n\n") : profile.bio ?? null;
+}
+
 export async function buildVoiceProfileFromLinks(params: {
   urls: string[];
   provider?: LLMProvider;

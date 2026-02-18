@@ -4,7 +4,7 @@ export interface Deal {
   company_name: string;
   vertical: string | null;
   stage: string | null;
-  status: "new" | "meeting" | "diligence" | "invested" | "passed";
+  status: "new" | "meeting" | "diligence" | "invested" | "passed" | "inbound";
   conviction_score: number | null;
   outcome: "invested" | "declined" | "failed" | "3x" | "10x" | "zombie" | null;
   share_public: boolean;

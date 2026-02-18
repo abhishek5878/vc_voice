@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { Deal, DealRun, FounderClaimRow } from "./types";
 import { pipelineResultToRunPayload } from "./persist";
@@ -58,6 +59,15 @@ export async function upsertDeal(
 
 export async function insertDealRun(dealId: string, result: PipelineResult): Promise<DealRun> {
   const supabase = await createServerSupabase();
+  return insertDealRunWithClient(supabase, dealId, result);
+}
+
+/** Use with admin client for server-initiated writes (e.g. inbound pitch submit). */
+export async function insertDealRunWithClient(
+  supabase: SupabaseClient,
+  dealId: string,
+  result: PipelineResult
+): Promise<DealRun> {
   const payload = pipelineResultToRunPayload(result);
   const { data, error } = await supabase
     .from("deal_runs")
@@ -101,6 +111,16 @@ export async function insertFounderClaims(
   claims: { claim: string; source_quote: string | null; status: string }[]
 ): Promise<void> {
   const supabase = await createServerSupabase();
+  return insertFounderClaimsWithClient(supabase, dealId, runId, claims);
+}
+
+/** Use with admin client for server-initiated writes (e.g. inbound pitch submit). */
+export async function insertFounderClaimsWithClient(
+  supabase: SupabaseClient,
+  dealId: string,
+  runId: string,
+  claims: { claim: string; source_quote: string | null; status: string }[]
+): Promise<void> {
   const existing = await supabase
     .from("founder_claims")
     .select("id, claim_text, status")
