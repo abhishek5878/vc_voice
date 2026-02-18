@@ -7,6 +7,7 @@ import type { RobinVoiceProfile } from "@/lib/voice/profile";
 
 interface ProfileResponse {
   user_id: string;
+  slug?: string | null;
   bio: string | null;
   tone: string | null;
   decision_style: string | null;
@@ -79,6 +80,7 @@ export default function ProfileSettingsPage() {
           "x-supabase-access-token": token,
         },
         body: JSON.stringify({
+          slug: profile.slug,
           bio: profile.bio,
           tone: profile.tone,
           decision_style: profile.decision_style,
@@ -176,6 +178,25 @@ export default function ProfileSettingsPage() {
             {error}
           </div>
         )}
+
+        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
+          <h2 className="text-sm font-medium text-zinc-300">Public pitch link</h2>
+          <p className="text-xs text-zinc-500 mb-1">
+            This becomes your shareable link for founders (e.g. on X / LinkedIn). Slug must be unique.
+          </p>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-zinc-500">robin.ai/pitch/</span>
+            <input
+              value={profile.slug ?? ""}
+              onChange={(e) => handleChange("slug", e.target.value.toLowerCase())}
+              placeholder="your-name-or-firm"
+              className="flex-1 rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+            />
+          </div>
+          <p className="text-[11px] text-zinc-500">
+            3–32 characters; lowercase letters, numbers, and dashes only.
+          </p>
+        </section>
 
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
           <h2 className="text-sm font-medium text-zinc-300">How you evaluate inbound</h2>

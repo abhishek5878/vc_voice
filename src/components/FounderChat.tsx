@@ -49,10 +49,12 @@ You are summarizing a founder pitch stress-test conversation into 3 concrete act
 
 export default function FounderChat({
   initialStreamContext,
+  voiceProfile,
   onBack,
   onToast,
 }: {
   initialStreamContext: StreamContext;
+  voiceProfile?: string | null;
   onBack: () => void;
   onToast?: (message: string) => void;
 }) {
@@ -101,7 +103,12 @@ export default function FounderChat({
     setInput("");
 
     try {
+      const persona =
+        voiceProfile?.trim()
+          ? `You are speaking exactly in this investor's voice. Adopt their tone, heuristics, and filters:\n\n${voiceProfile.trim()}\n\n`
+          : "";
       const systemWithDeck =
+        persona +
         SYSTEM_PROMPT +
         "\n\nDECK_TEXT (pitch deck content):\n" +
         deckText.slice(0, 20000);
@@ -144,7 +151,7 @@ export default function FounderChat({
     } finally {
       setLoading(false);
     }
-  }, [deckText, messages, input, loading]);
+  }, [deckText, messages, input, loading, voiceProfile]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
