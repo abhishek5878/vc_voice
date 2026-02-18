@@ -235,7 +235,7 @@ export default function InputInterface({
     };
     persistMetadata();
     try {
-      await onRun(ctx, "", "openai", metadata);
+      await onRun(ctx, metadata);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Analysis failed";
       setError(msg);

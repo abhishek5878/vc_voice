@@ -119,12 +119,7 @@ export default function AppPage() {
   }, []);
 
   const handleRun = useCallback(
-    async (
-      streamContext: StreamContext,
-      _apiKey: string,
-      _provider: "openai" | "anthropic" | "groq",
-      metadata: SessionMetadata
-    ) => {
+    async (streamContext: StreamContext, metadata: SessionMetadata) => {
       if (mode === 3) {
         setChatSession({ streamContext });
         setView("chat");
