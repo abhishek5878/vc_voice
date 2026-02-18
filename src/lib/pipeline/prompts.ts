@@ -107,9 +107,13 @@ export function layer4Prompt(
   layer1Json: string,
   layer2Json: string,
   layer3Json: string,
-  pedigreeData: string
+  pedigreeData: string,
+  voiceProfile?: string | null
 ): string {
-  return `You are Robin.ai's Conviction Interrogation Engine. You have been given the complete output of a 3-layer intelligence pipeline: Layer 1 (claim evidence map), Layer 2 (conflict report), Layer 3 (GRUE blind spots).
+  const voiceSection = voiceProfile?.trim()
+    ? `\n\nYou are speaking in the voice of this investor. Write your questions and comments in their tone and with their heuristics:\n${voiceProfile.trim()}\n`
+    : "";
+  return `You are Robin.ai's Conviction Interrogation Engine. You have been given the complete output of a 3-layer intelligence pipeline: Layer 1 (claim evidence map), Layer 2 (conflict report), Layer 3 (GRUE blind spots).${voiceSection}
 
 Your job: generate a ranked interrogation. Every question MUST be causally linked to a specific pipeline finding. No generic VC questions. No filler.
 

@@ -32,7 +32,9 @@ function buildLayer1Input(ctx: PipelineInput["streamContext"]): string {
 }
 
 export async function runPipeline(input: PipelineInput): Promise<PipelineResult> {
-  const { streamContext, mode, apiKey, provider, model } = input;
+  const { streamContext, mode, apiKey, provider, model, voiceProfile } = input as PipelineInput & {
+    voiceProfile?: string | null;
+  };
   const ctx = streamContext;
   const publicTranscript = ctx.PUBLIC_TRANSCRIPT ?? "";
   const pitchMaterial = ctx.PITCH_MATERIAL ?? "";
@@ -155,7 +157,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineResult>
       messages: [
         {
           role: "user",
-          content: prompts.layer4Prompt(layer1Json, layer2Json, layer3Json, pedigreeData),
+          content: prompts.layer4Prompt(layer1Json, layer2Json, layer3Json, pedigreeData, voiceProfile),
         },
       ],
       jsonMode: true,

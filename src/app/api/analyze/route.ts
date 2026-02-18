@@ -8,12 +8,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { runPipeline } from "@/lib/pipeline/run";
 import type { StreamContext } from "@/lib/ingest/types";
 import { MIN_INPUT_CHARS } from "@/lib/ingest/parse";
-import {
-  getUserIdFromRequest,
-  upsertDeal,
-  insertDealRun,
-  insertFounderClaims,
-} from "@/lib/deals/db";
+import { getUserIdFromRequest, upsertDeal, insertDealRun, insertFounderClaims } from "@/lib/deals/db";
+import { getRobinProfile } from "@/lib/voice/profile";
 import { extractClaims } from "@/lib/deals/persist";
 
 function getApiKey(request: NextRequest): string | null {
@@ -40,6 +36,40 @@ export async function POST(request: NextRequest) {
     supabaseAccessToken?: string;
   };
   try {
+    let voiceProfile: string | null = null;
+    let userIdForDeals: string | null = null;
+    if (supabaseAccessToken) {
+      userIdForDeals = await getUserIdFromRequest(supabaseAccessToken);
+      if (userIdForDeals) {
+        try {
+          const profile = await getRobinProfile(userIdForDeals);
+          if (profile?.voice_profile) {
+            const vp = profile.voice_profile;
+            const parts: string[] = [];
+            if (vp.tone) parts.push(`Tone: ${vp.tone}`);
+            if (vp.evaluation_heuristics?.length) {
+              parts.push(
+                `How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`
+              );
+            }
+            if (vp.green_flags?.length) {
+              parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
+            }
+            if (vp.red_flags?.length) {
+              parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
+            }
+            if (vp.favorite_phrases?.length) {
+              parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
+            }
+            voiceProfile = parts.join("\n\n");
+          } else if (profile?.bio) {
+            voiceProfile = profile.bio;
+          }
+        } catch {
+          // Voice profile fetch failure should not break analysis
+        }
+      }
+    }
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -78,11 +108,12 @@ export async function POST(request: NextRequest) {
       apiKey,
       provider,
       model,
+      voiceProfile,
     });
 
     let dealId: string | null = null;
-    if (supabaseAccessToken && companyName) {
-      const userId = await getUserIdFromRequest(supabaseAccessToken);
+    if (supabaseAccessToken && companyName && userIdForDeals) {
+      const userId = userIdForDeals;
       if (userId) {
         try {
           const deal = await upsertDeal(userId, companyName || "Unknown");

@@ -82,6 +82,8 @@ export interface PipelineInput {
   apiKey: string;
   provider: "openai" | "anthropic" | "groq";
   model?: string;
+  /** Optional per-user voice profile (serialized) to condition prompts. */
+  voiceProfile?: string | null;
 }
 
 export interface PipelineResult {
