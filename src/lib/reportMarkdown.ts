@@ -32,6 +32,135 @@ export function buildCalendarDescription(result: PipelineResult): string {
   return lines.join("\n").trim() || "Robin.ai report — see app for full brief.";
 }
 
+export type CalendarMetadata = { meetingTitle?: string; companyName?: string };
+
+/** Google Calendar: create event with title and description. */
+export function buildGoogleCalendarEventUrl(
+  meta: CalendarMetadata | null | undefined,
+  description: string
+): string {
+  const title = [meta?.meetingTitle, meta?.companyName].filter(Boolean).join(" — ") || "Robin.ai prep";
+  const base = "https://calendar.google.com/calendar/render";
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title.slice(0, 200),
+    details: description.slice(0, 5000),
+  });
+  return `${base}?${params.toString()}`;
+}
+
+/** Outlook (web): compose calendar event with subject and body. */
+export function buildOutlookCalendarEventUrl(
+  meta: CalendarMetadata | null | undefined,
+  description: string
+): string {
+  const subject = [meta?.meetingTitle, meta?.companyName].filter(Boolean).join(" — ") || "Robin.ai prep";
+  const base = "https://outlook.office.com/calendar/0/action/compose";
+  const params = new URLSearchParams({
+    subject: subject.slice(0, 200),
+    body: description.slice(0, 4000),
+  });
+  return `${base}?${params.toString()}`;
+}
+
+/** Short summary for Slack / chat: meeting, company, and 3–5 bullets from the brief. */
+export function buildSlackSummary(
+  result: PipelineResult,
+  meta: CalendarMetadata | null | undefined
+): string {
+  const parts: string[] = [];
+  if (meta?.meetingTitle || meta?.companyName) {
+    parts.push([meta.meetingTitle, meta.companyName].filter(Boolean).join(" — "));
+  }
+  parts.push(`Robin ${result.mode === 1 ? "Post-meeting" : result.mode === 2 ? "Pre-meeting brief" : "Stress-test"}`);
+  const brief = result?.pre_meeting_attack_brief;
+  if (brief?.red_list_framed?.length) {
+    brief.red_list_framed.slice(0, 3).forEach((r) => {
+      parts.push(`• ${String(r?.question ?? "").replace(/\n/g, " ").slice(0, 120)}`);
+    });
+  } else if (result?.layer_4?.red_list?.length) {
+    result.layer_4.red_list.slice(0, 3).forEach((r) => {
+      parts.push(`• ${String(r?.question ?? "").replace(/\n/g, " ").slice(0, 120)}`);
+    });
+  }
+  return parts.join("\n");
+}
+
+/** One-click follow-up email: "Great chatting. Robin flagged [A], [B]. Can you share data on X?" */
+export function buildFollowUpEmailBody(
+  result: PipelineResult,
+  meta: CalendarMetadata | null | undefined
+): string {
+  const topics: string[] = [];
+  const brief = result?.pre_meeting_attack_brief;
+  if (brief?.red_list_framed?.length) {
+    brief.red_list_framed.slice(0, 2).forEach((r) => {
+      const q = String(r?.question ?? "").replace(/\n/g, " ").slice(0, 80);
+      if (q) topics.push(q);
+    });
+  } else if (result?.layer_4?.red_list?.length) {
+    result.layer_4.red_list.slice(0, 2).forEach((r) => {
+      const q = String(r?.question ?? "").replace(/\n/g, " ").slice(0, 80);
+      if (q) topics.push(q);
+    });
+  }
+  const grue = result?.layer_3;
+  if (grue?.blind_spots?.length && topics.length < 2) {
+    grue.blind_spots.slice(0, 2 - topics.length).forEach((b) => topics.push(b));
+  }
+  const firstAsk = brief?.red_list_framed?.[0]?.question
+    ?? result?.layer_4?.red_list?.[0]?.question
+    ?? "the points above";
+  const topicList = topics.length ? topics.join(" and ") : "a few areas";
+  const intro =
+    meta?.meetingTitle || meta?.companyName
+      ? `Following up on ${[meta.meetingTitle, meta.companyName].filter(Boolean).join(" — ")}.\n\n`
+      : "";
+  return (
+    intro +
+    `Great chatting. Robin flagged ${topicList} as areas for us to dig deeper. ` +
+    `Can you share data on ${firstAsk.slice(0, 60)}${firstAsk.length > 60 ? "…" : ""}?`
+  );
+}
+
+/** Reply-to-founder email: "Thanks for the deck. Before we meet, can you clarify [first red] and share [one GRUE blind spot]?" */
+export function buildReplyToFounderEmailBody(
+  result: PipelineResult,
+  meta: CalendarMetadata | null | undefined
+): string {
+  const firstRed =
+    result?.pre_meeting_attack_brief?.red_list_framed?.[0]?.question ??
+    result?.layer_4?.red_list?.[0]?.question;
+  const blindSpot = result?.layer_3?.blind_spots?.[0];
+  const intro =
+    meta?.meetingTitle || meta?.companyName
+      ? `Re: ${[meta.meetingTitle, meta.companyName].filter(Boolean).join(" — ")}\n\n`
+      : "";
+  let body =
+    intro +
+    "Thanks for sharing the deck. Before we meet, I’d like to dig a bit deeper.\n\n";
+  if (firstRed) {
+    body += `Can you clarify: ${firstRed.replace(/\n/g, " ").slice(0, 120)}${firstRed.length > 120 ? "…" : ""}?\n\n`;
+  }
+  if (blindSpot) {
+    body += `Also, could you share data or context on: ${blindSpot}?\n\n`;
+  }
+  body += "Looking forward to the conversation.";
+  return body;
+}
+
+/** Red list bullets for Recent Run preview / copy. */
+export function getRedListPreview(result: PipelineResult): string[] {
+  const brief = result?.pre_meeting_attack_brief;
+  if (brief?.red_list_framed?.length) {
+    return brief.red_list_framed.map((r) => String(r?.question ?? "").replace(/\n/g, " "));
+  }
+  if (result?.layer_4?.red_list?.length) {
+    return result.layer_4.red_list.map((r) => String(r?.question ?? "").replace(/\n/g, " "));
+  }
+  return [];
+}
+
 export function pipelineResultToMarkdown(
   result: PipelineResult,
   metadata?: { meetingTitle?: string; companyName?: string; calendarEventUrl?: string } | null

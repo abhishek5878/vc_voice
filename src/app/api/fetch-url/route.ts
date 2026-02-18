@@ -42,6 +42,15 @@ export async function POST(request: NextRequest) {
       headers: { "User-Agent": "RobinBot/1.0 (fetch for pitch material)" },
       signal: AbortSignal.timeout(15000),
     });
+    if (res.status === 401 || res.status === 403) {
+      return NextResponse.json(
+        {
+          error:
+            "This link may require login. Try pasting the content manually or use a public share link.",
+        },
+        { status: res.status }
+      );
+    }
     if (!res.ok) {
       return NextResponse.json({ error: `Fetch failed: ${res.status}` }, { status: 502 });
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import type { StreamContext } from "@/lib/ingest/types";
 import { pdfFileToText } from "@/lib/pdfToImages";
 import {
@@ -32,6 +32,8 @@ export default function InputInterface({
   onBack,
   onRun,
   initialRun,
+  initialClipboardFill,
+  onClipboardFillApplied,
 }: {
   mode: Mode;
   onBack: () => void;
@@ -42,6 +44,8 @@ export default function InputInterface({
     metadata: SessionMetadata
   ) => Promise<void>;
   initialRun?: LastRunSnapshot | null;
+  initialClipboardFill?: { target: "PUBLIC_TRANSCRIPT" | "PITCH_MATERIAL"; text: string } | null;
+  onClipboardFillApplied?: () => void;
 }) {
   const [publicTranscript, setPublicTranscript] = useState("");
   const [privateDictation, setPrivateDictation] = useState("");
@@ -86,8 +90,19 @@ export default function InputInterface({
     setMeetingTitle(initialRun.metadata.meetingTitle ?? "");
     setCompanyName(initialRun.metadata.companyName ?? "");
     setCalendarEventUrl(initialRun.metadata.calendarEventUrl ?? "");
+    if (initialRun.provider) setProvider(initialRun.provider);
     saveSessionMetadata(initialRun.metadata);
   }, [initialRun]);
+
+  const onClipboardFillAppliedRef = useRef(onClipboardFillApplied);
+  onClipboardFillAppliedRef.current = onClipboardFillApplied;
+  useEffect(() => {
+    if (!initialClipboardFill) return;
+    if (initialClipboardFill.target === "PUBLIC_TRANSCRIPT")
+      setPublicTranscript((prev) => (prev ? prev + "\n\n" + initialClipboardFill!.text : initialClipboardFill!.text));
+    else setPitchMaterial((prev) => (prev ? prev + "\n\n" + initialClipboardFill!.text : initialClipboardFill!.text));
+    onClipboardFillAppliedRef.current?.();
+  }, [initialClipboardFill]);
 
   const applyLastRun = useCallback(() => {
     const run = loadLastRun();
@@ -98,6 +113,7 @@ export default function InputInterface({
     setMeetingTitle(run.metadata.meetingTitle ?? "");
     setCompanyName(run.metadata.companyName ?? "");
     setCalendarEventUrl(run.metadata.calendarEventUrl ?? "");
+    if (run.provider) setProvider(run.provider);
     saveSessionMetadata(run.metadata);
     setLastRunSnapshot(run);
   }, []);
@@ -238,11 +254,11 @@ export default function InputInterface({
       (ctx.PRIVATE_DICTATION?.length ?? 0) +
       (ctx.PITCH_MATERIAL?.length ?? 0);
     if (total < 200) {
-      setError("Input too short. Paste at least 200 characters total.");
+      setError(`Add ${200 - total} more characters (minimum 200 total).`);
       return;
     }
     if (!apiKey.trim()) {
-      setError("Enter your API key (Settings).");
+      setError("Add your API key in the panel on the right to run. We don't store it.");
       return;
     }
     setError(null);
@@ -256,7 +272,8 @@ export default function InputInterface({
     try {
       await onRun(ctx, apiKey.trim(), provider, metadata);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Analysis failed");
+      const msg = e instanceof Error ? e.message : "Analysis failed";
+      setError(msg.includes("API") || msg.includes("key") ? msg : `${msg} Check your API key and try again.`);
     } finally {
       setLoading(false);
     }
@@ -439,6 +456,26 @@ export default function InputInterface({
             </div>
           </section>
 
+          {hasInput && totalChars >= 200 && !apiKey.trim() && (
+            <p className="text-sm text-amber-500/90 px-1">
+              Almost there — add your API key in the panel on the right to run. We don&apos;t store it.
+            </p>
+          )}
+
+          {hasInput && totalChars > 0 && (
+            <p className="text-xs text-zinc-500 px-1">
+              This run will use:{" "}
+              {[
+                publicTranscript.trim() && `Transcript ${publicTranscript.trim().length.toLocaleString()} chars`,
+                privateDictation.trim() && `Notes ${privateDictation.trim().length.toLocaleString()} chars`,
+                pitchMaterial.trim() && `Pitch ${pitchMaterial.trim().length.toLocaleString()} chars`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              {meetingTitle.trim() && ` · Meeting: ${meetingTitle.trim().slice(0, 40)}${meetingTitle.trim().length > 40 ? "…" : ""}`}
+            </p>
+          )}
+
           {error && (
             <p className="text-sm text-red-400/90 px-1">{error}</p>
           )}
@@ -449,8 +486,11 @@ export default function InputInterface({
             disabled={loading || !canRun}
             className="btn-primary w-full py-3.5 text-base"
           >
-            {loading ? "Running…" : "Run Robin"}
+            {loading ? "Running… (usually 30–60 sec)" : "Run Robin"}
           </button>
+          <p className="text-xs text-zinc-500 px-1 mt-1">
+            Sign in and enter a company name to save this run to Deal Memory.
+          </p>
         </div>
 
         <div className="space-y-6">
@@ -486,9 +526,10 @@ export default function InputInterface({
             <p className="text-xs text-zinc-500 mt-2">
               Total input: <strong className="text-zinc-300">{totalChars}</strong> chars
               {totalChars > 0 && totalChars < 200 && (
-                <span className="text-amber-500/90 ml-1"> (min 200)</span>
+                <span className="text-amber-500/90 ml-1"> — add {200 - totalChars} more (min 200)</span>
               )}
             </p>
+            <p className="text-xs text-zinc-600 mt-1">We remember meeting title and company for next time.</p>
           </section>
 
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">

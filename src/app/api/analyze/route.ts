@@ -1,13 +1,20 @@
 /**
  * POST /api/analyze
- * Body: { streamContext, mode: 1|2|3, provider?, model? }
+ * Body: { streamContext, mode: 1|2|3, provider?, model?, companyName?, supabaseAccessToken? }
  * Header: Authorization: Bearer <user API key>
- * Runs SPA pipeline and returns full report (or pre-meeting brief for mode 2).
+ * Runs SPA pipeline and returns full report. If supabaseAccessToken + companyName, persists to deal + deal_runs.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { runPipeline } from "@/lib/pipeline/run";
 import type { StreamContext } from "@/lib/ingest/types";
 import { MIN_INPUT_CHARS } from "@/lib/ingest/parse";
+import {
+  getUserIdFromRequest,
+  upsertDeal,
+  insertDealRun,
+  insertFounderClaims,
+} from "@/lib/deals/db";
+import { extractClaims } from "@/lib/deals/persist";
 
 function getApiKey(request: NextRequest): string | null {
   const auth = request.headers.get("authorization");
@@ -29,12 +36,17 @@ export async function POST(request: NextRequest) {
     mode?: number;
     provider?: "openai" | "anthropic" | "groq";
     model?: string;
+    companyName?: string;
+    supabaseAccessToken?: string;
   };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  const companyName = typeof body.companyName === "string" ? body.companyName.trim() : "";
+  const supabaseAccessToken =
+    typeof body.supabaseAccessToken === "string" ? body.supabaseAccessToken.trim() : null;
 
   const streamContext = body.streamContext ?? {};
   const mode = Math.min(3, Math.max(1, Number(body.mode) || 1)) as 1 | 2 | 3;
@@ -68,7 +80,31 @@ export async function POST(request: NextRequest) {
       model,
     });
 
-    return NextResponse.json(result);
+    let dealId: string | null = null;
+    if (supabaseAccessToken && companyName) {
+      const userId = await getUserIdFromRequest(supabaseAccessToken);
+      if (userId) {
+        try {
+          const deal = await upsertDeal(userId, companyName || "Unknown");
+          dealId = deal.id;
+          const run = await insertDealRun(deal.id, result);
+          const claims = extractClaims(result);
+          await insertFounderClaims(
+            deal.id,
+            run.id,
+            claims.map((c) => ({
+              claim: c.claim,
+              source_quote: c.source_quote,
+              status: c.status,
+            }))
+          );
+        } catch {
+          // Persist failure does not fail the request; result still returned
+        }
+      }
+    }
+
+    return NextResponse.json(dealId ? { ...result, dealId } : result);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     return NextResponse.json(

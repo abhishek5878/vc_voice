@@ -18,10 +18,24 @@ export interface LastRunSnapshot {
   streamContext: StreamContext;
   metadata: SessionMetadata;
   timestamp: number;
+  provider?: "openai" | "anthropic" | "groq";
+  model?: string;
+}
+
+/** Single recent run for Command Palette / quick access */
+export interface RecentRunEntry {
+  id: string;
+  mode: 1 | 2 | 3;
+  meetingTitle: string;
+  companyName: string;
+  timestamp: number;
+  redListPreview: string[];
 }
 
 const STORAGE_LAST_RUN = "robin_last_run";
 const STORAGE_SESSION_METADATA = "robin_session_metadata";
+const STORAGE_RECENT_RUNS = "robin_recent_runs";
+const MAX_RECENT_RUNS = 10;
 
 export function loadLastRun(): LastRunSnapshot | null {
   if (typeof window === "undefined") return null;
@@ -63,6 +77,30 @@ export function saveSessionMetadata(meta: Partial<SessionMetadata>): void {
     const current = loadSessionMetadata();
     const next = { ...current, ...meta };
     localStorage.setItem(STORAGE_SESSION_METADATA, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function loadRecentRuns(): RecentRunEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_RECENT_RUNS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.slice(0, MAX_RECENT_RUNS) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function pushRecentRun(entry: Omit<RecentRunEntry, "id">): void {
+  if (typeof window === "undefined") return;
+  try {
+    const list = loadRecentRuns();
+    const newEntry: RecentRunEntry = { ...entry, id: `run-${Date.now()}-${(Math.random() * 1e9).toString(36)}` };
+    const next = [newEntry, ...list.filter((r) => r.id !== newEntry.id)].slice(0, MAX_RECENT_RUNS);
+    localStorage.setItem(STORAGE_RECENT_RUNS, JSON.stringify(next));
   } catch {
     /* ignore */
   }

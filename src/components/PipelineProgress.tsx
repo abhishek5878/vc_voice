@@ -1,10 +1,10 @@
 "use client";
 
 const STEPS = [
-  { label: "Extracting claims…", layer: 1 },
-  { label: "Cross-referencing streams…", layer: 2 },
-  { label: "Running GRUE analysis…", layer: 3 },
-  { label: "Building interrogation…", layer: 4 },
+  { label: "Extracting claims…", layer: 1, tip: "Finding claims and tying each to a source quote (verified / unverified / contradicted)." },
+  { label: "Cross-referencing streams…", layer: 2, tip: "Comparing transcript vs your notes for factual conflicts, tone gaps, and omissions." },
+  { label: "Running GRUE analysis…", layer: 3, tip: "Checking coverage on growth, retention, unit economics, moat, team—and flagging blind spots." },
+  { label: "Building interrogation…", layer: 4, tip: "Turning weak spots into red-list questions (probe hard) and yellow-list follow-ups." },
 ];
 
 export default function PipelineProgress({ current = 0 }: { current?: number }) {
@@ -15,12 +15,12 @@ export default function PipelineProgress({ current = 0 }: { current?: number }) 
           Analyzing your input…
         </h2>
         <p className="text-zinc-500 text-sm text-center mb-8">
-          Robin is loading the interrogation.
+          Usually takes 30–60 seconds. Don&apos;t close this page.
         </p>
         {STEPS.map((step, i) => (
           <div
             key={step.layer}
-            className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-colors ${
+            className={`flex items-start gap-4 px-4 py-3.5 rounded-xl border transition-colors ${
               i <= current
                 ? "border-amber-500/40 bg-amber-500/5"
                 : "border-zinc-800 bg-zinc-900/40"
@@ -37,9 +37,14 @@ export default function PipelineProgress({ current = 0 }: { current?: number }) 
             >
               {i < current ? "✓" : step.layer}
             </span>
-            <span className={i <= current ? "text-zinc-200" : "text-zinc-500"}>
-              Layer {step.layer}: {step.label}
-            </span>
+            <div className="min-w-0 flex-1">
+              <span className={i <= current ? "text-zinc-200" : "text-zinc-500"}>
+                Layer {step.layer}: {step.label}
+              </span>
+              {i === current && step.tip && (
+                <p className="text-xs text-zinc-500 mt-1.5">{step.tip}</p>
+              )}
+            </div>
           </div>
         ))}
       </div>

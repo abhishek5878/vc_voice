@@ -35,21 +35,37 @@ Hard rules:
 - Never break character. Keep responses short, high-signal, and actionable.
 `.trim();
 
+const VIBE_CHECK_SYSTEM = `
+You are summarizing a founder pitch stress-test chat for a VC partner. Output exactly 3 short bullets, no intro or outro:
+1) Vibe: one line on how the founder came across (e.g. prepared vs defensive, numbers vs fluff).
+2) Strengths: one line on what was strongest (e.g. clarity on TAM, crisp unit economics).
+3) Concerns: one line on what to probe (e.g. competition hand-waved, traction unverified).
+Keep each bullet under 100 characters. Plain text only, no markdown.
+`.trim();
+
+const ACTION_ITEMS_SYSTEM = `
+You are summarizing a founder pitch stress-test conversation into 3 concrete action items for the founder. Output exactly 3 bullets, no intro or outro. Each line should be a clear next step they can do (e.g. "Clarify burn rate with a number and runway date", "Add a slide on retention cohorts", "Rewrite the problem statement in one sentence"). Plain text only, no markdown. Number them 1. 2. 3.
+`.trim();
+
 export default function FounderChat({
   initialStreamContext,
   apiKey,
   provider,
   onBack,
+  onToast,
 }: {
   initialStreamContext: StreamContext;
   apiKey: string;
   provider: "openai" | "anthropic" | "groq";
   onBack: () => void;
+  onToast?: (message: string) => void;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [vibeCheckLoading, setVibeCheckLoading] = useState(false);
+  const [actionItemsLoading, setActionItemsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const deckText =
@@ -146,6 +162,80 @@ export default function FounderChat({
     }
   };
 
+  const copyForPartner = useCallback(async () => {
+    if (messages.length < 2 || !apiKey.trim() || vibeCheckLoading) return;
+    setError(null);
+    setVibeCheckLoading(true);
+    try {
+      const conversation = messages.map((m) => ({ role: m.role, content: m.content }));
+      const res = await fetch("/api/llm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          provider,
+          messages: [
+            { role: "system", content: VIBE_CHECK_SYSTEM },
+            ...conversation,
+          ],
+          stream: false,
+        }),
+      });
+      const raw = await res.text();
+      let data: { content?: string; error?: string; detail?: string };
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        throw new Error(res.ok ? "Invalid response" : `Failed (${res.status})`);
+      }
+      if (!res.ok) throw new Error(data.detail || data.error || `Failed (${res.status})`);
+      const summary = (data.content ?? "").trim();
+      if (!summary) throw new Error("Empty summary");
+      await navigator.clipboard.writeText(summary);
+      onToast?.("Vibe check copied to clipboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Vibe check failed");
+    } finally {
+      setVibeCheckLoading(false);
+    }
+  }, [apiKey, provider, messages, vibeCheckLoading, onToast]);
+
+  const copyActionItems = useCallback(async () => {
+    if (messages.length < 2 || !apiKey.trim() || actionItemsLoading) return;
+    setError(null);
+    setActionItemsLoading(true);
+    try {
+      const conversation = messages.map((m) => ({ role: m.role, content: m.content }));
+      const res = await fetch("/api/llm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          provider,
+          messages: [
+            { role: "system", content: ACTION_ITEMS_SYSTEM },
+            ...conversation,
+          ],
+          stream: false,
+        }),
+      });
+      const raw = await res.text();
+      let data: { content?: string; error?: string; detail?: string };
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        throw new Error(res.ok ? "Invalid response" : `Failed (${res.status})`);
+      }
+      if (!res.ok) throw new Error(data.detail || data.error || `Failed (${res.status})`);
+      const summary = (data.content ?? "").trim();
+      if (!summary) throw new Error("Empty action items");
+      await navigator.clipboard.writeText(summary);
+      onToast?.("3 action items copied to clipboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Action items failed");
+    } finally {
+      setActionItemsLoading(false);
+    }
+  }, [apiKey, provider, messages, actionItemsLoading, onToast]);
+
   const hasDeck = deckText.trim().length > 0;
 
   return (
@@ -173,6 +263,28 @@ export default function FounderChat({
           >
             Copy link for another founder
           </button>
+          {messages.length >= 2 && (
+            <>
+              <button
+                type="button"
+                onClick={() => void copyActionItems()}
+                disabled={actionItemsLoading}
+                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-xs border border-amber-500/40 disabled:opacity-50"
+                title="Your 3 action items from this session"
+              >
+                {actionItemsLoading ? "Generating…" : "Copy your 3 action items"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void copyForPartner()}
+                disabled={vibeCheckLoading}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs border border-zinc-700/50 disabled:opacity-50"
+                title="3-bullet vibe check for your partner"
+              >
+                {vibeCheckLoading ? "Generating…" : "Copy for my Partner"}
+              </button>
+            </>
+          )}
         </div>
       </header>
 

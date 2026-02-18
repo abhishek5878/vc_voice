@@ -1,9 +1,19 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import type { PipelineResult } from "@/lib/pipeline/types";
 import type { SessionMetadata } from "@/lib/sessionMetadata";
-import { pipelineResultToMarkdown, buildCalendarDescription } from "@/lib/reportMarkdown";
+import { getSupabaseAccessToken } from "@/lib/deals/supabase-auth";
+import {
+  pipelineResultToMarkdown,
+  buildCalendarDescription,
+  buildGoogleCalendarEventUrl,
+  buildOutlookCalendarEventUrl,
+  buildSlackSummary,
+  buildFollowUpEmailBody,
+  buildReplyToFounderEmailBody,
+} from "@/lib/reportMarkdown";
 
 function escapeHtml(s: string): string {
   const div = document.createElement("div");
@@ -16,14 +26,24 @@ export default function AnalysisReport({
   metadata,
   onBack,
   onDuplicateRun,
+  dealId,
+  onDealSaved,
 }: {
   result: PipelineResult;
   metadata?: SessionMetadata | null;
   onBack: () => void;
   onDuplicateRun?: () => void;
+  dealId?: string | null;
+  onDealSaved?: (dealId: string) => void;
 }) {
   const [copied, setCopied] = useState(false);
   const [calendarCopied, setCalendarCopied] = useState(false);
+  const [slackCopied, setSlackCopied] = useState(false);
+  const [snapshotLoading, setSnapshotLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveCompanyName, setSaveCompanyName] = useState(metadata?.companyName ?? "");
+  const [sharePublic, setSharePublic] = useState(false);
+  const [shareToggleLoading, setShareToggleLoading] = useState(false);
 
   const copyMarkdown = useCallback(() => {
     const md = pipelineResultToMarkdown(result, metadata);
@@ -44,13 +64,30 @@ export default function AnalysisReport({
     URL.revokeObjectURL(url);
   }, [result, metadata]);
 
+  const calendarDescription = buildCalendarDescription(result);
+
   const copyCalendarDescription = useCallback(() => {
-    const text = buildCalendarDescription(result);
-    void navigator.clipboard.writeText(text).then(() => {
+    void navigator.clipboard.writeText(calendarDescription).then(() => {
       setCalendarCopied(true);
       setTimeout(() => setCalendarCopied(false), 2000);
     });
-  }, [result]);
+  }, [calendarDescription]);
+
+  const openGoogleCalendar = useCallback(() => {
+    window.open(buildGoogleCalendarEventUrl(metadata ?? null, calendarDescription), "_blank", "noopener,noreferrer");
+  }, [metadata, calendarDescription]);
+
+  const openOutlookCalendar = useCallback(() => {
+    window.open(buildOutlookCalendarEventUrl(metadata ?? null, calendarDescription), "_blank", "noopener,noreferrer");
+  }, [metadata, calendarDescription]);
+
+  const copySlackSummary = useCallback(() => {
+    const text = buildSlackSummary(result, metadata ?? null);
+    void navigator.clipboard.writeText(text).then(() => {
+      setSlackCopied(true);
+      setTimeout(() => setSlackCopied(false), 2000);
+    });
+  }, [result, metadata]);
 
   const emailBrief = useCallback(() => {
     const md = pipelineResultToMarkdown(result, metadata);
@@ -62,6 +99,92 @@ export default function AnalysisReport({
     const body = encodeURIComponent(md.slice(0, 12000));
     window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
   }, [result, metadata]);
+
+  const followUpEmail = useCallback(() => {
+    const body = buildFollowUpEmailBody(result, metadata ?? null);
+    const subject = encodeURIComponent(
+      metadata?.meetingTitle || metadata?.companyName
+        ? `Follow-up: ${[metadata.meetingTitle, metadata.companyName].filter(Boolean).join(" — ")}`
+        : "Follow-up"
+    );
+    window.open(`mailto:?subject=${subject}&body=${encodeURIComponent(body)}`, "_blank");
+  }, [result, metadata]);
+
+  const replyToFounder = useCallback(() => {
+    const body = buildReplyToFounderEmailBody(result, metadata ?? null);
+    const subject = encodeURIComponent(
+      metadata?.meetingTitle || metadata?.companyName
+        ? `Re: ${[metadata.meetingTitle, metadata.companyName].filter(Boolean).join(" — ")}`
+        : "Re: Your deck"
+    );
+    window.open(`mailto:?subject=${subject}&body=${encodeURIComponent(body)}`, "_blank");
+  }, [result, metadata]);
+
+  const copyBriefAndOpenEvent = useCallback(() => {
+    void navigator.clipboard.writeText(calendarDescription).then(() => {
+      if (metadata?.calendarEventUrl) window.open(metadata.calendarEventUrl, "_blank", "noopener,noreferrer");
+    });
+  }, [calendarDescription, metadata?.calendarEventUrl]);
+
+  const generateRiskSnapshot = useCallback(async () => {
+    if (!dealId || snapshotLoading) return;
+    setSnapshotLoading(true);
+    try {
+      const token = await getSupabaseAccessToken();
+      if (!token) return;
+      await fetch(`/api/deals/${dealId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-supabase-access-token": token },
+        body: JSON.stringify({ share_public: true }),
+      });
+      window.open(`/snapshot/${dealId}`, "_blank", "noopener,noreferrer");
+    } finally {
+      setSnapshotLoading(false);
+    }
+  }, [dealId, snapshotLoading]);
+
+  const handleSaveAndTrack = useCallback(async () => {
+    const company = (saveCompanyName || metadata?.companyName || "").trim();
+    if (!company) return;
+    setSaveLoading(true);
+    try {
+      const token = await getSupabaseAccessToken();
+      if (!token) {
+        return;
+      }
+      const res = await fetch("/api/deals/save-run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-supabase-access-token": token,
+        },
+        body: JSON.stringify({ companyName: company, report: result }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Save failed");
+      onDealSaved?.(data.dealId);
+    } finally {
+      setSaveLoading(false);
+    }
+  }, [result, saveCompanyName, metadata?.companyName, onDealSaved]);
+
+  const handleSharePublicToggle = useCallback(async () => {
+    if (!dealId || shareToggleLoading) return;
+    setShareToggleLoading(true);
+    try {
+      const token = await getSupabaseAccessToken();
+      if (!token) return;
+      const next = !sharePublic;
+      await fetch(`/api/deals/${dealId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-supabase-access-token": token },
+        body: JSON.stringify({ share_public: next }),
+      });
+      setSharePublic(next);
+    } finally {
+      setShareToggleLoading(false);
+    }
+  }, [dealId, sharePublic, shareToggleLoading]);
 
   const claims = result.layer_1?.claims ?? [];
   const conflicts = result.layer_2?.conflicts ?? [];
@@ -85,16 +208,72 @@ export default function AnalysisReport({
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      {!dealId && (
+        <div className="bg-amber-500/15 border-b border-amber-500/40 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-amber-200 text-sm font-medium">
+            This deal is not yet saved to your Deal Memory.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {!metadata?.companyName && (
+              <input
+                type="text"
+                value={saveCompanyName}
+                onChange={(e) => setSaveCompanyName(e.target.value)}
+                placeholder="Company name"
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-200 text-sm w-40"
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => void handleSaveAndTrack()}
+              disabled={saveLoading || !(saveCompanyName.trim() || metadata?.companyName?.trim())}
+              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-zinc-950 text-sm font-medium"
+            >
+              {saveLoading ? "Saving…" : "Save & Track This Deal"}
+            </button>
+          </div>
+        </div>
+      )}
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button type="button" onClick={onBack} className="text-zinc-400 hover:text-zinc-200 text-sm transition-colors">
-            ← New analysis
+            ← Back to input
           </button>
           <h1 className="text-lg font-semibold tracking-tight">
             Robin.ai — {result.mode === 1 ? "Post-Meeting" : result.mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"} Report
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {metadata?.companyName && (
+            <Link
+              href="/app/deals"
+              className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm border border-zinc-700/50"
+            >
+              View Deal History
+            </Link>
+          )}
+          {dealId && (
+            <>
+              <label className="flex items-center gap-2 text-sm text-zinc-400">
+                <input
+                  type="checkbox"
+                  checked={sharePublic}
+                  onChange={() => void handleSharePublicToggle()}
+                  disabled={shareToggleLoading}
+                  className="rounded border-zinc-600 bg-zinc-800 text-amber-500 focus:ring-amber-500/50"
+                />
+                {shareToggleLoading ? "Updating…" : "Allow public snapshot"}
+              </label>
+              <button
+                type="button"
+                onClick={() => void generateRiskSnapshot()}
+                disabled={snapshotLoading}
+                className="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-sm border border-amber-500/40 disabled:opacity-50"
+              >
+                {snapshotLoading ? "Generating…" : "Generate Risk Snapshot"}
+              </button>
+            </>
+          )}
           {onDuplicateRun && (
             <button
               type="button"
@@ -108,8 +287,43 @@ export default function AnalysisReport({
             type="button"
             onClick={copyCalendarDescription}
             className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+            title="Copy brief text to paste into any calendar"
           >
-            {calendarCopied ? "Copied" : "Add to calendar (copy)"}
+            {calendarCopied ? "Copied" : "Copy for calendar"}
+          </button>
+          {metadata?.calendarEventUrl && (
+            <button
+              type="button"
+              onClick={copyBriefAndOpenEvent}
+              className="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-sm border border-amber-500/40"
+              title="Copy brief and open your calendar event to paste"
+            >
+              Copy & open event
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={openGoogleCalendar}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+            title="Open Google Calendar with event prefilled"
+          >
+            Google Calendar
+          </button>
+          <button
+            type="button"
+            onClick={openOutlookCalendar}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+            title="Open Outlook calendar with event prefilled"
+          >
+            Outlook
+          </button>
+          <button
+            type="button"
+            onClick={copySlackSummary}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+            title="Copy short summary for Slack or chat"
+          >
+            {slackCopied ? "Copied" : "Copy for Slack"}
           </button>
           <button
             type="button"
@@ -117,6 +331,22 @@ export default function AnalysisReport({
             className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
           >
             Email brief
+          </button>
+          <button
+            type="button"
+            onClick={followUpEmail}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+            title="One-click follow-up: Robin flagged [topics]. Can you share data on X?"
+          >
+            Follow-up email
+          </button>
+          <button
+            type="button"
+            onClick={replyToFounder}
+            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
+            title="Draft reply to founder: clarify first red question + one GRUE blind spot"
+          >
+            Reply to founder
           </button>
           <button
             type="button"
@@ -142,6 +372,20 @@ export default function AnalysisReport({
             {metadata.companyName && <span>Company: {escapeHtml(metadata.companyName)}</span>}
           </div>
         )}
+        <p className="text-xs text-zinc-500">
+          Copy the brief into your calendar event, email a co-investor, or run again with different input (your last run is saved).
+        </p>
+
+        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+          <h3 className="text-sm font-medium text-zinc-400 mb-2">Use with your tools</h3>
+          <ul className="text-xs text-zinc-500 space-y-1">
+            <li><strong className="text-zinc-400">Calendar:</strong> Use the buttons above to open Google Calendar or Outlook with the brief prefilled, or copy and paste into any event.</li>
+            <li><strong className="text-zinc-400">Email:</strong> Email brief sends a mailto with the full report. Add your co-investor&apos;s address before sending.</li>
+            <li><strong className="text-zinc-400">Slack / Notion:</strong> Copy for Slack (short summary) or Copy markdown (Notion-ready). Paste into a channel or a doc.</li>
+            <li><strong className="text-zinc-400">Bookmarks:</strong> <span className="font-mono text-zinc-400">/app?mode=1</span> for post-call, <span className="font-mono text-zinc-400">/app?mode=2</span> for prep, <span className="font-mono text-zinc-400">/app?mode=3</span> for founder stress-test.</li>
+          </ul>
+        </section>
+
         {result.error && (
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
             {result.error}
@@ -155,11 +399,13 @@ export default function AnalysisReport({
             <p className="text-sm font-medium text-red-400/90 mb-2">
               They will not have a good answer to this. Probe hard.
             </p>
-            <ul className="list-disc list-inside space-y-1 text-zinc-300 text-sm mb-4">
+            <ul className="list-disc list-inside space-y-2 text-zinc-300 text-sm mb-4">
               {(brief.red_list_framed ?? []).map((r) => (
                 <li key={r.question.slice(0, 40)}>
                   {escapeHtml(r.question)}
-                  <span className="text-zinc-500 block ml-4">{r.source_finding}</span>
+                  {r.source_finding && (
+                    <span className="text-red-400/90 font-medium block mt-0.5">Why red: <span className="text-zinc-500 font-normal">{escapeHtml(r.source_finding)}</span></span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -197,7 +443,13 @@ export default function AnalysisReport({
               {claims.map((c) => (
                 <li
                   key={c.id}
-                  className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/60"
+                  className={`p-4 rounded-xl border bg-zinc-950/60 ${
+                    c.status === "unverified"
+                      ? "border-amber-500/50 bg-amber-500/10"
+                      : c.status === "contradicted"
+                        ? "border-red-500/40 bg-red-500/5"
+                        : "border-zinc-800"
+                  }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     {statusBadge(c.status)}
@@ -330,7 +582,11 @@ export default function AnalysisReport({
                   >
                     <p className="font-medium text-zinc-100">{escapeHtml(r.question)}</p>
                     <p className="text-sm text-zinc-500 mt-1">Source: {escapeHtml(r.source_description)}</p>
-                    <p className="text-sm text-red-400/80 italic mt-1">{r.why_existential}</p>
+                    {r.why_existential && (
+                      <p className="text-sm text-red-400/90 mt-1.5 font-medium">
+                        Why red: <span className="italic font-normal">{escapeHtml(r.why_existential)}</span>
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -375,11 +631,13 @@ export default function AnalysisReport({
             <p className="text-sm font-medium text-red-400/90 mb-2">
               They will not have a good answer to this. Probe hard.
             </p>
-            <ul className="list-disc list-inside space-y-1 text-zinc-300 text-sm mb-4">
+            <ul className="list-disc list-inside space-y-2 text-zinc-300 text-sm mb-4">
               {(brief.red_list_framed ?? []).map((r) => (
                 <li key={r.question.slice(0, 40)}>
                   {escapeHtml(r.question)}
-                  <span className="text-zinc-500 block ml-4">{r.source_finding}</span>
+                  {r.source_finding && (
+                    <span className="text-red-400/90 font-medium block mt-0.5">Why red: <span className="text-zinc-500 font-normal">{escapeHtml(r.source_finding)}</span></span>
+                  )}
                 </li>
               ))}
             </ul>

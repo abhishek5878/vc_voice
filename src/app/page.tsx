@@ -136,6 +136,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Integrate with your stack */}
+      <section className="py-16 sm:py-20 border-t border-zinc-800/60">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">Integrate with your stack</p>
+          <h2 className="text-2xl font-semibold text-zinc-200 mb-6">Fits into the tools you already use</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
+              <p className="text-sm font-medium text-zinc-300">Calendar</p>
+              <p className="text-xs text-zinc-500 mt-1">Add the brief to Google Calendar or Outlook in one click. Or paste the copied text into any event. Link your Calendly in session context.</p>
+            </div>
+            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
+              <p className="text-sm font-medium text-zinc-300">Email &amp; Slack</p>
+              <p className="text-xs text-zinc-500 mt-1">Email brief to a co-investor via mailto, or copy a short summary for Slack. Markdown export is Notion-ready.</p>
+            </div>
+            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 sm:col-span-2">
+              <p className="text-sm font-medium text-zinc-300">Bookmark and go</p>
+              <p className="text-xs text-zinc-500 mt-1">
+                Bookmark <span className="font-mono text-zinc-400">/app?mode=1</span> for post-call review, <span className="font-mono text-zinc-400">/app?mode=2</span> for pre-meeting prep, <span className="font-mono text-zinc-400">/app?mode=3</span> for founder stress-test. No setup—paste and run.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why not ChatGPT */}
       <section className="py-16 sm:py-20 border-t border-zinc-800/60">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
