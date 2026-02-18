@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       risk_score: number | null;
       clarity_score: number | null;
       resistance_score: number | null;
-      deals: { vertical: string | null; stage: string | null } | null;
+      deals: { vertical: string | null; stage: string | null }[] | null;
     }>;
 
     type Key = { vertical: string | null; stage: string | null };
@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
     const keyStr = (k: Key) => `${k.vertical ?? ""}\t${k.stage ?? ""}`;
 
     for (const r of rows) {
-      const vertical = r.deals?.vertical ?? null;
-      const stage = r.deals?.stage ?? null;
+      const firstDeal = Array.isArray(r.deals) ? r.deals[0] : null;
+      const vertical = firstDeal?.vertical ?? null;
+      const stage = firstDeal?.stage ?? null;
       const key: Key = { vertical, stage };
       const s = keyStr(key);
       if (!groups.has(s)) groups.set(s, { risk: [], clarity: [], resistance: [] });
