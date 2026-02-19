@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabaseAccessToken } from "@/lib/deals/supabase-auth";
+import VoiceStyleInput from "@/components/VoiceStyleInput";
 
 interface ProfileResponse {
   user_id: string;
@@ -150,6 +151,53 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleGetLinkOnly = async () => {
+    const trimmedSlug = slug.trim().toLowerCase();
+    if (!trimmedSlug) {
+      setError("Choose a URL slug for your pitch link first.");
+      return;
+    }
+    if (!/^[a-z0-9-]{3,32}$/.test(trimmedSlug)) {
+      setError("Slug must be 3–32 characters: only lowercase letters, numbers, and dashes.");
+      return;
+    }
+    setError(null);
+    setSaving(true);
+    try {
+      const token = await getSupabaseAccessToken();
+      if (!token) {
+        router.replace("/auth");
+        return;
+      }
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "x-supabase-access-token": token,
+        },
+        body: JSON.stringify({
+          slug: trimmedSlug,
+          bio: bio.trim() || null,
+          twitter_url: twitterUrl.trim() || null,
+          linkedin_url: linkedinUrl.trim() || null,
+          substack_url: substackUrl.trim() || null,
+          blog_url: blogUrl.trim() || null,
+          podcast_url: podcastUrl.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save profile");
+      }
+      window.location.assign("/app");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleManualBuild = async () => {
     const text = manualDescription.trim();
     if (!text) {
@@ -216,7 +264,7 @@ export default function OnboardingPage() {
               href={liveLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-400 hover:text-amber-300 text-sm break-all"
+              className="text-cyan-400 hover:text-cyan-300 text-sm break-all"
             >
               {liveLink}
             </a>
@@ -224,7 +272,7 @@ export default function OnboardingPage() {
           <p className="text-xs text-zinc-500 mb-8">You can copy this link from Settings anytime.</p>
           <Link
             href="/app"
-            className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold text-sm"
+            className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm"
           >
             Go to Robin
           </Link>
@@ -246,25 +294,28 @@ export default function OnboardingPage() {
         </header>
         <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
           <p className="text-sm text-zinc-300 mb-4">
-            We scraped your links for up to 5 minutes but don&apos;t have enough yet to sound like you. Describe your investment style in 30 seconds: type below, or speak and paste the transcript.
+            We scraped your links but need a bit more to sound like you. Type below, or record / upload a short voice note and we&apos;ll use the transcript.
           </p>
           {error && (
             <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200 mb-4">
               {error}
             </div>
           )}
-          <textarea
+          <VoiceStyleInput
             value={manualDescription}
-            onChange={(e) => setManualDescription(e.target.value)}
+            onChange={setManualDescription}
             rows={5}
-            placeholder="e.g. I look for repeat founders with clear metrics. I pass when it's pre-product or the team hasn't shipped..."
-            className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70 resize-y mb-4"
+            getAccessToken={getSupabaseAccessToken}
+            label="Describe your investment style"
+            hint="Type, or use Record voice / Upload audio. We'll add the transcript here."
+            placeholder="e.g. I look for repeat founders with clear metrics. I pass when it's pre-product..."
+            className="mb-4"
           />
           <button
             type="button"
             onClick={handleManualBuild}
             disabled={building || !manualDescription.trim()}
-            className="w-full px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
+            className="w-full px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
           >
             {building ? "Building your voice…" : "Build my voice"}
           </button>
@@ -277,22 +328,26 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="border-b border-zinc-800/80 bg-zinc-950/95 p-4">
         <div className="max-w-lg mx-auto">
+          <div className="flex items-center gap-2 text-[11px] font-medium text-cyan-400/90 uppercase tracking-wider mb-1">
+            <span>Step 1</span><span className="text-zinc-600">·</span><span>Step 2</span><span className="text-zinc-600">·</span><span>Step 3</span>
+          </div>
           <h1 className="text-lg font-semibold tracking-tight">Set up your Robin</h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Flow: Social links → we build your voice → your personalised link → founders interact with it.
+            Social links → your pitch link → we build your voice. You can get your link first and add voice later.
           </p>
         </div>
       </header>
       <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200">
-              {error}
+            <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200" role="alert" aria-live="assertive" aria-atomic="true">
+              <p>{error}</p>
+              <Link href="/" className="inline-block mt-2 text-xs text-cyan-400 hover:text-cyan-300">Back to home</Link>
             </div>
           )}
 
           <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">1. Social links (build your voice)</h2>
+            <h2 className="text-sm font-medium text-zinc-300">Step 1 · Social links (build your voice)</h2>
             <p className="text-xs text-zinc-500">
               Add your public writing so Robin can learn your tone and how you evaluate founders. We’ll scrape these to build your voice. Add at least one.
             </p>
@@ -301,40 +356,40 @@ export default function OnboardingPage() {
               value={linkedinUrl}
               onChange={(e) => setLinkedinUrl(e.target.value)}
               placeholder="LinkedIn profile URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               type="url"
               value={twitterUrl}
               onChange={(e) => setTwitterUrl(e.target.value)}
               placeholder="Twitter / X profile URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               type="url"
               value={substackUrl}
               onChange={(e) => setSubstackUrl(e.target.value)}
               placeholder="Substack or newsletter URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               type="url"
               value={blogUrl}
               onChange={(e) => setBlogUrl(e.target.value)}
               placeholder="Personal blog or firm blog URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               type="url"
               value={podcastUrl}
               onChange={(e) => setPodcastUrl(e.target.value)}
               placeholder="Podcast or YouTube playlist URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">2. Your personalised pitch link</h2>
+            <h2 className="text-sm font-medium text-zinc-300">Step 2 · Your personalised pitch link</h2>
             <p className="text-xs text-zinc-500">
               Founders will use this URL to pitch you. Choose a unique slug (e.g. your name or firm).
             </p>
@@ -347,7 +402,7 @@ export default function OnboardingPage() {
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 placeholder="your-name"
-                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
                 required
               />
             </div>
@@ -355,26 +410,35 @@ export default function OnboardingPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">How you evaluate inbound (optional)</h2>
-            <p className="text-xs text-zinc-500">
-              A short description helps Robin when your links don’t give enough signal.
-            </p>
-            <textarea
+            <VoiceStyleInput
               value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={3}
+              onChange={setBio}
+              rows={4}
+              getAccessToken={getSupabaseAccessToken}
+              label="Step 3 · How you evaluate inbound (optional)"
+              hint="If your links don’t give enough signal, or to make your voice stronger: type below, or record / upload a short voice note."
               placeholder="e.g. I look for repeat founders with clear metrics. I pass when..."
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70 resize-y"
             />
           </section>
 
-          <button
-          type="submit"
-          disabled={saving || building}
-          className="w-full px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
-        >
-          {building ? "Building your voice…" : saving ? "Saving…" : "Build my voice & get my pitch link"}
-        </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="submit"
+              disabled={saving || building}
+              className="flex-1 px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
+            >
+              {building ? "Building your voice…" : saving ? "Saving…" : "Build my voice & get my pitch link"}
+            </button>
+            <p className="text-[11px] text-zinc-500 text-center sm:text-left">Building voice can take up to 5 minutes while we scrape your links.</p>
+            <button
+              type="button"
+              onClick={handleGetLinkOnly}
+              disabled={saving || building || !slug.trim()}
+              className="px-5 py-3 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 font-medium text-sm disabled:opacity-50"
+            >
+              Get my link now (add voice later)
+            </button>
+          </div>
         </form>
       </main>
     </div>

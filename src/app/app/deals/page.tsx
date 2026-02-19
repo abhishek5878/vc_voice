@@ -10,6 +10,7 @@ export default function DealsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [vertical, setVertical] = useState<string>("");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,7 +43,7 @@ export default function DealsPage() {
     return () => {
       cancelled = true;
     };
-  }, [vertical]);
+  }, [vertical, retryCount]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -74,12 +75,21 @@ export default function DealsPage() {
           <p className="text-zinc-500 text-sm">Loading deals…</p>
         )}
         {error && (
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
-            {error}
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm" role="alert" aria-live="assertive" aria-atomic="true">
+            <p>{error}</p>
+            <div className="mt-2 flex gap-3">
+              <button type="button" onClick={() => { setError(null); setLoading(true); setRetryCount((c) => c + 1); }} className="text-cyan-400 hover:text-cyan-300 text-xs font-medium">Try again</button>
+              <Link href="/app" className="text-cyan-400 hover:text-cyan-300 text-xs font-medium">Back to PitchRobin</Link>
+            </div>
           </div>
         )}
         {!loading && !error && deals.length === 0 && (
-          <p className="text-zinc-500 text-sm">No deals yet. Run an analysis with a company name to create one.</p>
+          <div className="text-center py-8">
+            <p className="text-zinc-500 text-sm mb-4">No deals yet. Run an analysis with a company name to create one.</p>
+            <Link href="/app" className="inline-flex px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium">
+              Run your first analysis
+            </Link>
+          </div>
         )}
         {!loading && !error && deals.length > 0 && (
           <ul className="space-y-2">

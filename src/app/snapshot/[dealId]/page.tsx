@@ -78,7 +78,7 @@ export default async function SnapshotPage({
               risk === "Low"
                 ? "text-emerald-400"
                 : risk === "Medium"
-                  ? "text-amber-400"
+                  ? "text-cyan-400"
                   : "text-red-400"
             }
           >

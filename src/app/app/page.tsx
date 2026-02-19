@@ -9,6 +9,7 @@ import AnalysisReport from "@/components/AnalysisReport";
 import FounderChat from "@/components/FounderChat";
 import Toast from "@/components/Toast";
 import CommandPalette from "@/components/CommandPalette";
+import AppNav from "@/components/AppNav";
 import type { PipelineResult } from "@/lib/pipeline/types";
 import type { StreamContext } from "@/lib/ingest/types";
 import type { SessionMetadata } from "@/lib/sessionMetadata";
@@ -239,7 +240,7 @@ export default function AppPage() {
                   href={typeof window !== "undefined" ? `${window.location.origin}/pitch/${profileSlug}` : `/pitch/${profileSlug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-amber-400 hover:text-amber-300 text-sm break-all"
+                  className="text-cyan-400 hover:text-cyan-300 text-sm break-all"
                 >
                   {typeof window !== "undefined" ? `${window.location.origin}/pitch/${profileSlug}` : `/pitch/${profileSlug}`}
                 </a>
@@ -253,7 +254,7 @@ export default function AppPage() {
                   if (url) void navigator.clipboard.writeText(url).then(() => setToastMessage("Link copied"));
                   setTimeout(() => setToastMessage(null), 2000);
                 }}
-                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-medium"
+                className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium"
               >
                 Copy link
               </button>
@@ -271,7 +272,9 @@ export default function AppPage() {
       )}
 
       {view === "input" && (
-        <>
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+          <AppNav />
+          <div className="flex-1">
           <InputInterface
             mode={mode}
             onBack={handleBackToMode}
@@ -301,7 +304,7 @@ export default function AppPage() {
                   setInitialClipboardFill({ target: "PUBLIC_TRANSCRIPT", text: clipboardOffer.text });
                   setClipboardOffer(null);
                 }}
-                className="px-3 py-1.5 rounded-lg bg-amber-600 text-zinc-950 font-medium"
+                className="px-3 py-1.5 rounded-lg bg-cyan-600 text-zinc-950 font-medium"
               >
                 Transcript
               </button>
@@ -320,12 +323,16 @@ export default function AppPage() {
               </button>
             </div>
           )}
-        </>
+          </div>
+        </div>
       )}
 
       {view === "progress" && <PipelineProgress current={progressStep} />}
 
       {view === "report" && result && (
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+          <AppNav />
+          <div className="flex-1">
         <AnalysisReport
           result={result}
           metadata={reportMetadata}
@@ -338,9 +345,14 @@ export default function AppPage() {
             setTimeout(() => setToastMessage(null), 3000);
           }}
         />
+          </div>
+        </div>
       )}
 
       {view === "chat" && chatSession && (
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+          <AppNav />
+          <div className="flex-1">
         <FounderChat
           initialStreamContext={chatSession.streamContext}
           onBack={() => {
@@ -352,6 +364,8 @@ export default function AppPage() {
             setTimeout(() => setToastMessage(null), 2500);
           }}
         />
+          </div>
+        </div>
       )}
 
       <CommandPalette

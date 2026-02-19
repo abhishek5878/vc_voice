@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSupabaseAccessToken } from "@/lib/deals/supabase-auth";
+import VoiceStyleInput from "@/components/VoiceStyleInput";
 import type { RobinVoiceProfile } from "@/lib/voice/profile";
 
 interface ProfileResponse {
@@ -173,7 +174,7 @@ export default function ProfileSettingsPage() {
     return (
       <div className="min-h-screen bg-zinc-950 p-6">
         <p className="text-red-400 text-sm">{error}</p>
-        <Link href="/app" className="text-amber-400 text-sm mt-2 inline-block">
+        <Link href="/app" className="text-cyan-400 text-sm mt-2 inline-block">
           ← Back
         </Link>
       </div>
@@ -220,7 +221,7 @@ export default function ProfileSettingsPage() {
               value={profile.slug ?? ""}
               onChange={(e) => handleChange("slug", e.target.value.toLowerCase())}
               placeholder="your-name-or-firm"
-              className="flex-1 rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="flex-1 rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
           </div>
           <p className="text-[11px] text-zinc-500">
@@ -238,7 +239,7 @@ export default function ProfileSettingsPage() {
             value={profile.email ?? ""}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="you@firm.com"
-            className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+            className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
           />
         </section>
 
@@ -251,7 +252,7 @@ export default function ProfileSettingsPage() {
             value={profile.bio ?? ""}
             onChange={(e) => handleChange("bio", e.target.value)}
             rows={4}
-            className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+            className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             placeholder="Example: I look for repeat founders with clear GRUE metrics. I say no when..."
           />
         </section>
@@ -266,39 +267,39 @@ export default function ProfileSettingsPage() {
               value={profile.twitter_url ?? ""}
               onChange={(e) => handleChange("twitter_url", e.target.value)}
               placeholder="Twitter / X"
-              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               value={profile.linkedin_url ?? ""}
               onChange={(e) => handleChange("linkedin_url", e.target.value)}
               placeholder="LinkedIn"
-              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               value={profile.substack_url ?? ""}
               onChange={(e) => handleChange("substack_url", e.target.value)}
               placeholder="Substack / newsletter"
-              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               value={profile.blog_url ?? ""}
               onChange={(e) => handleChange("blog_url", e.target.value)}
               placeholder="Personal blog"
-              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
             <input
               value={profile.podcast_url ?? ""}
               onChange={(e) => handleChange("podcast_url", e.target.value)}
               placeholder="Podcast / YouTube playlist"
-              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+              className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
             />
           </div>
         </section>
 
-        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
+        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-4">
           <h2 className="text-sm font-medium text-zinc-300">Build your Robin voice</h2>
-          <p className="text-xs text-zinc-500 mb-2">
-            We&apos;ll crawl your links and compress them into a voice profile. No extra API key needed.
+          <p className="text-xs text-zinc-500">
+            We crawl your links and compress them into a voice profile. Rebuilding can take up to 5 minutes. If that isn&apos;t enough, add text or a voice note below and we&apos;ll use it when you rebuild.
           </p>
           <div className="flex flex-wrap gap-3 items-center">
             <button
@@ -311,11 +312,11 @@ export default function ProfileSettingsPage() {
             </button>
             <button
               type="button"
-              onClick={() => triggerIngest(false)}
+              onClick={() => triggerIngest(!!manualText.trim())}
               disabled={ingesting}
-              className="px-3 py-1.5 rounded-lg bg-amber-500/90 text-xs text-zinc-950 font-medium hover:bg-amber-400 disabled:opacity-60"
+              className="px-3 py-1.5 rounded-lg bg-cyan-500/90 text-xs text-zinc-950 font-medium hover:bg-cyan-400 disabled:opacity-60"
             >
-              {ingesting ? "Building…" : "Rebuild from links"}
+              {ingesting ? "Building…" : manualText.trim() ? "Rebuild from links + my description" : "Rebuild from links"}
             </button>
             {profile.scrape_status === "done" && (
               <span className="text-xs text-emerald-400">
@@ -323,39 +324,26 @@ export default function ProfileSettingsPage() {
               </span>
             )}
             {needsManual && (
-              <span className="text-xs text-amber-400">
-                We scraped for up to 5 min but need more. Describe your investment style in 30 seconds below.
+              <span className="text-xs text-cyan-400">
+                Links alone weren&apos;t enough. Add text or voice below and click Rebuild.
               </span>
             )}
           </div>
 
-          {needsManual && (
-            <div className="mt-3 space-y-2">
-              <p className="text-xs text-zinc-500">
-                Type or speak for ~30 seconds about how you evaluate founders (what you look for, what you pass on).
-              </p>
-              <textarea
-                value={manualText}
-                onChange={(e) => setManualText(e.target.value)}
-                rows={4}
-                className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
-                placeholder="Paste a transcript or type: e.g. I look for repeat founders with clear metrics..."
-              />
-              <button
-                type="button"
-                onClick={() => triggerIngest(true)}
-                disabled={ingesting || !manualText.trim()}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/90 text-xs text-zinc-950 font-medium hover:bg-amber-400 disabled:opacity-60"
-              >
-                {ingesting ? "Building from your description…" : "Use this description"}
-              </button>
-            </div>
-          )}
+          <VoiceStyleInput
+            value={manualText}
+            onChange={setManualText}
+            rows={4}
+            getAccessToken={getSupabaseAccessToken}
+            label="Text or voice (optional)"
+            hint="Type, or record / upload a short voice note. We'll transcribe it and use it with your links when you Rebuild."
+            placeholder="e.g. I look for repeat founders with clear metrics. I pass when..."
+          />
         </section>
 
         {profile.voice_profile && (
-          <section className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-2 text-xs">
-            <h2 className="text-sm font-medium text-amber-400/90">Robin will speak like:</h2>
+          <section className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5 space-y-2 text-xs">
+            <h2 className="text-sm font-medium text-cyan-400/90">Robin will speak like:</h2>
             <p className="text-zinc-200">
               <span className="text-zinc-500">Tone:</span> {profile.voice_profile.tone}
             </p>

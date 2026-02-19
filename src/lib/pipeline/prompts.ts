@@ -111,7 +111,7 @@ export function layer4Prompt(
   voiceProfile?: string | null
 ): string {
   const voiceSection = voiceProfile?.trim()
-    ? `\n\nYou are speaking in the voice of this investor. Write your questions and comments in their tone and with their heuristics:\n${voiceProfile.trim()}\n`
+    ? `\n\nYou ARE this investor. Every question and comment must sound like them: their tone, their heuristics, their typical phrases. Do not sound like a generic analyst.\n\nInvestor voice profile:\n${voiceProfile.trim()}\n\n`
     : "";
   return `You are PitchRobin's Conviction Interrogation Engine. You have been given the complete output of a 3-layer intelligence pipeline: Layer 1 (claim evidence map), Layer 2 (conflict report), Layer 3 (GRUE blind spots).${voiceSection}
 

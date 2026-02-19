@@ -36,7 +36,7 @@ export default function ModeSelect({ onStart }: { onStart: (mode: Mode) => void 
         </nav>
       </header>
       <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8">
-        <p className="text-amber-500/90 text-sm font-medium uppercase tracking-widest mb-2">Your calendar, filtered.</p>
+        <p className="text-cyan-500/90 text-sm font-medium uppercase tracking-widest mb-2">Your calendar, filtered.</p>
         <h2 className="text-2xl sm:text-3xl font-semibold text-zinc-100 mb-2 text-center">What are we analyzing?</h2>
         <p className="text-zinc-500 text-sm mb-6 max-w-md text-center">
           Triage inbound requests or stress-test a meeting. Give transcript + optional voice note for the best signal.
@@ -50,13 +50,13 @@ export default function ModeSelect({ onStart }: { onStart: (mode: Mode) => void 
               key={mode}
               type="button"
               onClick={() => onStart(mode)}
-              className="card-hover text-left p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-amber-500/30 hover:bg-zinc-900/80 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 focus:ring-offset-zinc-950"
+              className="card-hover text-left p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-cyan-500/30 hover:bg-zinc-900/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
               <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Mode {mode}</span>
               <h3 className="text-lg font-semibold text-zinc-100 mt-2">{title}</h3>
               <p className="text-zinc-500 text-sm mt-2 leading-relaxed">{description}</p>
               <p className="text-zinc-600 text-xs mt-2 italic">Best for: {bestFor}</p>
-              <span className="inline-block mt-4 text-sm font-medium text-amber-500/90">Start →</span>
+              <span className="inline-block mt-4 text-sm font-medium text-cyan-500/90">Start →</span>
             </button>
           ))}
         </div>

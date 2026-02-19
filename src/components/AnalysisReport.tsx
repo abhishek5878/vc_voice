@@ -200,7 +200,7 @@ export default function AnalysisReport({
       status === "verified"
         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
         : status === "unverified"
-          ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
+          ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40"
           : "bg-red-500/20 text-red-400 border-red-500/40";
     const label = status === "verified" ? "✓ Verified" : status === "unverified" ? "⚠ Unverified" : "✗ Contradicted";
     return <span className={`text-xs px-2 py-0.5 rounded border ${cls}`}>{label}</span>;
@@ -209,8 +209,8 @@ export default function AnalysisReport({
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       {!dealId && (
-        <div className="bg-amber-500/15 border-b border-amber-500/40 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-amber-200 text-sm font-medium">
+        <div className="bg-cyan-500/15 border-b border-cyan-500/40 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-cyan-200 text-sm font-medium">
             This deal is not yet saved to your Deal Memory.
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -227,7 +227,7 @@ export default function AnalysisReport({
               type="button"
               onClick={() => void handleSaveAndTrack()}
               disabled={saveLoading || !(saveCompanyName.trim() || metadata?.companyName?.trim())}
-              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-zinc-950 text-sm font-medium"
+              className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-zinc-950 text-sm font-medium"
             >
               {saveLoading ? "Saving…" : "Save & Track This Deal"}
             </button>
@@ -260,7 +260,7 @@ export default function AnalysisReport({
                   checked={sharePublic}
                   onChange={() => void handleSharePublicToggle()}
                   disabled={shareToggleLoading}
-                  className="rounded border-zinc-600 bg-zinc-800 text-amber-500 focus:ring-amber-500/50"
+                  className="rounded border-zinc-600 bg-zinc-800 text-cyan-500 focus:ring-cyan-500/50"
                 />
                 {shareToggleLoading ? "Updating…" : "Allow public snapshot"}
               </label>
@@ -268,7 +268,7 @@ export default function AnalysisReport({
                 type="button"
                 onClick={() => void generateRiskSnapshot()}
                 disabled={snapshotLoading}
-                className="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-sm border border-amber-500/40 disabled:opacity-50"
+                className="px-3 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 text-sm border border-cyan-500/40 disabled:opacity-50"
               >
                 {snapshotLoading ? "Generating…" : "Generate Risk Snapshot"}
               </button>
@@ -278,7 +278,7 @@ export default function AnalysisReport({
             <button
               type="button"
               onClick={onDuplicateRun}
-              className="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-sm border border-amber-500/40"
+              className="px-3 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 text-sm border border-cyan-500/40"
             >
               Duplicate this run
             </button>
@@ -295,7 +295,7 @@ export default function AnalysisReport({
             <button
               type="button"
               onClick={copyBriefAndOpenEvent}
-              className="px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-sm border border-amber-500/40"
+              className="px-3 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 text-sm border border-cyan-500/40"
               title="Copy brief and open your calendar event to paste"
             >
               Copy & open event
@@ -394,7 +394,7 @@ export default function AnalysisReport({
 
         {/* Mode 2 — Pre-Meeting Attack Brief (show first for Pre-Meeting Prep) */}
         {result.mode === 2 && brief && (brief.red_list_framed?.length > 0 || brief.yellow_list_framed?.length > 0) && (
-          <section className="p-5 sm:p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+          <section className="p-5 sm:p-6 rounded-2xl border border-cyan-500/30 bg-cyan-500/5">
             <h2 className="text-xl font-semibold text-zinc-200 mb-4">Pre-Meeting Attack Brief</h2>
             <p className="text-sm font-medium text-red-400/90 mb-2">
               They will not have a good answer to this. Probe hard.
@@ -409,7 +409,7 @@ export default function AnalysisReport({
                 </li>
               ))}
             </ul>
-            <p className="text-sm font-medium text-amber-400/90 mb-2">
+            <p className="text-sm font-medium text-cyan-400/90 mb-2">
               This is where you separate polish from preparation.
             </p>
             <ul className="list-disc list-inside space-y-1 text-zinc-300 text-sm mb-4">
@@ -445,7 +445,7 @@ export default function AnalysisReport({
                   key={c.id}
                   className={`p-4 rounded-xl border bg-zinc-950/60 ${
                     c.status === "unverified"
-                      ? "border-amber-500/50 bg-amber-500/10"
+                      ? "border-cyan-500/50 bg-cyan-500/10"
                       : c.status === "contradicted"
                         ? "border-red-500/40 bg-red-500/5"
                         : "border-zinc-800"
@@ -500,7 +500,7 @@ export default function AnalysisReport({
                           c.severity === "high"
                             ? "bg-red-500/20 text-red-400"
                             : c.severity === "medium"
-                              ? "bg-amber-500/20 text-amber-400"
+                              ? "bg-cyan-500/20 text-cyan-400"
                               : "bg-blue-500/20 text-blue-400"
                         }`}
                       >
@@ -527,7 +527,7 @@ export default function AnalysisReport({
                 </div>
                 <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
                   <div
-                    className="h-full bg-amber-500/80 rounded-full transition-all"
+                    className="h-full bg-cyan-500/80 rounded-full transition-all"
                     style={{ width: `${Math.min(100, grue.coverage_score)}%` }}
                   />
                 </div>
@@ -543,7 +543,7 @@ export default function AnalysisReport({
                         m.status === "mentioned"
                           ? "bg-emerald-500/20 text-emerald-400"
                           : m.status === "underspecified"
-                            ? "bg-amber-500/20 text-amber-400"
+                            ? "bg-cyan-500/20 text-cyan-400"
                             : "bg-red-500/20 text-red-400"
                       }`}
                     >
@@ -559,7 +559,7 @@ export default function AnalysisReport({
                 ))}
               </ul>
               {(grue.blind_spots ?? []).length > 0 && (
-                <p className="mt-3 text-sm text-amber-400/90">
+                <p className="mt-3 text-sm text-cyan-400/90">
                   Blind spots: {grue.blind_spots.join(", ")}
                 </p>
               )}
@@ -595,7 +595,7 @@ export default function AnalysisReport({
 
           {yellow.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-amber-400/90 mb-2">Yellow List</h3>
+              <h3 className="text-sm font-medium text-cyan-400/90 mb-2">Yellow List</h3>
               <ul className="space-y-2">
                 {yellow.map((y) => (
                   <li
@@ -612,7 +612,7 @@ export default function AnalysisReport({
 
           {pedigree.length > 0 && (
             <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
-              <h3 className="text-sm font-medium text-amber-400/90 mb-2">Pedigree Flags</h3>
+              <h3 className="text-sm font-medium text-cyan-400/90 mb-2">Pedigree Flags</h3>
               <ul className="space-y-1 text-sm text-zinc-300">
                 {pedigree.map((p) => (
                   <li key={p.flag.slice(0, 30)}>
@@ -641,7 +641,7 @@ export default function AnalysisReport({
                 </li>
               ))}
             </ul>
-            <p className="text-sm font-medium text-amber-400/90 mb-2">
+            <p className="text-sm font-medium text-cyan-400/90 mb-2">
               This is where you separate polish from preparation.
             </p>
             <ul className="list-disc list-inside space-y-1 text-zinc-300 text-sm mb-4">

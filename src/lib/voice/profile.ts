@@ -10,6 +10,10 @@ export interface RobinVoiceProfile {
   favorite_phrases: string[];
   red_flags: string[];
   green_flags: string[];
+  /** 2–3 sentences: how they sound, what they’d never say, sentence patterns. Makes the bot sound like them, not a generic VC. */
+  persona_summary?: string;
+  /** Typical first questions or probes they use when evaluating founders. */
+  typical_questions?: string[];
 }
 
 export interface RobinProfileRow {
@@ -64,16 +68,19 @@ function buildVoicePrompt(corpus: string, manualText?: string): string {
   const extra = manualText?.trim()
     ? `\n\nThe user also provided this direct description of how they think about inbound and founders:\n${manualText.trim()}\n`
     : "";
-  return `You are building a structured \"voice profile\" for a VC.
+  return `You are building a deep "voice profile" for a VC so an AI can speak exactly like them.
 
-You will be given samples of their writing / public content.${extra}
+You will be given samples of their writing and public content.${extra}
 
-From this, infer:
-- Tone (few words)
-- Evaluation heuristics (how they decide, what they look for, what they avoid)
-- Favorite phrases or stylistic tics
-- Red flags they often mention
-- Green flags they highlight
+Extract:
+
+1) tone: A few words (e.g. "Skeptical, dry, numbers-obsessed" or "Supportive but direct").
+2) evaluation_heuristics: How they decide, what they look for, what they avoid. Be specific.
+3) favorite_phrases: Exact phrases or stylistic tics they use (quotes, pet words, sentence openers).
+4) red_flags: What they often call out or hate.
+5) green_flags: What they reward or highlight.
+6) persona_summary: 2–4 sentences that capture HOW they sound: typical sentence structure, what they would never say, how they push back, how they encourage. This is the most important field for making the AI sound like this person, not a generic VC.
+7) typical_questions: 4–8 questions or probes they typically ask founders (exact or close to their wording). Used to open and steer the conversation in their voice.
 
 Return ONLY valid JSON in this schema:
 {
@@ -81,10 +88,12 @@ Return ONLY valid JSON in this schema:
   "evaluation_heuristics": ["string", "..."],
   "favorite_phrases": ["string", "..."],
   "red_flags": ["string", "..."],
-  "green_flags": ["string", "..."]
+  "green_flags": ["string", "..."],
+  "persona_summary": "string",
+  "typical_questions": ["string", "..."]
 }
 
-Do not add any extra keys.
+You may omit persona_summary or typical_questions only if the corpus gives no signal. Otherwise include them.
 
 Corpus:
 
@@ -111,11 +120,13 @@ function normalizeVoiceProfile(
     (Array.isArray(o.evaluation_heuristics) && o.evaluation_heuristics.length > 0) ||
     (Array.isArray(o.green_flags) && o.green_flags.length > 0) ||
     (Array.isArray(o.red_flags) && o.red_flags.length > 0) ||
-    (Array.isArray(o.favorite_phrases) && o.favorite_phrases.length > 0);
+    (Array.isArray(o.favorite_phrases) && o.favorite_phrases.length > 0) ||
+    (typeof o.persona_summary === "string" && o.persona_summary.trim() !== "") ||
+    (Array.isArray(o.typical_questions) && o.typical_questions.length > 0);
   return hasContent ? (vp as RobinVoiceProfile) : null;
 }
 
-/** Build a single text block for system prompts from profile row (voice_profile + bio). */
+/** Build a single text block for system prompts from profile row (voice_profile + bio). Prioritises depth so the bot sounds like the VC. */
 export function buildVoiceProfileText(profile: {
   voice_profile?: RobinVoiceProfile | null;
   bio?: string | null;
@@ -123,7 +134,13 @@ export function buildVoiceProfileText(profile: {
   const vp = normalizeVoiceProfile(profile?.voice_profile);
   if (!vp) return (profile?.bio?.trim() ?? "") || null;
   const parts: string[] = [];
+  if (typeof vp.persona_summary === "string" && vp.persona_summary.trim()) {
+    parts.push(`Persona (speak exactly like this):\n${vp.persona_summary.trim()}`);
+  }
   if (vp.tone?.trim()) parts.push(`Tone: ${vp.tone.trim()}`);
+  if (Array.isArray(vp.typical_questions) && vp.typical_questions.length > 0) {
+    parts.push(`Questions they typically ask:\n- ${vp.typical_questions.slice(0, 6).join("\n- ")}`);
+  }
   if (vp.evaluation_heuristics?.length) {
     parts.push(`How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`);
   }
@@ -134,7 +151,7 @@ export function buildVoiceProfileText(profile: {
     parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
   }
   if (vp.favorite_phrases?.length) {
-    parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
+    parts.push(`Phrases they use:\n- ${vp.favorite_phrases.slice(0, 5).join("\n- ")}`);
   }
   return parts.length ? parts.join("\n\n") : (profile?.bio?.trim() ?? "") || null;
 }

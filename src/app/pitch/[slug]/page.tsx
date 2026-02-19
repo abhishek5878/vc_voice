@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { unstable_noStore } from "next/cache";
 import type { Metadata } from "next";
 import PitchIntake from "@/components/PitchIntake";
+import CopyablePitchLink from "@/components/CopyablePitchLink";
 import { buildVoiceProfileText } from "@/lib/voice/profile";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 
@@ -58,39 +59,48 @@ export default async function PitchPage({ params }: PageProps) {
   if (!profile) notFound();
 
   const voiceProfileText = buildVoiceProfileText(profile);
+  const displayName = profile.bio ? profile.bio.split(/[,·]| at /)[0]?.trim() || profile.bio.slice(0, 40).trim() : rawSlug;
   const headerSubtitle =
-    "Paste your deck or narrative below, upload a PDF/PPT/DOCX, or fetch from a URL. Robin will stress-test it using my evaluation style.";
+    "Paste your deck or narrative below, upload a PDF/PPT/DOCX, or fetch from a URL. I’ll stress-test it in my voice and style.";
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <header className="w-full border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <p className="text-xs text-amber-400/90 uppercase tracking-[0.2em] mb-1">Pitch to my Robin</p>
-            <h1 className="text-xl font-semibold tracking-tight">
-              {profile.bio ? profile.bio.slice(0, 80) : "VC pitch portal"}
-            </h1>
-            <p className="text-xs text-zinc-500 mt-1">
-              Before we meet, my AI associate Robin will stress-test your pitch against my specific heuristics.
-            </p>
+      <header className="relative w-full overflow-hidden border-b border-zinc-800/80">
+        <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent" aria-hidden />
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <p className="text-[11px] font-medium text-cyan-400/90 uppercase tracking-[0.25em] mb-2">
+            Pitch to {displayName}
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-50 mb-2">
+            Stress-test your pitch in my voice
+          </h1>
+          <p className="text-sm text-zinc-400 max-w-xl">
+            Before we meet, my AI will run your deck through my real evaluation style: the same heuristics, tone, and questions I use on first calls.
+          </p>
+          <p className="text-xs text-zinc-500 mt-2">
+            What happens next: you’ll answer a few questions in my style, then you can submit to my pipeline or get pointers to sharpen the pitch.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-zinc-500">Your link:</span>
+            <CopyablePitchLink slug={rawSlug} />
           </div>
         </div>
       </header>
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-4 sm:py-6">
-        <section className="mb-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
-          <h2 className="text-sm font-medium text-zinc-300 mb-2">How I evaluate inbound</h2>
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+        <section className="mb-6 p-5 sm:p-6 rounded-2xl border border-zinc-800/90 bg-zinc-900/50 shadow-lg shadow-black/20">
+          <h2 className="text-sm font-semibold text-zinc-200 mb-3">How I evaluate inbound</h2>
           {voiceProfileText ? (
-            <p className="text-xs text-zinc-400 whitespace-pre-wrap">{voiceProfileText}</p>
+            <div className="text-sm text-zinc-400 whitespace-pre-wrap leading-relaxed">{voiceProfileText}</div>
           ) : (
             <>
-              <p className="text-xs text-zinc-500 italic">
-                This investor hasn’t set their evaluation style yet. Robin will use a generic VC voice. The stress-test will still use your deck.
+              <p className="text-sm text-zinc-500 italic">
+                I haven’t set my evaluation style yet. The stress-test will still use your deck with a generic VC voice.
               </p>
-              <p className="text-xs text-zinc-400 mt-2">
-                Paste your deck or narrative below, upload a deck, or fetch from a URL. Robin will probe and help harden the pitch.
+              <p className="text-sm text-zinc-400 mt-3">
+                Paste your deck or narrative below, upload a deck, or fetch from a URL. You’ll get blunt feedback and concrete next steps.
               </p>
-              <p className="text-[11px] text-zinc-500 mt-2">
-                If you own this link: sign in at Robin → Settings → Save profile, then &quot;Rebuild from links&quot; so your style appears here.
+              <p className="text-xs text-zinc-500 mt-3">
+                If this is your link: sign in at pitchrobin.work → Settings → &quot;Rebuild from links&quot; so your style appears here.
               </p>
             </>
           )}
@@ -102,6 +112,11 @@ export default async function PitchPage({ params }: PageProps) {
           investorDisplayName={profile.bio ? profile.bio.slice(0, 50).trim() : rawSlug}
         />
       </main>
+      <footer className="py-4 border-t border-zinc-800/60">
+        <p className="text-center text-xs text-zinc-600">
+          Powered by <a href="https://www.pitchrobin.work" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-cyan-400/80 transition-colors">PitchRobin</a>
+        </p>
+      </footer>
     </div>
   );
 }

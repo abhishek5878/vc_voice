@@ -64,6 +64,7 @@ export default function FounderChat({
   slug,
   investorDisplayName,
   companyName,
+  submitted,
 }: {
   initialStreamContext: StreamContext;
   voiceProfile?: string | null;
@@ -75,6 +76,8 @@ export default function FounderChat({
   slug?: string | null;
   investorDisplayName?: string | null;
   companyName?: string;
+  /** When true (e.g. after founder submitted pitch), auto-fetch pointers and show prominently */
+  submitted?: boolean;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -85,6 +88,7 @@ export default function FounderChat({
   const [sendToInvestorLoading, setSendToInvestorLoading] = useState(false);
   const [sendToInvestorResult, setSendToInvestorResult] = useState<SendToInvestorResult | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const hasAutoFetchedPointers = useRef(false);
 
   const deckText =
     initialStreamContext.PITCH_MATERIAL ||
@@ -127,7 +131,7 @@ export default function FounderChat({
     try {
       const persona =
         voiceProfile?.trim()
-          ? `You are speaking exactly in this investor's voice. Adopt their tone, heuristics, and filters:\n\n${voiceProfile.trim()}\n\n`
+          ? `You ARE this investor. Every reply must sound like them: their wording, their skepticism, their pet phrases. Do not fall back to generic VC tone. Adopt their sentence structure and the questions they typically ask.\n\nInvestor voice profile:\n${voiceProfile.trim()}\n\n---\n\n`
           : "";
       const systemWithDeck =
         persona +
@@ -289,6 +293,48 @@ export default function FounderChat({
 
   const showSendToInvestor = Boolean(slug && investorDisplayName);
 
+  // After founder submits pitch, auto-fetch pointers once so they get actionable feedback
+  useEffect(() => {
+    if (
+      !submitted ||
+      !showSendToInvestor ||
+      messages.length < 2 ||
+      sendToInvestorResult != null ||
+      sendToInvestorLoading ||
+      hasAutoFetchedPointers.current
+    )
+      return;
+    hasAutoFetchedPointers.current = true;
+    void (async () => {
+      setSendToInvestorLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/pitch/send-to-investor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug,
+            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+            companyName: companyName?.trim() || "Unknown",
+          }),
+        });
+        const data = (await res.json()) as SendToInvestorResult & { error?: string; detail?: string };
+        if (!res.ok) throw new Error(data.error || data.detail || "Failed");
+        setSendToInvestorResult({
+          pointers: data.pointers ?? "",
+          at_par: Boolean(data.at_par),
+          vc_email: data.vc_email,
+          emailSubject: data.emailSubject,
+          emailBody: data.emailBody,
+        });
+      } catch {
+        hasAutoFetchedPointers.current = false;
+      } finally {
+        setSendToInvestorLoading(false);
+      }
+    })();
+  }, [submitted, showSendToInvestor, slug, messages, companyName, sendToInvestorResult, sendToInvestorLoading]);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-between">
@@ -301,8 +347,14 @@ export default function FounderChat({
             ← Back to inputs
           </button>
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">PitchRobin · Founder Chat</h1>
-            <p className="text-xs text-zinc-500">Mode 3: Pitch Stress-Test (live VC interrogation)</p>
+            <h1 className="text-lg font-semibold tracking-tight">
+              {investorDisplayName && slug
+                ? `Stress-test in ${investorDisplayName.split(/[,·]| at /)[0]?.trim() || investorDisplayName}'s voice`
+                : "PitchRobin · Founder Chat"}
+            </h1>
+            <p className="text-xs text-zinc-500">
+              {investorDisplayName && slug ? "Live Q&A in this investor’s style" : "Mode 3: Pitch Stress-Test (live VC interrogation)"}
+            </p>
           </div>
           <button
             type="button"
@@ -312,7 +364,7 @@ export default function FounderChat({
                 `${typeof window !== "undefined" ? window.location.origin : ""}/app?mode=3`;
               void navigator.clipboard.writeText(url);
             }}
-            className="text-xs text-amber-500/90 hover:text-amber-400"
+            className="text-xs text-cyan-500/90 hover:text-cyan-400"
           >
             Copy link for another founder
           </button>
@@ -323,7 +375,7 @@ export default function FounderChat({
                   type="button"
                   onClick={() => void handleSendToInvestor()}
                   disabled={sendToInvestorLoading}
-                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-xs font-medium border border-amber-400/50 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-xs font-medium border border-cyan-400/50 disabled:opacity-50"
                   title={`Get pointers from ${investorDisplayName} and optionally email them`}
                 >
                   {sendToInvestorLoading ? "Generating…" : `Send to ${investorDisplayName}`}
@@ -333,7 +385,7 @@ export default function FounderChat({
                 type="button"
                 onClick={() => void copyActionItems()}
                 disabled={actionItemsLoading}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-xs border border-amber-500/40 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 text-xs border border-cyan-500/40 disabled:opacity-50"
                 title="Your 3 action items from this session"
               >
                 {actionItemsLoading ? "Generating…" : "Copy your 3 action items"}
@@ -354,10 +406,13 @@ export default function FounderChat({
 
       <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full p-4 sm:p-6 gap-4">
         {hasDeck && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2 px-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50 text-xs text-zinc-400">
-            <span>Using {deckText.length.toLocaleString()} chars from your deck</span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5 px-3 rounded-xl bg-zinc-800/60 border border-zinc-700/50 text-xs">
+            <span className="text-zinc-400">Using {deckText.length.toLocaleString()} chars from your deck</span>
             {hasInvestorVoice && (
-              <span className="text-amber-400/90">· Speaking in this investor&apos;s voice</span>
+              <span className="inline-flex items-center gap-1.5 font-medium text-cyan-400/95">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400/90" aria-hidden />
+                Speaking in this investor&apos;s voice
+              </span>
             )}
           </div>
         )}
@@ -371,16 +426,45 @@ export default function FounderChat({
             {error}
           </div>
         )}
+        {submitted && sendToInvestorLoading && !sendToInvestorResult && (
+          <section className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/5">
+            <p className="text-sm text-cyan-400/90">Getting your personalized pointers…</p>
+          </section>
+        )}
         {sendToInvestorResult && (
-          <section className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 space-y-3">
-            <h3 className="text-sm font-medium text-amber-400/90">
-              {investorDisplayName}’s pointers for you
-            </h3>
-            <p className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">
-              {sendToInvestorResult.pointers}
-            </p>
+          <section className="p-5 sm:p-6 rounded-2xl border-2 border-cyan-500/40 bg-cyan-500/10 space-y-4 shadow-lg shadow-cyan-500/5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-base font-semibold text-zinc-100">
+                {submitted ? "Here’s what to work on before your meeting" : `${investorDisplayName ?? "Investor"}'s pointers for you`}
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  if (sendToInvestorResult.pointers) {
+                    void navigator.clipboard.writeText(sendToInvestorResult.pointers);
+                    onToast?.("Pointers copied to clipboard");
+                  }
+                }}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-600"
+              >
+                Copy pointers
+              </button>
+            </div>
+            <div className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed space-y-2">
+              {(() => {
+                const lines = sendToInvestorResult.pointers.split(/\n/).map((l) => l.trim()).filter(Boolean);
+                return lines.length > 0
+                  ? lines.map((line, i) => (
+                      <p key={i} className="flex gap-2">
+                        <span className="text-cyan-400/80 shrink-0">•</span>
+                        <span>{line}</span>
+                      </p>
+                    ))
+                  : <p>{sendToInvestorResult.pointers}</p>;
+              })()}
+            </div>
             {sendToInvestorResult.at_par && sendToInvestorResult.vc_email && (
-              <div className="pt-2 border-t border-amber-500/20">
+              <div className="pt-3 border-t border-cyan-500/20">
                 <p className="text-xs text-zinc-400 mb-2">
                   You’re at par. Email your profile and evidence directly to {investorDisplayName}:
                 </p>
@@ -388,22 +472,22 @@ export default function FounderChat({
                   href={`mailto:${encodeURIComponent(sendToInvestorResult.vc_email)}?subject=${encodeURIComponent(sendToInvestorResult.emailSubject ?? "")}&body=${encodeURIComponent(sendToInvestorResult.emailBody ?? "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-medium"
+                  className="inline-flex px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium"
                 >
                   Email my pitch to {investorDisplayName}
                 </a>
               </div>
             )}
             {sendToInvestorResult.at_par && !sendToInvestorResult.vc_email && (
-              <p className="text-xs text-zinc-500 pt-2 border-t border-amber-500/20">
+              <p className="text-xs text-zinc-500 pt-3 border-t border-cyan-500/20">
                 You’re at par. This investor hasn’t set a contact email yet; submit your pitch using the button below to land in their queue.
               </p>
             )}
           </section>
         )}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4 flex-1">
-          <section className="hidden lg:flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-xs text-zinc-400 overflow-hidden">
-            <div className="flex items-center justify-between mb-2">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4 flex-1 min-h-0">
+          <section className="hidden lg:flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-xs text-zinc-400 overflow-hidden min-h-0">
+            <div className="flex items-center justify-between mb-2 shrink-0">
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-zinc-500">Deck snapshot</p>
                 <p className="text-[11px] text-zinc-500">
@@ -412,7 +496,7 @@ export default function FounderChat({
                 </p>
               </div>
             </div>
-            <div className="flex-1 rounded-md bg-zinc-950/60 border border-zinc-800/70 p-2 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+            <div className="flex-1 min-h-0 rounded-md bg-zinc-950/60 border border-zinc-800/70 p-2 overflow-y-auto whitespace-pre-wrap leading-relaxed">
               {deckText ? deckText.slice(0, 3000) : "No deck text available."}
               {deckText.length > 3000 && (
                 <span className="block mt-2 text-[10px] text-zinc-600">
@@ -422,37 +506,34 @@ export default function FounderChat({
             </div>
           </section>
 
-          <section className="flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30">
-            <div className="px-3 py-2 border-b border-zinc-800 flex items-center justify-between">
-              <div className="text-[11px] text-zinc-500">
-                The VC has your deck loaded. Expect blunt questions and concrete rewrites.
-              </div>
-              <span className="hidden sm:inline text-[11px] text-zinc-600">
-                Press Enter to send · Shift+Enter for newline
+          <section className="flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 min-h-0 overflow-hidden">
+            <div className="px-3 py-2 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-1 shrink-0">
+              <span className="text-[11px] text-zinc-500">
+                Reply below. Enter to send, Shift+Enter for new line.
               </span>
             </div>
             <div
               ref={scrollRef}
-              className="flex-1 min-h-[260px] max-h-[520px] p-3 overflow-y-auto space-y-3 text-sm"
+              className="flex-1 min-h-[200px] overflow-y-auto p-4 space-y-4 text-sm"
             >
               {messages.map((m, idx) => (
                 <div
                   key={idx}
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className="max-w-[85%] space-y-1">
-                    <div
+                  <div className={`max-w-[90%] sm:max-w-[85%] flex flex-col space-y-1.5 ${m.role === "user" ? "items-end" : "items-start"}`}>
+                    <span
                       className={`text-[10px] font-medium tracking-wide ${
-                        m.role === "user" ? "text-amber-400 text-right" : "text-zinc-500"
+                        m.role === "user" ? "text-cyan-400" : "text-zinc-500"
                       }`}
                     >
                       {m.role === "user" ? "You" : "VC"}
-                    </div>
+                    </span>
                     <div
-                      className={`whitespace-pre-wrap leading-relaxed ${
+                      className={`whitespace-pre-wrap leading-relaxed rounded-2xl px-4 py-3 text-sm ${
                         m.role === "user"
-                          ? "ml-auto bg-amber-500 text-zinc-950 rounded-lg px-3 py-2 text-sm"
-                          : "mr-auto bg-zinc-800 text-zinc-100 rounded-lg px-3 py-2 text-sm"
+                          ? "bg-cyan-500 text-zinc-950"
+                          : "bg-zinc-800 text-zinc-100 border border-zinc-700/50"
                       }`}
                     >
                       {m.content}
@@ -461,32 +542,33 @@ export default function FounderChat({
                 </div>
               ))}
               {messages.length === 0 && (
-                <div className="text-zinc-500 text-xs">
-                  Start by confirming you&apos;re okay with brutal feedback, or ask what part of your deck to
-                  fix first (Problem, Market, Traction, Team, Moat, etc.).
+                <div className="text-zinc-500 text-sm py-2">
+                  Reply with your one-line summary, or ask to focus on Problem, Market, Traction, Team, or Moat.
                 </div>
               )}
             </div>
-            <div className="border-t border-zinc-800 px-3 py-2 space-y-2">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  hasDeck
-                    ? "Ask for help on a specific slide, metric, or section. Shift+Enter for newline."
-                    : "Paste your question, but note: no deck text was found."
-                }
-                className="w-full h-20 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 resize-y"
-              />
-              <div className="flex items-center justify-end">
+            <div className="border-t border-zinc-800 p-3 shrink-0 bg-zinc-900/50">
+              <div className="flex gap-2 items-end">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={
+                    hasDeck
+                      ? "Type your reply…"
+                      : "No deck text found. Go back and add your pitch."
+                  }
+                  rows={2}
+                  className="flex-1 min-h-[44px] max-h-32 px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y"
+                  aria-label="Message"
+                />
                 <button
                   type="button"
                   onClick={() => void sendMessage()}
                   disabled={loading || !input.trim()}
-                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none text-sm font-medium text-zinc-950"
+                  className="shrink-0 px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:pointer-events-none text-sm font-semibold text-zinc-950 h-[44px]"
                 >
-                  {loading ? "Thinking…" : "Send"}
+                  {loading ? "…" : "Send"}
                 </button>
               </div>
             </div>

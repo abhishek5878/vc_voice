@@ -145,13 +145,19 @@ export default function PitchIntake({
           slug={slug}
           investorDisplayName={investorDisplayName}
           companyName={companyName}
+          submitted={submitted}
         />
         {showSubmit && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
             {submitted ? (
-              <p className="text-sm text-emerald-400/90">
-                Pitch submitted. The investor will review it in their dashboard.
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm text-emerald-400/90">
+                  Pitch submitted. The investor will review it in their dashboard.
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Your personalized pointers appear above so you can work on them before the meeting.
+                </p>
+              </div>
             ) : (
               <>
                 <p className="text-xs text-zinc-400 mb-3">
@@ -161,12 +167,12 @@ export default function PitchIntake({
                   type="button"
                   onClick={handleSubmitPitch}
                   disabled={submitLoading}
-                  className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-semibold disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-semibold disabled:opacity-50"
                 >
                   {submitLoading ? "Submitting…" : `Submit this pitch to ${investorDisplayName}`}
                 </button>
                 {submitError && (
-                  <p className="text-sm text-amber-400/90 mt-2">{submitError}</p>
+                  <p className="text-sm text-cyan-400/90 mt-2">{submitError}</p>
                 )}
               </>
             )}
@@ -177,15 +183,18 @@ export default function PitchIntake({
   }
 
   return (
-    <div className="space-y-4">
-      <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-4">
-        <h2 className="text-sm font-medium text-zinc-300">Your pitch</h2>
-        {headerSubtitle && (
-          <p className="text-xs text-zinc-500">{headerSubtitle}</p>
-        )}
+    <div className="space-y-6">
+      <section className="p-5 sm:p-6 rounded-2xl border border-zinc-800/90 bg-zinc-900/50 shadow-lg shadow-black/10 space-y-5">
         <div>
-          <label htmlFor="pitch-company" className="block text-xs text-zinc-400 mb-1">
-            Company name (optional)
+          <span className="text-[11px] font-medium text-cyan-400/90 uppercase tracking-wider">Step 1</span>
+          <h2 className="text-base font-semibold text-zinc-200 mt-0.5">Add your pitch</h2>
+          {headerSubtitle && (
+            <p className="text-sm text-zinc-500 mt-1">{headerSubtitle}</p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="pitch-company" className="block text-sm font-medium text-zinc-400 mb-1.5">
+            Company name <span className="text-zinc-600">(optional)</span>
           </label>
           <input
             id="pitch-company"
@@ -193,12 +202,12 @@ export default function PitchIntake({
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder="Acme Inc."
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+            className="w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-shadow"
           />
         </div>
         <div>
-          <label htmlFor="pitch-text" className="block text-xs text-zinc-400 mb-1">
-            Pitch deck or narrative
+          <label htmlFor="pitch-text" className="block text-sm font-medium text-zinc-400 mb-1.5">
+            Deck or narrative
           </label>
           <textarea
             id="pitch-text"
@@ -206,14 +215,14 @@ export default function PitchIntake({
             onChange={(e) => setPitchText(e.target.value)}
             placeholder="Paste your deck text, one-pager, or a short narrative of what you're building..."
             rows={6}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 resize-y"
+            className="w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y transition-shadow"
           />
         </div>
-        <div>
-          <label className="block text-xs text-zinc-400 mb-1">
-            Or upload deck (PDF, PPT, or DOCX)
-          </label>
-          <div className="flex items-center gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              Upload deck
+            </label>
             <input
               type="file"
               accept=".pdf,.docx,.pptx"
@@ -223,55 +232,55 @@ export default function PitchIntake({
             />
             <label
               htmlFor="pitch-deck-upload"
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 hover:bg-zinc-700/80 text-zinc-200 text-sm font-medium cursor-pointer transition-colors"
             >
-              {uploadDeckLoading ? "Extracting…" : "Upload PDF / PPT / DOCX"}
+              {uploadDeckLoading ? "Extracting…" : "PDF / PPT / DOCX"}
             </label>
           </div>
-        </div>
-        <div>
-          <label htmlFor="pitch-url" className="block text-xs text-zinc-400 mb-1">
-            Or fetch from URL (Google Docs, Notion, etc.)
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="pitch-url"
-              type="url"
-              value={fetchUrlValue}
-              onChange={(e) => setFetchUrlValue(e.target.value)}
-              placeholder="https://..."
-              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50"
-            />
-            <button
-              type="button"
-              onClick={handleFetchUrl}
-              disabled={fetchUrlLoading}
-              className="px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium disabled:opacity-50"
-            >
-              {fetchUrlLoading ? "Fetching…" : "Fetch"}
-            </button>
+          <div>
+            <label htmlFor="pitch-url" className="block text-sm font-medium text-zinc-400 mb-1.5">
+              Or paste a URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="pitch-url"
+                type="url"
+                value={fetchUrlValue}
+                onChange={(e) => setFetchUrlValue(e.target.value)}
+                placeholder="https://..."
+                className="flex-1 px-3 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+              />
+              <button
+                type="button"
+                onClick={handleFetchUrl}
+                disabled={fetchUrlLoading}
+                className="px-4 py-2.5 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium disabled:opacity-50 shrink-0"
+              >
+                {fetchUrlLoading ? "…" : "Fetch"}
+              </button>
+            </div>
           </div>
         </div>
         {pitchCharCount > 0 && (
           <p className="text-xs text-zinc-500">
-            {pitchCharCount.toLocaleString()} characters from your deck
-            {!hasPitchContent && " - add more (or paste/upload/fetch) for a better stress-test."}
+            {pitchCharCount.toLocaleString()} characters
+            {!hasPitchContent && " — add more for a better stress-test."}
           </p>
         )}
         {error && (
-          <p className="text-sm text-amber-400/90">{error}</p>
+          <p className="text-sm text-cyan-400/90">{error}</p>
         )}
         <button
           type="button"
           onClick={handleStartStressTest}
           disabled={uploadDeckLoading || fetchUrlLoading}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400/50 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto min-w-[200px] px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:ring-offset-2 focus:ring-offset-zinc-950 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {uploadDeckLoading || fetchUrlLoading
             ? "Loading your deck…"
             : hasPitchContent
-              ? `Start stress-test (${pitchCharCount.toLocaleString()} chars)`
-              : "Start stress-test"}
+              ? `Start stress-test → (${pitchCharCount.toLocaleString()} chars)`
+              : "Start stress-test →"}
         </button>
       </section>
     </div>

@@ -22,16 +22,16 @@ export default function PipelineProgress({ current = 0 }: { current?: number }) 
             key={step.layer}
             className={`flex items-start gap-4 px-4 py-3.5 rounded-xl border transition-colors ${
               i <= current
-                ? "border-amber-500/40 bg-amber-500/5"
+                ? "border-cyan-500/40 bg-cyan-500/5"
                 : "border-zinc-800 bg-zinc-900/40"
             }`}
           >
             <span
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${
                 i < current
-                  ? "bg-amber-500/20 text-amber-400"
+                  ? "bg-cyan-500/20 text-cyan-400"
                   : i === current
-                    ? "bg-amber-500 text-zinc-950"
+                    ? "bg-cyan-500 text-zinc-950"
                     : "bg-zinc-700 text-zinc-500"
               }`}
             >

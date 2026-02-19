@@ -23,7 +23,7 @@ function BarChart({ value, max = 100, label }: { value: number; max?: number; la
         <span>{typeof value === "number" && !Number.isNaN(value) ? value.toFixed(0) : "—"}</span>
       </div>
       <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
-        <div className="h-full rounded-full bg-amber-500/70" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-cyan-500/70" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -66,7 +66,7 @@ export default function InsightsPage() {
     return (
       <div className="min-h-screen bg-zinc-950 p-6">
         <p className="text-red-400">{error}</p>
-        <Link href="/app" className="text-amber-400 text-sm mt-2 inline-block">← Back</Link>
+        <Link href="/app" className="text-cyan-400 text-sm mt-2 inline-block">← Back</Link>
       </div>
     );
   }

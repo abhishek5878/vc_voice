@@ -282,7 +282,7 @@ export default function InputInterface({
             setError("Clipboard access denied or empty.")
           )
         }
-        className="text-xs text-amber-500/90 hover:text-amber-400"
+        className="text-xs text-cyan-500/90 hover:text-cyan-400"
       >
         Paste from clipboard
       </button>
@@ -300,7 +300,7 @@ export default function InputInterface({
         }}
       />
       {fileStatus[stream] && (
-        <span className="text-xs text-amber-500/80">{fileStatus[stream]}</span>
+        <span className="text-xs text-cyan-500/80">{fileStatus[stream]}</span>
       )}
     </div>
   );
@@ -336,7 +336,7 @@ export default function InputInterface({
         )}
         {mode === 3 && (
           <>
-            <div className="lg:col-span-2 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+            <div className="lg:col-span-2 p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
               <p className="text-sm font-medium text-zinc-200 mb-1">For founders: stress-test your pitch</p>
               <p className="text-sm text-zinc-500 max-w-2xl">
                 Paste your deck or one-liner. You&apos;ll get a blunt, skeptical VC: short answers, real numbers, no fluff. Then chat to harden the pitch before the real meeting.
@@ -349,7 +349,7 @@ export default function InputInterface({
                   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/app?mode=3`;
                   void navigator.clipboard.writeText(url).then(() => setError(null));
                 }}
-                className="text-sm text-amber-500/90 hover:text-amber-400"
+                className="text-sm text-cyan-500/90 hover:text-cyan-400"
               >
                 Send link to founder (copy stress-test URL)
               </button>
@@ -362,7 +362,7 @@ export default function InputInterface({
             <button
               type="button"
               onClick={applyLastRun}
-              className="text-sm text-amber-500/90 hover:text-amber-400"
+              className="text-sm text-cyan-500/90 hover:text-cyan-400"
             >
               Duplicate last run →
             </button>
@@ -379,7 +379,7 @@ export default function InputInterface({
                 setError(null);
               }}
               placeholder={mode === 1 ? "Paste meeting transcript or .txt/.md" : mode === 2 ? "Optional: any shared context" : "Paste transcript or pitch narrative"}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 focus:outline-none resize-y transition-colors"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 focus:outline-none resize-y transition-colors"
             />
             {rowActions("PUBLIC_TRANSCRIPT", publicTranscript, setPublicTranscript)}
           </section>
@@ -393,7 +393,7 @@ export default function InputInterface({
                 setError(null);
               }}
               placeholder={mode === 1 ? "Paste private notes or voice note" : "Optional: private notes or .txt/.md/.pdf/.docx"}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 focus:outline-none resize-y transition-colors"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 focus:outline-none resize-y transition-colors"
             />
             {rowActions("PRIVATE_DICTATION", privateDictation, setPrivateDictation)}
           </section>
@@ -407,7 +407,7 @@ export default function InputInterface({
                 setError(null);
               }}
               placeholder={mode === 2 ? "Paste pitch deck / memo or upload PDF/DOCX (required)" : "Paste deck narrative or upload PDF/DOCX"}
-              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 focus:outline-none resize-y transition-colors"
+              className="w-full h-32 px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 focus:outline-none resize-y transition-colors"
             />
             {rowActions("PITCH_MATERIAL", pitchMaterial, setPitchMaterial)}
             <div className="mt-3 pt-3 border-t border-zinc-800">
@@ -481,7 +481,7 @@ export default function InputInterface({
               onChange={(e) => setMeetingTitle(e.target.value)}
               onBlur={persistMetadata}
               placeholder="e.g. Partner call – Acme Co"
-              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm placeholder-zinc-500 focus:border-amber-500/40 focus:outline-none mb-3"
+              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm placeholder-zinc-500 focus:border-cyan-500/40 focus:outline-none mb-3"
             />
             <label className="block text-xs text-zinc-500 mb-1">Company / founder (optional)</label>
             <input
@@ -490,7 +490,7 @@ export default function InputInterface({
               onChange={(e) => setCompanyName(e.target.value)}
               onBlur={persistMetadata}
               placeholder="e.g. Acme Inc"
-              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm placeholder-zinc-500 focus:border-amber-500/40 focus:outline-none mb-3"
+              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm placeholder-zinc-500 focus:border-cyan-500/40 focus:outline-none mb-3"
             />
             <label className="block text-xs text-zinc-500 mb-1">Calendar event link (optional)</label>
             <input
@@ -499,12 +499,12 @@ export default function InputInterface({
               onChange={(e) => setCalendarEventUrl(e.target.value)}
               onBlur={persistMetadata}
               placeholder="https://calendar.google.com/… or Calendly link"
-              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm placeholder-zinc-500 focus:border-amber-500/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-sm placeholder-zinc-500 focus:border-cyan-500/40 focus:outline-none"
             />
             <p className="text-xs text-zinc-500 mt-2">
               Total input: <strong className="text-zinc-300">{totalChars}</strong> chars
               {totalChars > 0 && totalChars < 200 && (
-                <span className="text-amber-500/90 ml-1"> - add {200 - totalChars} more (min 200)</span>
+                <span className="text-cyan-500/90 ml-1"> - add {200 - totalChars} more (min 200)</span>
               )}
             </p>
             <p className="text-xs text-zinc-600 mt-1">We remember meeting title and company for next time.</p>

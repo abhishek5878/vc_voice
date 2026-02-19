@@ -10,7 +10,7 @@ import type { StreamContext } from "@/lib/ingest/types";
 import { MIN_INPUT_CHARS } from "@/lib/ingest/parse";
 import { getUserIdFromRequest, upsertDeal, insertDealRun, insertFounderClaims } from "@/lib/deals/db";
 import { createServerSupabaseWithToken } from "@/lib/supabase/server";
-import { getRobinProfile } from "@/lib/voice/profile";
+import { getRobinProfile, buildVoiceProfileText } from "@/lib/voice/profile";
 import { extractClaims } from "@/lib/deals/persist";
 
 export async function POST(request: NextRequest) {
@@ -43,28 +43,7 @@ export async function POST(request: NextRequest) {
     try {
       const supabaseForProfile = token ? createServerSupabaseWithToken(token) : null;
       const profile = await getRobinProfile(userIdForDeals, supabaseForProfile ?? undefined);
-      if (profile?.voice_profile) {
-        const vp = profile.voice_profile;
-        const parts: string[] = [];
-        if (vp.tone) parts.push(`Tone: ${vp.tone}`);
-        if (vp.evaluation_heuristics?.length) {
-          parts.push(
-            `How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`
-          );
-        }
-        if (vp.green_flags?.length) {
-          parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
-        }
-        if (vp.red_flags?.length) {
-          parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
-        }
-        if (vp.favorite_phrases?.length) {
-          parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
-        }
-        voiceProfile = parts.join("\n\n");
-      } else if (profile?.bio) {
-        voiceProfile = profile.bio;
-      }
+      voiceProfile = buildVoiceProfileText(profile ?? undefined) ?? null;
     } catch {
       // Voice profile fetch failure should not break analysis
     }

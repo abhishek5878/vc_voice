@@ -134,7 +134,7 @@ export default function DealDetailPage() {
     return (
       <div className="min-h-screen bg-zinc-950 p-6">
         <p className="text-red-400">{error ?? "Not found"}</p>
-        <Link href="/app/deals" className="text-amber-400 text-sm mt-2 inline-block">← Back to deals</Link>
+        <Link href="/app/deals" className="text-cyan-400 text-sm mt-2 inline-block">← Back to deals</Link>
       </div>
     );
   }
@@ -195,7 +195,7 @@ export default function DealDetailPage() {
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-1">Ranking</h2>
             <p className="text-zinc-200">
-              This deal ranks in the top <span className="text-amber-400 font-medium">{100 - strengthPercentile}%</span> of your {totalDeals} deals by strength.
+              This deal ranks in the top <span className="text-cyan-400 font-medium">{100 - strengthPercentile}%</span> of your {totalDeals} deals by strength.
             </p>
             {clarityPercentile != null && (
               <p className="text-zinc-400 text-sm mt-1">
@@ -206,22 +206,22 @@ export default function DealDetailPage() {
         )}
 
         {latestRun && (
-          <section className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+          <section className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
             <h2 className="text-sm font-medium text-zinc-400 mb-3">Latest run scores</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
               <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
                 <p className="text-zinc-500 text-xs uppercase">Risk level</p>
-                <p className={`font-medium ${riskVal != null && riskVal > 50 ? "text-amber-400" : "text-zinc-200"}`}>{riskLevel(riskVal != null ? riskVal : null)}</p>
+                <p className={`font-medium ${riskVal != null && riskVal > 50 ? "text-cyan-400" : "text-zinc-200"}`}>{riskLevel(riskVal != null ? riskVal : null)}</p>
                 {riskVal != null && <p className="text-zinc-500 text-xs">{riskVal.toFixed(0)}</p>}
               </div>
               <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
                 <p className="text-zinc-500 text-xs uppercase">Clarity level</p>
-                <p className={`font-medium ${clarityVal != null && clarityVal > 75 ? "text-amber-400" : "text-zinc-200"}`}>{clarityLevel(clarityVal != null ? clarityVal : null)}</p>
+                <p className={`font-medium ${clarityVal != null && clarityVal > 75 ? "text-cyan-400" : "text-zinc-200"}`}>{clarityLevel(clarityVal != null ? clarityVal : null)}</p>
                 {clarityVal != null && <p className="text-zinc-500 text-xs">{clarityVal.toFixed(0)}</p>}
               </div>
               <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
                 <p className="text-zinc-500 text-xs uppercase">Resistance level</p>
-                <p className={`font-medium ${resistanceVal != null && resistanceVal > 75 ? "text-amber-400" : "text-zinc-200"}`}>{resistanceLevel(resistanceVal != null ? resistanceVal : null)}</p>
+                <p className={`font-medium ${resistanceVal != null && resistanceVal > 75 ? "text-cyan-400" : "text-zinc-200"}`}>{resistanceLevel(resistanceVal != null ? resistanceVal : null)}</p>
                 {resistanceVal != null && <p className="text-zinc-500 text-xs">{resistanceVal.toFixed(0)}</p>}
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function DealDetailPage() {
                   {(r.red_flags as unknown[]).length} red · {(r.yellow_flags as unknown[]).length} yellow
                 </span>
                 {r.risk_score != null && (
-                  <span className="text-amber-400/90">risk {Math.round(r.risk_score)}</span>
+                  <span className="text-cyan-400/90">risk {Math.round(r.risk_score)}</span>
                 )}
               </li>
             ))}
@@ -250,7 +250,7 @@ export default function DealDetailPage() {
 
         {driftPairs.length > 0 && (
           <section className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
-            <h2 className="text-sm font-medium text-amber-400/90 mb-3">Claim Drift</h2>
+            <h2 className="text-sm font-medium text-cyan-400/90 mb-3">Claim Drift</h2>
             <ul className="space-y-4">
               {driftPairs.map((p, i) => (
                 <li key={i} className="text-sm">
@@ -258,7 +258,7 @@ export default function DealDetailPage() {
                   <p className="text-zinc-400 mb-2">{p.original.slice(0, 200)}{p.original.length > 200 ? "…" : ""}</p>
                   <p className="text-zinc-500 text-xs mb-1">Latest</p>
                   <p className="text-zinc-300">{p.latest.slice(0, 200)}{p.latest.length > 200 ? "…" : ""}</p>
-                  <span className="text-amber-400/90 text-xs">{p.status}</span>
+                  <span className="text-cyan-400/90 text-xs">{p.status}</span>
                 </li>
               ))}
             </ul>
