@@ -8,7 +8,7 @@
  * Returns: { streamContext: { PUBLIC_TRANSCRIPT?, PRIVATE_DICTATION?, PITCH_MATERIAL? }, present: StreamLabel[] }
  */
 import { NextRequest, NextResponse } from "next/server";
-import { extractPdfText, extractDocxText, truncate, MAX_STREAM_CHARS, MIN_INPUT_CHARS } from "@/lib/ingest/parse";
+import { extractPdfText, extractDocxText, extractPptxText, truncate, MAX_STREAM_CHARS, MIN_INPUT_CHARS } from "@/lib/ingest/parse";
 import type { StreamContext, StreamLabel } from "@/lib/ingest/types";
 
 export const runtime = "nodejs";
@@ -124,14 +124,12 @@ async function handleIngest(request: NextRequest) {
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error("[ingest] Error:", message, e instanceof Error ? e.stack : "");
-    const isPdfEnvError =
-      /Path2D|canvas|polyfill|pdf|PDF/.test(message) || message.includes("not supported in this environment");
-    if (isPdfEnvError) {
+    const isPdfOpenAIError = message.includes("OPENAI_API_KEY") || /pdf|PDF/.test(message);
+    if (isPdfOpenAIError && message.includes("OPENAI")) {
       return NextResponse.json(
         {
           error: "Pitch deck upload failed",
-          detail:
-            "PDF upload is not supported in this environment. Please paste your pitch text into the box or upload a .txt or .docx file.",
+          detail: "PDF extraction requires OPENAI_API_KEY. Paste your pitch text or upload a .txt, .docx, or .pptx file.",
         },
         { status: 400 }
       );
@@ -161,9 +159,9 @@ async function fileToTextSafe(file: File): Promise<{ text: string } | { error: s
         const msg = e instanceof Error ? e.message : String(e);
         return {
           error:
-            msg.includes("not supported in this environment")
-              ? msg
-              : "This PDF could not be read (e.g. scanned image or unsupported format). Try pasting the text into the box, or upload a .txt or .docx file.",
+            msg.includes("OPENAI_API_KEY")
+              ? "PDF extraction requires OPENAI_API_KEY to be set on the server."
+              : "This PDF could not be read. Try pasting the text into the box or upload a .txt, .docx, or .pptx file.",
         };
       }
     }
@@ -177,10 +175,20 @@ async function fileToTextSafe(file: File): Promise<{ text: string } | { error: s
         };
       }
     }
+    if (name.endsWith(".pptx")) {
+      try {
+        const text = await extractPptxText(buf);
+        return { text: text || "" };
+      } catch {
+        return {
+          error: "This PPTX could not be read. Try saving as PDF or paste the text into the box.",
+        };
+      }
+    }
     if (name.endsWith(".txt") || name.endsWith(".md")) {
       return { text: new TextDecoder().decode(buf).trim() };
     }
-    return { error: "Unsupported format. Use .txt, .md, .pdf, or .docx." };
+    return { error: "Unsupported format. Use .txt, .md, .pdf, .docx, or .pptx." };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     return { error: message.slice(0, 200) };

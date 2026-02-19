@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { callLLMServer } from "@/lib/llm/callServer";
 import type { LLMProvider } from "@/lib/llm/types";
-import { crawlUrl } from "./firecrawl";
+import { scrapeUrlsWithTimeBudget } from "./firecrawl";
 
 export interface RobinVoiceProfile {
   tone: string;
@@ -114,34 +114,27 @@ export function buildVoiceProfileText(profile: {
   return parts.length ? parts.join("\n\n") : profile.bio ?? null;
 }
 
+const MIN_CORPUS_CHARS = 1000;
+
 export async function buildVoiceProfileFromLinks(params: {
   urls: string[];
   provider?: LLMProvider;
   model?: string;
   manualText?: string;
+  /** Max time to spend scraping links (default 5 minutes). */
+  maxCrawlMs?: number;
 }): Promise<RobinVoiceProfile | null> {
-  const { urls, provider = "openai", model, manualText } = params;
-  const uniqueUrls = Array.from(new Set(urls.map((u) => u.trim()).filter(Boolean)));
+  const { urls, provider = "openai", model, manualText, maxCrawlMs = 5 * 60 * 1000 } = params;
 
-  let corpus = "";
-  for (const url of uniqueUrls) {
-    try {
-      const text = await crawlUrl(url);
-      if (text) {
-        corpus += `\n\n===== ${url} =====\n\n${text}`;
-      }
-    } catch {
-      // Ignore individual URL failures; continue with others
-    }
-  }
+  const { corpus } = await scrapeUrlsWithTimeBudget(urls, maxCrawlMs);
 
-  if (!corpus.trim() && !manualText?.trim()) {
+  if (!corpus && !manualText?.trim()) {
     return null;
   }
 
   const effectiveText = corpus.trim() || manualText?.trim() || "";
-  if (effectiveText.length < 1000 && !manualText?.trim()) {
-    // Too little public content and no manual fallback provided
+  if (effectiveText.length < MIN_CORPUS_CHARS && !manualText?.trim()) {
+    // After up to 5 min of scraping, not enough content — ask for 30s description
     return null;
   }
 

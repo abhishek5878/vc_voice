@@ -208,9 +208,28 @@ export default function InputInterface({
         }
         return;
       }
+      if (name.endsWith(".pptx") && stream === "PITCH_MATERIAL") {
+        setFileStatus((s) => ({ ...s, [stream]: `Extracting ${file.name}…` }));
+        try {
+          const formData = new FormData();
+          formData.set("file", file);
+          const res = await fetch("/api/extract-pitch", { method: "POST", body: formData });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || data.detail || "Extract failed");
+          const text = (data.text as string) || "";
+          setPitchMaterial((prev) => (prev ? prev + "\n\n" + text : text));
+          setFileStatus((s) => ({ ...s, [stream]: `Parsed ${file.name}` }));
+        } catch (e) {
+          setFileStatus((s) => ({
+            ...s,
+            [stream]: `Error: ${e instanceof Error ? e.message : "PPTX extract failed"}`,
+          }));
+        }
+        return;
+      }
       setFileStatus((s) => ({
         ...s,
-        [stream]: "Unsupported format. Use .txt, .md, .pdf, .docx",
+        [stream]: "Unsupported format. Use .txt, .md, .pdf, .docx, .pptx",
       }));
     },
     []

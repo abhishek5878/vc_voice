@@ -39,11 +39,13 @@ export async function POST(request: NextRequest) {
 
     await upsertRobinProfile(userId, { scrape_status: "running", scrape_error: null }, supabase);
 
+    const maxCrawlMs = 5 * 60 * 1000; // 5 minutes
     const profile = await buildVoiceProfileFromLinks({
       urls,
       provider: "openai",
       model: "gpt-4o-mini",
       manualText,
+      maxCrawlMs,
     });
 
     if (!profile) {
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
         {
           user_id: userId,
           status: "insufficient_content",
+          message: "We scraped your links for up to 5 minutes but need a bit more. Describe your investment style in 30 seconds (type or speak and paste the transcript).",
         },
         { status: 200 }
       );

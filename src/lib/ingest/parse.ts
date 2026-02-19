@@ -1,35 +1,94 @@
 /**
- * Parse PDF and DOCX to plain text. Used by ingestion API.
- * Mammoth is imported dynamically so DOCX parsing only loads when needed (avoids Vercel cold-start issues).
+ * Parse PDF, DOCX, and PPTX to plain text. Used by ingestion API.
+ * PDF/PPT: OpenAI API (vision-capable model). DOCX: mammoth.
  */
 
-const PDF_UNSUPPORTED_MSG =
-  "PDF upload is not supported in this environment (e.g. Vercel serverless). Please paste your pitch text into the box or upload a .txt or .docx file.";
+const EXTRACT_PROMPT =
+  "Extract all text from this document in order. Return only the extracted text, preserving order and structure. Do not add commentary or headings.";
 
-/** PDF: use pdf-parse only when not on Vercel (Path2D/canvas unavailable in serverless). */
+/**
+ * PDF: use OpenAI Responses API (gpt-4o) with base64 PDF. Works in serverless.
+ * Requires OPENAI_API_KEY.
+ */
 export async function extractPdfText(buffer: Buffer): Promise<string> {
-  if (process.env.VERCEL) {
-    throw new Error(PDF_UNSUPPORTED_MSG);
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured. Set it in your environment for PDF extraction.");
   }
-  try {
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  const OpenAI = (await import("openai")).default;
+  const client = new OpenAI({ apiKey });
+  const base64 = buffer.toString("base64");
+  const response = await client.responses.create({
+    model: "gpt-4o",
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_file", filename: "document.pdf", file_data: `data:application/pdf;base64,${base64}` },
+          { type: "input_text", text: EXTRACT_PROMPT },
+        ],
+      },
+    ],
+  });
+  const text = (response as { output_text?: string }).output_text?.trim() ?? "";
+  return text;
+}
+
+/**
+ * PPTX: use OpenAI Responses API (gpt-4o) with base64 PPTX if supported; otherwise fallback to JSZip.
+ * Requires OPENAI_API_KEY for OpenAI path.
+ */
+export async function extractPptxText(buffer: Buffer): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (apiKey) {
     try {
-      const textResult = await parser.getText();
-      const text = (textResult as { text?: string }).text ?? "";
-      await parser.destroy();
-      return text.trim();
-    } catch (e) {
-      await parser.destroy().catch(() => {});
-      throw e;
+      const OpenAI = (await import("openai")).default;
+      const client = new OpenAI({ apiKey });
+      const base64 = buffer.toString("base64");
+      const response = await client.responses.create({
+        model: "gpt-4o",
+        input: [
+          {
+            role: "user",
+            content: [
+              { type: "input_file", filename: "slides.pptx", file_data: `data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,${base64}` },
+              { type: "input_text", text: EXTRACT_PROMPT },
+            ],
+          },
+        ],
+      });
+      const text = (response as { output_text?: string }).output_text?.trim() ?? "";
+      if (text) return text;
+    } catch {
+      // OpenAI may not support PPTX; fall back to JSZip
     }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("Path2D") || msg.includes("canvas") || msg.includes("polyfill")) {
-      throw new Error(PDF_UNSUPPORTED_MSG);
-    }
-    throw e;
   }
+  return extractPptxTextWithJszip(buffer);
+}
+
+async function extractPptxTextWithJszip(buffer: Buffer): Promise<string> {
+  const JSZip = (await import("jszip")).default;
+  const zip = await JSZip.loadAsync(buffer);
+  const slideNames = Object.keys(zip.files)
+    .filter((n) => n.match(/^ppt\/slides\/slide\d+\.xml$/i))
+    .sort((a, b) => {
+      const numA = parseInt(a.replace(/\D/g, ""), 10) || 0;
+      const numB = parseInt(b.replace(/\D/g, ""), 10) || 0;
+      return numA - numB;
+    });
+  const parts: string[] = [];
+  for (const name of slideNames) {
+    const file = zip.files[name];
+    if (!file?.dir) {
+      const xml = await file.async("string");
+      const textMatches = xml.matchAll(/<a:t>([^<]*)<\/a:t>/g);
+      const text = Array.from(textMatches)
+        .map((m) => m[1])
+        .join(" ");
+      if (text.trim()) parts.push(text.trim());
+    }
+  }
+  return parts.join("\n\n");
 }
 
 export async function extractDocxText(buffer: Buffer): Promise<string> {

@@ -21,6 +21,7 @@ export default function PitchIntake({
   const [pitchText, setPitchText] = useState("");
   const [fetchUrlValue, setFetchUrlValue] = useState("");
   const [fetchUrlLoading, setFetchUrlLoading] = useState(false);
+  const [uploadDeckLoading, setUploadDeckLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -52,6 +53,30 @@ export default function PitchIntake({
     }
   }, [fetchUrlValue]);
 
+  const handleUploadDeck = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setUploadDeckLoading(true);
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      const res = await fetch("/api/extract-pitch", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.detail || "Upload failed");
+      const text = (data.text as string) || "";
+      setPitchText((prev) => (prev ? prev + "\n\n" + text : text));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadDeckLoading(false);
+      e.target.value = "";
+    }
+  }, []);
+
   const buildStreamContext = useCallback((): StreamContext => {
     const parts: string[] = [];
     if (companyName.trim()) {
@@ -67,7 +92,7 @@ export default function PitchIntake({
   const handleStartStressTest = useCallback(() => {
     const ctx = buildStreamContext();
     if (!ctx.PITCH_MATERIAL?.trim()) {
-      setError("Add your company name and/or pitch (paste text or fetch from a URL).");
+      setError("Add your company name and/or pitch (paste text, upload a deck, or fetch from URL).");
       return;
     }
     setError(null);
@@ -174,6 +199,26 @@ export default function PitchIntake({
             rows={6}
             className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/50 resize-y"
           />
+        </div>
+        <div>
+          <label className="block text-xs text-zinc-400 mb-1">
+            Or upload deck (PDF, PPT, or DOCX)
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              accept=".pdf,.docx,.pptx"
+              onChange={handleUploadDeck}
+              className="hidden"
+              id="pitch-deck-upload"
+            />
+            <label
+              htmlFor="pitch-deck-upload"
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium cursor-pointer disabled:opacity-50"
+            >
+              {uploadDeckLoading ? "Extracting…" : "Upload PDF / PPT / DOCX"}
+            </label>
+          </div>
         </div>
         <div>
           <label htmlFor="pitch-url" className="block text-xs text-zinc-400 mb-1">

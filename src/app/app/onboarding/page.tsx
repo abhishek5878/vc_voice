@@ -32,6 +32,8 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [liveLink, setLiveLink] = useState("");
+  const [needManualStep, setNeedManualStep] = useState(false);
+  const [manualDescription, setManualDescription] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -128,7 +130,15 @@ export default function OnboardingPage() {
         },
         body: JSON.stringify({ manualText: bio.trim() || undefined }),
       });
-      await ingestRes.json();
+      const ingestJson = (await ingestRes.json()) as { status?: string; error?: string };
+      if (ingestJson.status === "insufficient_content") {
+        setNeedManualStep(true);
+        setBuilding(false);
+        return;
+      }
+      if (!ingestRes.ok) {
+        throw new Error(ingestJson.error || "Failed to build voice");
+      }
       const origin = typeof window !== "undefined" ? window.location.origin : "";
       setLiveLink(`${origin}/pitch/${trimmedSlug}`);
       setDone(true);
@@ -136,6 +146,48 @@ export default function OnboardingPage() {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setSaving(false);
+      setBuilding(false);
+    }
+  };
+
+  const handleManualBuild = async () => {
+    const text = manualDescription.trim();
+    if (!text) {
+      setError("Add a short description of your investment style.");
+      return;
+    }
+    setError(null);
+    setBuilding(true);
+    try {
+      const token = await getSupabaseAccessToken();
+      if (!token) {
+        router.replace("/auth");
+        return;
+      }
+      const ingestRes = await fetch("/api/profile/ingest", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "x-supabase-access-token": token,
+        },
+        body: JSON.stringify({ manualText: text }),
+      });
+      const ingestJson = (await ingestRes.json()) as { status?: string; error?: string };
+      if (!ingestRes.ok) {
+        throw new Error(ingestJson.error || "Failed to build voice");
+      }
+      if (ingestJson.status === "insufficient_content") {
+        setError("Still not enough. Add a few more sentences about how you evaluate founders.");
+        setBuilding(false);
+        return;
+      }
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      setLiveLink(`${origin}/pitch/${slug.trim().toLowerCase()}`);
+      setDone(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
       setBuilding(false);
     }
   };
@@ -176,6 +228,46 @@ export default function OnboardingPage() {
           >
             Go to Robin
           </Link>
+        </main>
+      </div>
+    );
+  }
+
+  if (needManualStep) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+        <header className="border-b border-zinc-800/80 bg-zinc-950/95 p-4">
+          <div className="max-w-lg mx-auto">
+            <h1 className="text-lg font-semibold tracking-tight">Almost there</h1>
+            <p className="text-xs text-zinc-500 mt-1">
+              We need a bit more to build your voice.
+            </p>
+          </div>
+        </header>
+        <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
+          <p className="text-sm text-zinc-300 mb-4">
+            We scraped your links for up to 5 minutes but don&apos;t have enough yet to sound like you. Describe your investment style in 30 seconds — type below, or speak and paste the transcript.
+          </p>
+          {error && (
+            <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200 mb-4">
+              {error}
+            </div>
+          )}
+          <textarea
+            value={manualDescription}
+            onChange={(e) => setManualDescription(e.target.value)}
+            rows={5}
+            placeholder="e.g. I look for repeat founders with clear metrics. I pass when it's pre-product or the team hasn't shipped..."
+            className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70 resize-y mb-4"
+          />
+          <button
+            type="button"
+            onClick={handleManualBuild}
+            disabled={building || !manualDescription.trim()}
+            className="w-full px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
+          >
+            {building ? "Building your voice…" : "Build my voice"}
+          </button>
         </main>
       </div>
     );

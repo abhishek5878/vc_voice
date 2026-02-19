@@ -282,7 +282,7 @@ export default function ProfileSettingsPage() {
             )}
             {needsManual && (
               <span className="text-xs text-amber-400">
-                We couldn&apos;t find enough from your links. Add a short description below.
+                We scraped for up to 5 min but need more. Describe your investment style in 30 seconds below.
               </span>
             )}
           </div>
@@ -290,19 +290,14 @@ export default function ProfileSettingsPage() {
           {needsManual && (
             <div className="mt-3 space-y-2">
               <p className="text-xs text-zinc-500">
-                Record or think through a 1-minute explanation of:
+                Type or speak for ~30 seconds about how you evaluate founders (what you look for, what you pass on).
               </p>
-              <ul className="text-xs text-zinc-400 list-disc list-inside space-y-1">
-                <li>What you want Robin to handle for you.</li>
-                <li>What kinds of founders / conversations you look for.</li>
-                <li>What you typically say no to.</li>
-              </ul>
               <textarea
                 value={manualText}
                 onChange={(e) => setManualText(e.target.value)}
                 rows={4}
                 className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
-                placeholder="Paste a quick transcript or type your own description here."
+                placeholder="Paste a transcript or type: e.g. I look for repeat founders with clear metrics..."
               />
               <button
                 type="button"
