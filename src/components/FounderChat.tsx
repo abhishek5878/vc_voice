@@ -52,11 +52,14 @@ export default function FounderChat({
   voiceProfile,
   onBack,
   onToast,
+  shareablePitchLink,
 }: {
   initialStreamContext: StreamContext;
   voiceProfile?: string | null;
   onBack: () => void;
   onToast?: (message: string) => void;
+  /** When on a VC pitch page, pass the full URL so "Copy link" shares that instead of /app?mode=3 */
+  shareablePitchLink?: string | null;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -254,7 +257,9 @@ export default function FounderChat({
           <button
             type="button"
             onClick={() => {
-              const url = `${typeof window !== "undefined" ? window.location.origin : ""}/app?mode=3`;
+              const url =
+                shareablePitchLink?.trim() ||
+                `${typeof window !== "undefined" ? window.location.origin : ""}/app?mode=3`;
               void navigator.clipboard.writeText(url);
             }}
             className="text-xs text-amber-500/90 hover:text-amber-400"

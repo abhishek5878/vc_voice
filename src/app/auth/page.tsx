@@ -45,9 +45,9 @@ export default function AuthPage() {
         // Ensure session is in storage before navigation; full reload so next page sees it
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.access_token) {
-          window.location.assign("/app/onboarding");
+          window.location.assign("/app");
         } else {
-          router.push("/app/onboarding");
+          router.push("/app");
         }
       } catch {
         setError("Something went wrong.");

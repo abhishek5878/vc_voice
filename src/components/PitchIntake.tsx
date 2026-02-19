@@ -132,6 +132,8 @@ export default function PitchIntake({
   if (phase === "chat") {
     const initialStreamContext = buildStreamContext();
     const showSubmit = Boolean(slug && investorDisplayName);
+    const shareablePitchLink =
+      typeof window !== "undefined" && slug ? `${window.location.origin}/pitch/${slug}` : null;
     return (
       <div className="space-y-4">
         <FounderChat
@@ -139,6 +141,7 @@ export default function PitchIntake({
           voiceProfile={voiceProfileText}
           onBack={() => setPhase("form")}
           onToast={undefined}
+          shareablePitchLink={shareablePitchLink}
         />
         {showSubmit && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">

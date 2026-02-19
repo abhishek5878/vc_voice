@@ -207,9 +207,9 @@ export default function OnboardingPage() {
           <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6">
             <span className="text-2xl text-emerald-400">✓</span>
           </div>
-          <h1 className="text-xl font-semibold text-zinc-100 mb-2">Your pitch link is live</h1>
+          <h1 className="text-xl font-semibold text-zinc-100 mb-2">Your personalised link is live</h1>
           <p className="text-sm text-zinc-400 mb-6">
-            Share this link with founders. They’ll stress-test their pitch in your voice and can submit to your pipeline.
+            Share this link with founders. They’ll interact with Robin in your voice—stress-test their pitch and submit to your pipeline.
           </p>
           <div className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-700 mb-2">
             <a
@@ -279,7 +279,7 @@ export default function OnboardingPage() {
         <div className="max-w-lg mx-auto">
           <h1 className="text-lg font-semibold tracking-tight">Set up your Robin</h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Add your pitch link and social links so Robin can speak in your voice.
+            Flow: Social links → we build your voice → your personalised link → founders interact with it.
           </p>
         </div>
       </header>
@@ -292,30 +292,9 @@ export default function OnboardingPage() {
           )}
 
           <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">Your pitch link</h2>
+            <h2 className="text-sm font-medium text-zinc-300">1. Social links (build your voice)</h2>
             <p className="text-xs text-zinc-500">
-              Founders will use this URL to pitch you. Choose a unique slug (e.g. your name or firm).
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-zinc-500 text-sm whitespace-nowrap">
-                {typeof window !== "undefined" ? `${window.location.origin}/pitch/` : "/pitch/"}
-              </span>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                placeholder="your-name"
-                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
-                required
-              />
-            </div>
-            <p className="text-[11px] text-zinc-500">3–32 characters; lowercase letters, numbers, and dashes only.</p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">Social links</h2>
-            <p className="text-xs text-zinc-500">
-              Robin will use your public writing to learn your tone and how you evaluate founders. Add at least one.
+              Add your public writing so Robin can learn your tone and how you evaluate founders. We’ll scrape these to build your voice. Add at least one.
             </p>
             <input
               type="url"
@@ -355,6 +334,27 @@ export default function OnboardingPage() {
           </section>
 
           <section className="space-y-3">
+            <h2 className="text-sm font-medium text-zinc-300">2. Your personalised pitch link</h2>
+            <p className="text-xs text-zinc-500">
+              Founders will use this URL to pitch you. Choose a unique slug (e.g. your name or firm).
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-500 text-sm whitespace-nowrap">
+                {typeof window !== "undefined" ? `${window.location.origin}/pitch/` : "/pitch/"}
+              </span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                placeholder="your-name"
+                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+                required
+              />
+            </div>
+            <p className="text-[11px] text-zinc-500">3–32 characters; lowercase letters, numbers, and dashes only.</p>
+          </section>
+
+          <section className="space-y-3">
             <h2 className="text-sm font-medium text-zinc-300">How you evaluate inbound (optional)</h2>
             <p className="text-xs text-zinc-500">
               A short description helps Robin when your links don’t give enough signal.
@@ -369,12 +369,12 @@ export default function OnboardingPage() {
           </section>
 
           <button
-            type="submit"
-            disabled={saving || building}
-            className="w-full px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
-          >
-            {building ? "Building your voice…" : saving ? "Saving…" : "Save & turn on my pitch link"}
-          </button>
+          type="submit"
+          disabled={saving || building}
+          className="w-full px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
+        >
+          {building ? "Building your voice…" : saving ? "Saving…" : "Build my voice & get my pitch link"}
+        </button>
         </form>
       </main>
     </div>
