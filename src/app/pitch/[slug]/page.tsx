@@ -4,6 +4,9 @@ import PitchIntake from "@/components/PitchIntake";
 import { buildVoiceProfileText } from "@/lib/voice/profile";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 
+/** Always load latest profile so saved/updated evaluation style shows. */
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: { slug: string };
   searchParams: { [key: string]: string | string[] | undefined };
