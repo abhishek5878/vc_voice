@@ -15,6 +15,7 @@ export interface RobinVoiceProfile {
 export interface RobinProfileRow {
   user_id: string;
   slug?: string | null;
+  email?: string | null;
   bio: string | null;
   tone: string | null;
   decision_style: string | null;

@@ -47,12 +47,23 @@ const ACTION_ITEMS_SYSTEM = `
 You are summarizing a founder pitch stress-test conversation into 3 concrete action items for the founder. Output exactly 3 bullets, no intro or outro. Each line should be a clear next step they can do (e.g. "Clarify burn rate with a number and runway date", "Add a slide on retention cohorts", "Rewrite the problem statement in one sentence"). Plain text only, no markdown. Number them 1. 2. 3.
 `.trim();
 
+interface SendToInvestorResult {
+  pointers: string;
+  at_par: boolean;
+  vc_email?: string;
+  emailSubject?: string;
+  emailBody?: string;
+}
+
 export default function FounderChat({
   initialStreamContext,
   voiceProfile,
   onBack,
   onToast,
   shareablePitchLink,
+  slug,
+  investorDisplayName,
+  companyName,
 }: {
   initialStreamContext: StreamContext;
   voiceProfile?: string | null;
@@ -60,6 +71,10 @@ export default function FounderChat({
   onToast?: (message: string) => void;
   /** When on a VC pitch page, pass the full URL so "Copy link" shares that instead of /app?mode=3 */
   shareablePitchLink?: string | null;
+  /** VC slug for "Send to [investor]" */
+  slug?: string | null;
+  investorDisplayName?: string | null;
+  companyName?: string;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -67,6 +82,8 @@ export default function FounderChat({
   const [loading, setLoading] = useState(false);
   const [vibeCheckLoading, setVibeCheckLoading] = useState(false);
   const [actionItemsLoading, setActionItemsLoading] = useState(false);
+  const [sendToInvestorLoading, setSendToInvestorLoading] = useState(false);
+  const [sendToInvestorResult, setSendToInvestorResult] = useState<SendToInvestorResult | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const deckText =
@@ -239,6 +256,39 @@ export default function FounderChat({
     }
   }, [messages, actionItemsLoading, onToast]);
 
+  const handleSendToInvestor = useCallback(async () => {
+    if (!slug || messages.length < 2 || sendToInvestorLoading) return;
+    setError(null);
+    setSendToInvestorResult(null);
+    setSendToInvestorLoading(true);
+    try {
+      const res = await fetch("/api/pitch/send-to-investor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          messages: messages.map((m) => ({ role: m.role, content: m.content })),
+          companyName: companyName?.trim() || "Unknown",
+        }),
+      });
+      const data = (await res.json()) as SendToInvestorResult & { error?: string; detail?: string };
+      if (!res.ok) throw new Error(data.error || data.detail || "Failed");
+      setSendToInvestorResult({
+        pointers: data.pointers ?? "",
+        at_par: Boolean(data.at_par),
+        vc_email: data.vc_email,
+        emailSubject: data.emailSubject,
+        emailBody: data.emailBody,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not get pointers");
+    } finally {
+      setSendToInvestorLoading(false);
+    }
+  }, [slug, messages, companyName, sendToInvestorLoading]);
+
+  const showSendToInvestor = Boolean(slug && investorDisplayName);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-between">
@@ -268,6 +318,17 @@ export default function FounderChat({
           </button>
           {messages.length >= 2 && (
             <>
+              {showSendToInvestor && (
+                <button
+                  type="button"
+                  onClick={() => void handleSendToInvestor()}
+                  disabled={sendToInvestorLoading}
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-xs font-medium border border-amber-400/50 disabled:opacity-50"
+                  title={`Get pointers from ${investorDisplayName} and optionally email them`}
+                >
+                  {sendToInvestorLoading ? "Generating…" : `Send to ${investorDisplayName}`}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => void copyActionItems()}
@@ -309,6 +370,36 @@ export default function FounderChat({
           <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs mb-1">
             {error}
           </div>
+        )}
+        {sendToInvestorResult && (
+          <section className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 space-y-3">
+            <h3 className="text-sm font-medium text-amber-400/90">
+              {investorDisplayName}’s pointers for you
+            </h3>
+            <p className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">
+              {sendToInvestorResult.pointers}
+            </p>
+            {sendToInvestorResult.at_par && sendToInvestorResult.vc_email && (
+              <div className="pt-2 border-t border-amber-500/20">
+                <p className="text-xs text-zinc-400 mb-2">
+                  You’re at par. Email your profile and evidence directly to {investorDisplayName}:
+                </p>
+                <a
+                  href={`mailto:${encodeURIComponent(sendToInvestorResult.vc_email)}?subject=${encodeURIComponent(sendToInvestorResult.emailSubject ?? "")}&body=${encodeURIComponent(sendToInvestorResult.emailBody ?? "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-medium"
+                >
+                  Email my pitch to {investorDisplayName}
+                </a>
+              </div>
+            )}
+            {sendToInvestorResult.at_par && !sendToInvestorResult.vc_email && (
+              <p className="text-xs text-zinc-500 pt-2 border-t border-amber-500/20">
+                You’re at par. This investor hasn’t set a contact email yet—submit your pitch using the button below to land in their queue.
+              </p>
+            )}
+          </section>
         )}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4 flex-1">
           <section className="hidden lg:flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-xs text-zinc-400 overflow-hidden">

@@ -8,6 +8,7 @@ import type { RobinVoiceProfile } from "@/lib/voice/profile";
 interface ProfileResponse {
   user_id: string;
   slug?: string | null;
+  email?: string | null;
   bio: string | null;
   tone: string | null;
   decision_style: string | null;
@@ -98,6 +99,7 @@ export default function ProfileSettingsPage() {
         },
         body: JSON.stringify({
           slug: slugValue || null,
+          email: profile.email ?? null,
           bio: profile.bio ?? null,
           tone: profile.tone ?? null,
           decision_style: profile.decision_style ?? null,
@@ -224,6 +226,20 @@ export default function ProfileSettingsPage() {
           <p className="text-[11px] text-zinc-500">
             3–32 characters; lowercase letters, numbers, and dashes only.
           </p>
+        </section>
+
+        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
+          <h2 className="text-sm font-medium text-zinc-300">Contact email (for founders when at par)</h2>
+          <p className="text-xs text-zinc-500 mb-1">
+            When a founder&apos;s conversation quality is at par, they can email their profile and evidence directly to this address.
+          </p>
+          <input
+            type="email"
+            value={profile.email ?? ""}
+            onChange={(e) => handleChange("email", e.target.value)}
+            placeholder="you@firm.com"
+            className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/70"
+          />
         </section>
 
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">

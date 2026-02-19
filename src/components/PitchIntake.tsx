@@ -142,6 +142,9 @@ export default function PitchIntake({
           onBack={() => setPhase("form")}
           onToast={undefined}
           shareablePitchLink={shareablePitchLink}
+          slug={slug}
+          investorDisplayName={investorDisplayName}
+          companyName={companyName}
         />
         {showSubmit && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
