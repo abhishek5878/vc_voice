@@ -184,8 +184,10 @@ export default function ProfileSettingsPage() {
           <p className="text-xs text-zinc-500 mb-1">
             This becomes your shareable link for founders (e.g. on X / LinkedIn). Slug must be unique.
           </p>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-zinc-500">robin.ai/pitch/</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-zinc-500">
+              {typeof window !== "undefined" ? `${window.location.origin}/pitch/` : ""}
+            </span>
             <input
               value={profile.slug ?? ""}
               onChange={(e) => handleChange("slug", e.target.value.toLowerCase())}

@@ -3,7 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Robin.ai – Your calendar, filtered.",
   description:
-    "Screen inbound founder requests and stress-test meeting transcripts. Built for solo GPs and small-fund partners.",
+    "Sign up, get your shareable pitch link, and let founders stress-test in your voice. They submit; you see them in your pipeline. Built for solo GPs and small-fund partners.",
 };
 
 export default function LandingPage() {
@@ -16,14 +16,11 @@ export default function LandingPage() {
             Robin.ai
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/app?mode=3" className="text-sm text-zinc-400 hover:text-amber-400 transition-colors">
-              For founders
+            <Link href="/auth" className="text-sm text-zinc-400 hover:text-amber-400 transition-colors">
+              Log in
             </Link>
-            <Link href="/app" className="btn-primary text-sm">
-              Open Robin
-            </Link>
-            <Link href="/auth" className="btn-secondary text-sm">
-              Sign in
+            <Link href="/auth" className="btn-primary text-sm">
+              Sign up
             </Link>
           </div>
         </div>
@@ -36,17 +33,54 @@ export default function LandingPage() {
             Your calendar, filtered.
           </p>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-100 mb-5 leading-[1.15]">
-            Screen inbound requests. Stress-test meetings. One workflow.
+            Get your own Robin. Share a link. Founders pitch in your voice.
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-            Robin runs skeptical conversations with founders, extracts signals, and recommends meet, refer, or pass—so you get a pipeline and one place to override. No screening emails.
+            Sign up, set your profile, and get a shareable link. Founders who use it stress-test their pitch the way you would—then land in your pipeline. No screening emails.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/app" className="btn-primary px-6 py-3 text-base">
-              Open Robin
+            <Link href="/auth" className="btn-primary px-6 py-3 text-base">
+              Sign up free
             </Link>
             <Link href="/auth" className="btn-secondary px-6 py-3 text-base">
-              Sign up free
+              Log in
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works — VC flow */}
+      <section className="py-16 sm:py-20 border-t border-zinc-800/60">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">How it works</p>
+          <h2 className="text-2xl font-semibold text-zinc-200 mb-10">
+            Sign up → Get your link → Share with founders
+          </h2>
+          <div className="grid sm:grid-cols-4 gap-6">
+            <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span className="inline-block text-lg font-mono font-semibold text-amber-500/90 mb-2">1</span>
+              <p className="text-sm font-medium text-zinc-300">Sign up</p>
+              <p className="text-xs text-zinc-500 mt-1">Create your account. No credit card required.</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span className="inline-block text-lg font-mono font-semibold text-amber-500/90 mb-2">2</span>
+              <p className="text-sm font-medium text-zinc-300">Set your profile</p>
+              <p className="text-xs text-zinc-500 mt-1">Add your thesis, links, tone. Robin learns your voice.</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span className="inline-block text-lg font-mono font-semibold text-amber-500/90 mb-2">3</span>
+              <p className="text-sm font-medium text-zinc-300">Get your link</p>
+              <p className="text-xs text-zinc-500 mt-1">Your unique pitch link (e.g. /pitch/you). Share on X, LinkedIn, or email.</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span className="inline-block text-lg font-mono font-semibold text-amber-500/90 mb-2">4</span>
+              <p className="text-sm font-medium text-zinc-300">Founders pitch</p>
+              <p className="text-xs text-zinc-500 mt-1">They stress-test in your voice and submit. You see them in your pipeline.</p>
+            </div>
+          </div>
+          <div className="mt-8 text-center">
+            <Link href="/auth" className="btn-primary inline-flex px-6 py-3 text-base">
+              Get started
             </Link>
           </div>
         </div>
@@ -80,40 +114,33 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* For Founders — Lennybot / Mean VC style: one clear entry */}
+      {/* For founders — use the link your VC sent */}
       <section className="py-16 sm:py-20 border-t border-zinc-800/60 bg-gradient-to-b from-amber-500/5 to-transparent">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <p className="text-xs uppercase tracking-wider text-amber-500/90 mb-2">For founders</p>
           <h2 className="text-2xl font-semibold text-zinc-200 mb-3">
-            Stress-test your pitch before the real meeting
+            Use the link your VC sent you
           </h2>
-          <p className="text-zinc-400 text-[0.9375rem] max-w-2xl mb-8">
-            Paste your deck or one-liner. Get interrogated by a blunt, skeptical VC—short answers, real numbers, no fluff. 
-            The kind of pushback that makes your pitch stronger. Used by founders prepping for partner meetings and fundraising.
+          <p className="text-zinc-400 text-[0.9375rem] max-w-2xl mb-6">
+            If an investor shared a Robin link with you (e.g. robin.ai/pitch/theirname), open that link. You’ll paste your deck or one-liner, get stress-tested in their voice, and can submit your pitch straight to their pipeline. No signup—just use the link.
           </p>
-          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
               <span className="text-xs font-mono text-amber-500/90">1</span>
-              <p className="text-sm text-zinc-300 mt-1">Paste your deck or pitch</p>
-              <p className="text-xs text-zinc-500 mt-0.5">PDF, doc, or raw text. No signup required.</p>
+              <p className="text-sm text-zinc-300 mt-1">Open the link</p>
+              <p className="text-xs text-zinc-500 mt-0.5">The one your VC shared (X, LinkedIn, or email).</p>
             </div>
             <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
               <span className="text-xs font-mono text-amber-500/90">2</span>
-              <p className="text-sm text-zinc-300 mt-1">Get interrogated</p>
-              <p className="text-xs text-zinc-500 mt-0.5">Blunt questions. Demand for specifics. Concrete rewrites.</p>
+              <p className="text-sm text-zinc-300 mt-1">Paste your pitch</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Deck, one-pager, or narrative. Get interrogated in their style.</p>
             </div>
             <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800">
               <span className="text-xs font-mono text-amber-500/90">3</span>
-              <p className="text-sm text-zinc-300 mt-1">Tighten before the call</p>
-              <p className="text-xs text-zinc-500 mt-0.5">Walk in ready for the hard questions.</p>
+              <p className="text-sm text-zinc-300 mt-1">Submit to their pipeline</p>
+              <p className="text-xs text-zinc-500 mt-0.5">They see your pitch and analysis in their dashboard.</p>
             </div>
           </div>
-          <Link
-            href="/app?mode=3"
-            className="btn-primary inline-flex px-6 py-3 text-base"
-          >
-            Start stress-test →
-          </Link>
         </div>
       </section>
 
@@ -126,6 +153,7 @@ export default function LandingPage() {
               "Fewer bad meetings. Your calendar becomes the moat, not the bottleneck.",
               "One workflow: triage state, pipeline, overrides, and post-meeting analysis in one place.",
               "Your bar, not a generic chatbot. Robin uses your thesis and config (harshness, turn count, rejection message).",
+              "Share a pitch link with founders (e.g. robin.ai/pitch/you)—they stress-test in your voice and submit to your pipeline.",
             ].map((text, i) => (
               <li key={i} className="flex items-start gap-3 text-zinc-400 text-[0.9375rem]">
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500/80 shrink-0" />
@@ -202,11 +230,11 @@ export default function LandingPage() {
       <footer className="py-12 sm:py-16 border-t border-zinc-800/60">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href="/app" className="btn-primary px-6 py-3">
-              Open Robin
+            <Link href="/auth" className="btn-primary px-6 py-3">
+              Sign up free
             </Link>
             <Link href="/auth" className="btn-secondary px-6 py-3">
-              Sign up
+              Log in
             </Link>
           </div>
           <div className="flex items-center gap-4 text-xs text-zinc-500">
