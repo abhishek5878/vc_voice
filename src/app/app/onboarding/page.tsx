@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getSupabaseAccessToken } from "@/lib/deals/supabase-auth";
 
 interface ProfileResponse {
   user_id: string;
@@ -36,16 +35,13 @@ export default function OnboardingPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const token = await getSupabaseAccessToken();
-      if (!token) {
-        if (!cancelled) router.replace("/auth");
-        setLoading(false);
-        return;
-      }
       try {
-        const res = await fetch("/api/profile", {
-          headers: { "x-supabase-access-token": token },
-        });
+        const res = await fetch("/api/profile", { credentials: "include" });
+        if (res.status === 401) {
+          if (!cancelled) router.replace("/auth");
+          setLoading(false);
+          return;
+        }
         if (!res.ok) throw new Error("Failed to load profile");
         const json = (await res.json()) as ProfileResponse;
         if (cancelled) return;
@@ -86,17 +82,10 @@ export default function OnboardingPage() {
     setError(null);
     setSaving(true);
     try {
-      const token = await getSupabaseAccessToken();
-      if (!token) {
-        router.replace("/auth");
-        return;
-      }
       const res = await fetch("/api/profile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "x-supabase-access-token": token,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slug: trimmedSlug,
           bio: bio.trim() || null,
@@ -112,10 +101,8 @@ export default function OnboardingPage() {
       setBuilding(true);
       const ingestRes = await fetch("/api/profile/ingest", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-supabase-access-token": token,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ manualText: bio.trim() || undefined }),
       });
       await ingestRes.json();

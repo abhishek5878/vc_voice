@@ -12,18 +12,11 @@ import {
   getStrengthPercentile,
 } from "@/lib/deals/db";
 
-function getAccessToken(request: NextRequest): string | null {
-  const header = request.headers.get("x-supabase-access-token");
-  if (header?.trim()) return header.trim();
-  return null;
-}
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ dealId: string }> }
 ) {
-  const token = getAccessToken(request);
-  const userId = await getUserIdFromRequest(token);
+  const userId = await getUserIdFromRequest(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -54,8 +47,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ dealId: string }> }
 ) {
-  const token = getAccessToken(request);
-  const userId = await getUserIdFromRequest(token);
+  const userId = await getUserIdFromRequest(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

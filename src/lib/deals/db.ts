@@ -1,11 +1,21 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { NextRequest } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { Deal, DealRun, FounderClaimRow } from "./types";
 import { pipelineResultToRunPayload } from "./persist";
 import type { PipelineResult } from "@/lib/pipeline/types";
 
-export async function getUserIdFromRequest(accessToken: string | null): Promise<string | null> {
-  if (!accessToken?.trim()) return null;
+const PASSCODE_COOKIE = "robin_passcode_verified";
+
+/** Resolve user ID from passcode cookie (ROBIN_USER_ID) or from Supabase access token. */
+export async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
+  const passcodeVerified = request.cookies.get(PASSCODE_COOKIE)?.value === "1";
+  if (passcodeVerified) {
+    const fixedUserId = process.env.ROBIN_USER_ID?.trim();
+    if (fixedUserId) return fixedUserId;
+  }
+  const accessToken = request.headers.get("x-supabase-access-token")?.trim() ?? null;
+  if (!accessToken) return null;
   const supabase = await createServerSupabase();
   const {
     data: { user },

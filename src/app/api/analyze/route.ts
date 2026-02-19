@@ -1,8 +1,8 @@
 /**
  * POST /api/analyze
- * Body: { streamContext, mode: 1|2|3, provider?, model?, companyName?, supabaseAccessToken? }
- * Auth: uses server-side OPENAI_API_KEY for all LLM calls.
- * Runs SPA pipeline and returns full report. If supabaseAccessToken + companyName, persists to deal + deal_runs.
+ * Body: { streamContext, mode: 1|2|3, provider?, model?, companyName? }
+ * Auth: user from passcode cookie (ROBIN_USER_ID) or x-supabase-access-token. Uses server OPENAI_API_KEY for LLM.
+ * Persists to deal + deal_runs when user and companyName present.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { runPipeline } from "@/lib/pipeline/run";
@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
     provider?: "openai" | "anthropic" | "groq";
     model?: string;
     companyName?: string;
-    supabaseAccessToken?: string;
   };
   try {
     body = await request.json();
@@ -35,41 +34,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   const companyName = typeof body.companyName === "string" ? body.companyName.trim() : "";
-  const supabaseAccessToken =
-    typeof body.supabaseAccessToken === "string" ? body.supabaseAccessToken.trim() : null;
 
   let voiceProfile: string | null = null;
-  let userIdForDeals: string | null = null;
-  if (supabaseAccessToken) {
-    userIdForDeals = await getUserIdFromRequest(supabaseAccessToken);
-    if (userIdForDeals) {
-      try {
-        const profile = await getRobinProfile(userIdForDeals);
-        if (profile?.voice_profile) {
-          const vp = profile.voice_profile;
-          const parts: string[] = [];
-          if (vp.tone) parts.push(`Tone: ${vp.tone}`);
-          if (vp.evaluation_heuristics?.length) {
-            parts.push(
-              `How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`
-            );
-          }
-          if (vp.green_flags?.length) {
-            parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
-          }
-          if (vp.red_flags?.length) {
-            parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
-          }
-          if (vp.favorite_phrases?.length) {
-            parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
-          }
-          voiceProfile = parts.join("\n\n");
-        } else if (profile?.bio) {
-          voiceProfile = profile.bio;
+  const userIdForDeals = await getUserIdFromRequest(request);
+  if (userIdForDeals) {
+    try {
+      const profile = await getRobinProfile(userIdForDeals);
+      if (profile?.voice_profile) {
+        const vp = profile.voice_profile;
+        const parts: string[] = [];
+        if (vp.tone) parts.push(`Tone: ${vp.tone}`);
+        if (vp.evaluation_heuristics?.length) {
+          parts.push(
+            `How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`
+          );
         }
-      } catch {
-        // Voice profile fetch failure should not break analysis
+        if (vp.green_flags?.length) {
+          parts.push(`Green flags:\n- ${vp.green_flags.slice(0, 5).join("\n- ")}`);
+        }
+        if (vp.red_flags?.length) {
+          parts.push(`Red flags they often mention:\n- ${vp.red_flags.slice(0, 5).join("\n- ")}`);
+        }
+        if (vp.favorite_phrases?.length) {
+          parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
+        }
+        voiceProfile = parts.join("\n\n");
+      } else if (profile?.bio) {
+        voiceProfile = profile.bio;
       }
+    } catch {
+      // Voice profile fetch failure should not break analysis
     }
   }
 
@@ -107,26 +101,23 @@ export async function POST(request: NextRequest) {
     });
 
     let dealId: string | null = null;
-    if (supabaseAccessToken && companyName && userIdForDeals) {
-      const userId = userIdForDeals;
-      if (userId) {
-        try {
-          const deal = await upsertDeal(userId, companyName || "Unknown");
-          dealId = deal.id;
-          const run = await insertDealRun(deal.id, result);
-          const claims = extractClaims(result);
-          await insertFounderClaims(
-            deal.id,
-            run.id,
-            claims.map((c) => ({
-              claim: c.claim,
-              source_quote: c.source_quote,
-              status: c.status,
-            }))
-          );
-        } catch {
-          // Persist failure does not fail the request; result still returned
-        }
+    if (companyName && userIdForDeals) {
+      try {
+        const deal = await upsertDeal(userIdForDeals, companyName || "Unknown");
+        dealId = deal.id;
+        const run = await insertDealRun(deal.id, result);
+        const claims = extractClaims(result);
+        await insertFounderClaims(
+          deal.id,
+          run.id,
+          claims.map((c) => ({
+            claim: c.claim,
+            source_quote: c.source_quote,
+            status: c.status,
+          }))
+        );
+      } catch {
+        // Persist failure does not fail the request; result still returned
       }
     }
 

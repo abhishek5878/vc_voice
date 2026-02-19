@@ -45,11 +45,9 @@ export default function AppPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const token = await getSupabaseAccessToken();
-      if (!token) return;
       try {
-        const res = await fetch("/api/profile", { headers: { "x-supabase-access-token": token } });
-        if (!res.ok || cancelled) return;
+        const res = await fetch("/api/profile", { credentials: "include" });
+        if (res.status === 401 || !res.ok || cancelled) return;
         const profile = (await res.json()) as { slug?: string | null };
         if (!cancelled && profile && !profile.slug?.trim()) {
           window.location.replace("/app/onboarding");

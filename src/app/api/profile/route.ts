@@ -2,15 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/deals/db";
 import { getRobinProfile, upsertRobinProfile } from "@/lib/voice/profile";
 
-function getAccessToken(request: NextRequest): string | null {
-  const header = request.headers.get("x-supabase-access-token");
-  if (header?.trim()) return header.trim();
-  return null;
-}
-
 export async function GET(request: NextRequest) {
-  const token = getAccessToken(request);
-  const userId = await getUserIdFromRequest(token);
+  const userId = await getUserIdFromRequest(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -24,8 +17,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const token = getAccessToken(request);
-  const userId = await getUserIdFromRequest(token);
+  const userId = await getUserIdFromRequest(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

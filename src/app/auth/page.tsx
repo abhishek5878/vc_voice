@@ -2,80 +2,42 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserSupabase } from "@/lib/supabase/client";
-
-type Mode = "login" | "register";
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<Mode>("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const router = useRouter();
+  const [passcode, setPasscode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const switchMode = (next: Mode) => {
-    setMode(next);
-    setError(null);
-  };
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setError(null);
-
-      const trimmedEmail = email.trim();
-      if (!trimmedEmail || !password) {
-        setError("Enter your email and password.");
+      const trimmed = passcode.trim();
+      if (!trimmed) {
+        setError("Enter the passcode.");
         return;
       }
-
+      setError(null);
       setLoading(true);
       try {
-        const supabase = createBrowserSupabase();
-
-        if (mode === "login") {
-          const { data, error: err } = await supabase.auth.signInWithPassword({
-            email: trimmedEmail,
-            password,
-          });
-          if (err) {
-            setError(err.message || "Login failed.");
-            return;
-          }
-          if (!data.session) {
-            setError("Login failed. No active session returned.");
-            return;
-          }
-        } else {
-          const displayName = (name || "My Workspace").trim();
-          const { data, error: err } = await supabase.auth.signUp({
-            email: trimmedEmail,
-            password,
-            options: {
-              data: { name: displayName },
-            },
-          });
-          if (err) {
-            setError(err.message || "Sign up failed.");
-            return;
-          }
-          if (!data.session) {
-            setError("Sign up succeeded. If email confirmation is enabled, check your inbox and then log in.");
-            setLoading(false);
-            return;
-          }
+        const res = await fetch("/api/auth/passcode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passcode: trimmed }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Incorrect passcode.");
+          setLoading(false);
+          return;
         }
-
-        router.push("/auth/passcode");
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Unexpected error.");
-      } finally {
+        router.push("/app/onboarding");
+      } catch {
+        setError("Something went wrong.");
         setLoading(false);
       }
     },
-    [mode, email, password, name, router]
+    [passcode, router]
   );
 
   return (
@@ -85,78 +47,20 @@ export default function AuthPage() {
           <h1 className="text-xl font-semibold tracking-tight mb-1">Robin.ai</h1>
           <p className="text-xs text-zinc-500 mb-6">Your calendar, filtered.</p>
 
-          <div className="flex gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => switchMode("login")}
-              className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                mode === "login"
-                  ? "bg-amber-600 text-zinc-950"
-                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-700/50"
-              }`}
-            >
-              Log in
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode("register")}
-              className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                mode === "register"
-                  ? "bg-amber-600 text-zinc-950"
-                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-700/50"
-              }`}
-            >
-              Sign up
-            </button>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "register" && (
-              <div className="space-y-1.5">
-                <label className="block text-xs text-zinc-400" htmlFor="name">
-                  Name (optional)
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  autoComplete="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
-                  placeholder="My Workspace"
-                />
-              </div>
-            )}
-
             <div className="space-y-1.5">
-              <label className="block text-xs text-zinc-400" htmlFor="email">
-                Email
+              <label className="block text-xs text-zinc-400" htmlFor="passcode">
+                Passcode
               </label>
               <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
-                placeholder="you@company.com"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs text-zinc-400" htmlFor="password">
-                Password {mode === "register" && <span className="text-zinc-500">(min 6)</span>}
-              </label>
-              <input
-                id="password"
+                id="passcode"
                 type="password"
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                required
-                minLength={mode === "register" ? 6 : undefined}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
+                placeholder="Enter passcode"
               />
             </div>
 
@@ -167,7 +71,7 @@ export default function AuthPage() {
               disabled={loading}
               className="btn-primary w-full py-2.5 mt-1"
             >
-              {loading ? (mode === "login" ? "Logging in…" : "Signing up…") : mode === "login" ? "Log in" : "Sign up"}
+              {loading ? "Verifying…" : "Sign in"}
             </button>
           </form>
 
@@ -187,4 +91,3 @@ export default function AuthPage() {
     </div>
   );
 }
-
