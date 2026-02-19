@@ -2,7 +2,7 @@ import Link from "next/link";
 import FAQAccordion from "@/components/landing/FAQAccordion";
 
 export const metadata = {
-  title: "Robin.ai – Your Investment Bar, Automated.",
+  title: "PitchRobin – Your Investment Bar, Automated.",
   description:
     "Clone your exact decision criteria. Let founders pitch your digital twin. Get Belief Maps, not just decks.",
 };
@@ -46,7 +46,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
           <Link href="/" className="text-lg font-semibold tracking-tight text-slate-100 hover:text-cyan-400 transition-colors">
-            Robin.ai
+            PitchRobin
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/auth" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors">
@@ -65,7 +65,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="text-center lg:text-left">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-50 mb-4 leading-[1.1]">
-                Your Investment Bar — Automated
+                Your Investment Bar, Automated
               </h1>
               <p className="text-lg text-slate-400 mb-6 leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Clone your exact decision criteria. Let founders pitch your digital twin. Get Belief Maps, not just decks.
@@ -73,7 +73,7 @@ export default function LandingPage() {
               <ul className="space-y-2 mb-8 text-slate-300 text-sm">
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                  Belief Map per pitch — evidence held vs. collapsed
+                  Belief Map per pitch: evidence held vs. collapsed
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
@@ -81,12 +81,12 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                  Your bar, your tone — no generic chatbot
+                  Your bar, your tone. No generic chatbot.
                 </li>
               </ul>
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <Link href="/auth" className="btn-primary px-8 py-4 text-base w-full sm:w-auto">
-                  Create Your Pitch Link — Free
+                  Create Your Pitch Link (Free)
                 </Link>
                 <p className="text-xs text-slate-500">No credit card · Set up in 2 minutes</p>
               </div>
@@ -94,7 +94,7 @@ export default function LandingPage() {
                 <span className="inline-flex items-center gap-1.5 text-slate-400">
                   <IconLock /> Stateful &amp; Private
                 </span>
-                — Your data never trains public models
+                · Your data never trains public models
               </p>
             </div>
             {/* Hero: Belief Map mock */}
@@ -103,7 +103,7 @@ export default function LandingPage() {
                 <span className="w-3 h-3 rounded-full bg-red-500/80" />
                 <span className="w-3 h-3 rounded-full bg-amber-500/80" />
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="text-xs text-slate-500 ml-2">Belief Map — Acme Inc.</span>
+                <span className="text-xs text-slate-500 ml-2">Belief Map · Acme Inc.</span>
               </div>
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between text-xs">
@@ -143,7 +143,7 @@ export default function LandingPage() {
             20 hours a week on first-look calls. Inbox full of decks you&apos;ll never open.
           </p>
           <p className="text-slate-300">
-            <strong className="text-cyan-400">Robin is your first-pass filter</strong> — stateful AI wired to your bar, interrogation style, and portfolio gaps.
+            <strong className="text-cyan-400">Robin is your first-pass filter</strong>: stateful AI wired to your bar, interrogation style, and portfolio gaps.
           </p>
         </div>
       </section>
@@ -169,8 +169,8 @@ export default function LandingPage() {
                 <IconDeploy />
               </div>
               <h3 className="font-semibold text-slate-100 mb-2">2. Deploy Your Link</h3>
-              <p className="text-sm text-slate-400 mb-3">Add <code className="text-slate-300 bg-slate-700/50 px-1 rounded">robin.ai/pitch/you</code> to X, LinkedIn, or auto-reply.</p>
-              <p className="text-xs text-cyan-300/90">Founders enter a simulation of a call with you — not just &quot;submit.&quot;</p>
+              <p className="text-sm text-slate-400 mb-3">Add <code className="text-slate-300 bg-slate-700/50 px-1 rounded">pitchrobin.work/pitch/you</code> to X, LinkedIn, or auto-reply.</p>
+              <p className="text-xs text-cyan-300/90">Founders enter a simulation of a call with you, not just &quot;submit.&quot;</p>
             </div>
             <div className="card-hover p-6 rounded-2xl border border-slate-700/80 bg-slate-800/30">
               <div className="mb-4">
@@ -183,7 +183,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-10 text-center">
             <Link href="/auth" className="btn-primary px-8 py-3">
-              Create Your Pitch Link — Free
+              Create Your Pitch Link (Free)
             </Link>
           </div>
         </div>
@@ -250,15 +250,15 @@ export default function LandingPage() {
           <ul className="space-y-3 text-slate-400 text-sm">
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-              <span><strong className="text-slate-300">Conflict Report</strong> — Where did claims contradict the data?</span>
+              <span><strong className="text-slate-300">Conflict Report</strong>: where did claims contradict the data?</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-              <span><strong className="text-slate-300">GRUE Checklist</strong> — Growth, Retention, Unit economics, Execution.</span>
+              <span><strong className="text-slate-300">GRUE Checklist</strong>: Growth, Retention, Unit economics, Execution.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-              <span><strong className="text-slate-300">Next-call script</strong> — The 3 toughest questions for the second partner meeting.</span>
+              <span><strong className="text-slate-300">Next-call script</strong>: the 3 toughest questions for the second partner meeting.</span>
             </li>
           </ul>
         </div>
@@ -274,15 +274,15 @@ export default function LandingPage() {
           <ul className="space-y-3 text-slate-400 text-sm">
             <li className="flex items-start gap-3">
               <span className="text-cyan-400 mt-0.5">✓</span>
-              <span><strong className="text-slate-300">Stateful</strong> — Remembers your pipeline and Pass reasons; gets smarter over time.</span>
+              <span><strong className="text-slate-300">Stateful</strong>: remembers your pipeline and Pass reasons; gets smarter over time.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-cyan-400 mt-0.5">✓</span>
-              <span><strong className="text-slate-300">Evidence-first</strong> — Cross-references claims against your fund&apos;s risk tolerance.</span>
+              <span><strong className="text-slate-300">Evidence-first</strong>: cross-references claims against your fund&apos;s risk tolerance.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-cyan-400 mt-0.5">✓</span>
-              <span><strong className="text-slate-300">Native</strong> — Markdown for Notion, one-click briefs for Slack, Calendar integration.</span>
+              <span><strong className="text-slate-300">Native</strong>: Markdown for Notion, one-click briefs for Slack, Calendar integration.</span>
             </li>
           </ul>
         </div>
@@ -301,8 +301,8 @@ export default function LandingPage() {
               <ul className="mt-4 space-y-2 text-xs text-slate-400">
                 <li className="flex items-center gap-2"><span className="text-cyan-400">✓</span> Pitch link</li>
                 <li className="flex items-center gap-2"><span className="text-cyan-400">✓</span> Belief Map</li>
-                <li className="flex items-center gap-2"><span className="text-slate-600">—</span> Unlimited triage</li>
-                <li className="flex items-center gap-2"><span className="text-slate-600">—</span> Calendly logic</li>
+                <li className="flex items-center gap-2"><span className="text-slate-600">•</span> Unlimited triage</li>
+                <li className="flex items-center gap-2"><span className="text-slate-600">•</span> Calendly logic</li>
               </ul>
               <Link href="/auth" className="mt-6 btn-secondary w-full block text-center">Get started</Link>
             </div>
@@ -328,7 +328,7 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2"><span className="text-cyan-400">✓</span> Team intelligence</li>
                 <li className="flex items-center gap-2"><span className="text-cyan-400">✓</span> White-label</li>
               </ul>
-              <a href="mailto:hello@robin.ai" className="mt-6 btn-secondary w-full block text-center">Contact sales</a>
+              <a href="mailto:hello@pitchrobin.work" className="mt-6 btn-secondary w-full block text-center">Contact sales</a>
             </div>
           </div>
           <div className="mt-12">

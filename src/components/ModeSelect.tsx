@@ -9,19 +9,19 @@ const MODES: { mode: Mode; title: string; description: string; bestFor: string }
     mode: 1,
     title: "Post-Meeting",
     description: "Analyze meeting transcript and your private notes. Get evidence map, conflicts, GRUE, and interrogation.",
-    bestFor: "Just had a call — stress-test what was said",
+    bestFor: "Just had a call; stress-test what was said",
   },
   {
     mode: 2,
     title: "Pre-Meeting Prep",
     description: "Upload pitch material. Get the attack brief: red list, yellow list, and recommended question order.",
-    bestFor: "Call tomorrow — get your question list ready",
+    bestFor: "Call tomorrow; get your question list ready",
   },
   {
     mode: 3,
     title: "Pitch Stress-Test",
     description: "Founder mode. Run the pipeline silently, then face the Interrogator in a live session.",
-    bestFor: "Founder prepping — harden the pitch before the meeting",
+    bestFor: "Founder prepping; harden the pitch before the meeting",
   },
 ];
 
@@ -29,7 +29,7 @@ export default function ModeSelect({ onStart }: { onStart: (mode: Mode) => void 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="p-6 border-b border-zinc-800/80 flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-100">Robin.ai</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-100">PitchRobin</h1>
         <nav className="flex items-center gap-4 text-sm">
           <Link href="/app/deals" className="text-zinc-400 hover:text-zinc-200">Deals</Link>
           <Link href="/app/insights" className="text-zinc-400 hover:text-zinc-200">Insights</Link>

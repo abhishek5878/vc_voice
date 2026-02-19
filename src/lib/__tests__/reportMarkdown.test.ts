@@ -27,8 +27,8 @@ describe("reportMarkdown", () => {
     it("returns header or fallback when no red/yellow content", () => {
       const r = minimalResult();
       const out = buildCalendarDescription(r);
-      expect(out).toContain("Robin.ai");
-      expect(out === "Robin.ai — Prep / Review" || out.includes("see app for full brief")).toBe(true);
+      expect(out).toContain("PitchRobin");
+      expect(out === "PitchRobin — Prep / Review" || out.includes("see app for full brief")).toBe(true);
     });
 
     it("mode 1: includes layer_4 red_list", () => {
@@ -244,7 +244,7 @@ describe("reportMarkdown", () => {
         },
       });
       const md = pipelineResultToMarkdown(r, null);
-      expect(md).toContain("# Robin.ai Analysis Report");
+      expect(md).toContain("# PitchRobin Analysis Report");
       expect(md).toContain("Evidence Map");
       expect(md).toContain("50% MoM growth");
       expect(md).toContain("verified");

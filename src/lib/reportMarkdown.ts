@@ -7,7 +7,7 @@ function esc(s: unknown): string {
 
 /** Build plain text for calendar event description (red-list questions, etc.). */
 export function buildCalendarDescription(result: PipelineResult): string {
-  const lines: string[] = ["Robin.ai — Prep / Review", ""];
+  const lines: string[] = ["PitchRobin — Prep / Review", ""];
   const brief = result?.pre_meeting_attack_brief;
   if (result?.mode === 2 && brief?.red_list_framed?.length) {
     lines.push("RED LIST (probe hard):");
@@ -29,7 +29,7 @@ export function buildCalendarDescription(result: PipelineResult): string {
       lines.push(`${i + 1}. ${String(r?.question ?? "").replace(/\n/g, " ")}`);
     });
   }
-  return lines.join("\n").trim() || "Robin.ai report — see app for full brief.";
+  return lines.join("\n").trim() || "PitchRobin report — see app for full brief.";
 }
 
 export type CalendarMetadata = { meetingTitle?: string; companyName?: string };
@@ -39,7 +39,7 @@ export function buildGoogleCalendarEventUrl(
   meta: CalendarMetadata | null | undefined,
   description: string
 ): string {
-  const title = [meta?.meetingTitle, meta?.companyName].filter(Boolean).join(" — ") || "Robin.ai prep";
+  const title = [meta?.meetingTitle, meta?.companyName].filter(Boolean).join(" — ") || "PitchRobin prep";
   const base = "https://calendar.google.com/calendar/render";
   const params = new URLSearchParams({
     action: "TEMPLATE",
@@ -54,7 +54,7 @@ export function buildOutlookCalendarEventUrl(
   meta: CalendarMetadata | null | undefined,
   description: string
 ): string {
-  const subject = [meta?.meetingTitle, meta?.companyName].filter(Boolean).join(" — ") || "Robin.ai prep";
+  const subject = [meta?.meetingTitle, meta?.companyName].filter(Boolean).join(" — ") || "PitchRobin prep";
   const base = "https://outlook.office.com/calendar/0/action/compose";
   const params = new URLSearchParams({
     subject: subject.slice(0, 200),
@@ -165,7 +165,7 @@ export function pipelineResultToMarkdown(
   result: PipelineResult,
   metadata?: { meetingTitle?: string; companyName?: string; calendarEventUrl?: string } | null
 ): string {
-  const lines: string[] = ["# Robin.ai Analysis Report", "", `Mode: ${result?.mode ?? 1}`, ""];
+  const lines: string[] = ["# PitchRobin Analysis Report", "", `Mode: ${result?.mode ?? 1}`, ""];
   if (metadata?.meetingTitle || metadata?.companyName) {
     if (metadata.meetingTitle) lines.push(`Meeting: ${String(metadata.meetingTitle).replace(/\n/g, " ")}`, "");
     if (metadata.companyName) lines.push(`Company: ${String(metadata.companyName).replace(/\n/g, " ")}`, "");

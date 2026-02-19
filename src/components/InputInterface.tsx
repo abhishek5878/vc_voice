@@ -316,7 +316,7 @@ export default function InputInterface({
           >
             ← Back
           </button>
-          <h1 className="text-xl font-semibold tracking-tight">Robin.ai</h1>
+          <h1 className="text-xl font-semibold tracking-tight">PitchRobin</h1>
         </div>
         <span className="text-xs text-zinc-500 uppercase tracking-wider">
           {mode === 1 ? "Post-Meeting" : mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"}
@@ -339,7 +339,7 @@ export default function InputInterface({
             <div className="lg:col-span-2 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
               <p className="text-sm font-medium text-zinc-200 mb-1">For founders: stress-test your pitch</p>
               <p className="text-sm text-zinc-500 max-w-2xl">
-                Paste your deck or one-liner. You&apos;ll get a blunt, skeptical VC—short answers, real numbers, no fluff. Then chat to harden the pitch before the real meeting.
+                Paste your deck or one-liner. You&apos;ll get a blunt, skeptical VC: short answers, real numbers, no fluff. Then chat to harden the pitch before the real meeting.
               </p>
             </div>
             <div className="lg:col-span-2">
@@ -504,7 +504,7 @@ export default function InputInterface({
             <p className="text-xs text-zinc-500 mt-2">
               Total input: <strong className="text-zinc-300">{totalChars}</strong> chars
               {totalChars > 0 && totalChars < 200 && (
-                <span className="text-amber-500/90 ml-1"> — add {200 - totalChars} more (min 200)</span>
+                <span className="text-amber-500/90 ml-1"> - add {200 - totalChars} more (min 200)</span>
               )}
             </p>
             <p className="text-xs text-zinc-600 mt-1">We remember meeting title and company for next time.</p>

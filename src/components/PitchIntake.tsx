@@ -255,7 +255,7 @@ export default function PitchIntake({
         {pitchCharCount > 0 && (
           <p className="text-xs text-zinc-500">
             {pitchCharCount.toLocaleString()} characters from your deck
-            {!hasPitchContent && " — add more (or paste/upload/fetch) for a better stress-test."}
+            {!hasPitchContent && " - add more (or paste/upload/fetch) for a better stress-test."}
           </p>
         )}
         {error && (

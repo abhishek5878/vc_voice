@@ -221,7 +221,7 @@ export default function AppPage() {
       {view === "mode" && (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
           <header className="p-6 border-b border-zinc-800/80 flex items-center justify-between">
-            <h1 className="text-xl font-semibold tracking-tight text-zinc-100">Robin.ai</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-100">PitchRobin</h1>
             <nav className="flex items-center gap-4 text-sm">
               <Link href="/app/deals" className="text-zinc-400 hover:text-zinc-200">Deals</Link>
               <Link href="/app/insights" className="text-zinc-400 hover:text-zinc-200">Insights</Link>

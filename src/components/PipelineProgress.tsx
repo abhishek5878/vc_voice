@@ -3,7 +3,7 @@
 const STEPS = [
   { label: "Extracting claims…", layer: 1, tip: "Finding claims and tying each to a source quote (verified / unverified / contradicted)." },
   { label: "Cross-referencing streams…", layer: 2, tip: "Comparing transcript vs your notes for factual conflicts, tone gaps, and omissions." },
-  { label: "Running GRUE analysis…", layer: 3, tip: "Checking coverage on growth, retention, unit economics, moat, team—and flagging blind spots." },
+  { label: "Running GRUE analysis…", layer: 3, tip: "Checking coverage on growth, retention, unit economics, moat, team, and flagging blind spots." },
   { label: "Building interrogation…", layer: 4, tip: "Turning weak spots into red-list questions (probe hard) and yellow-list follow-ups." },
 ];
 

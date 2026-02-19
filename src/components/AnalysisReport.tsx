@@ -94,7 +94,7 @@ export default function AnalysisReport({
     const subject = encodeURIComponent(
       metadata?.meetingTitle || metadata?.companyName
         ? `Robin brief: ${[metadata.meetingTitle, metadata.companyName].filter(Boolean).join(" — ")}`
-        : "Robin.ai brief"
+        : "PitchRobin brief"
     );
     const body = encodeURIComponent(md.slice(0, 12000));
     window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
@@ -240,7 +240,7 @@ export default function AnalysisReport({
             ← Back to input
           </button>
           <h1 className="text-lg font-semibold tracking-tight">
-            Robin.ai — {result.mode === 1 ? "Post-Meeting" : result.mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"} Report
+            PitchRobin — {result.mode === 1 ? "Post-Meeting" : result.mode === 2 ? "Pre-Meeting Prep" : "Pitch Stress-Test"} Report
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">

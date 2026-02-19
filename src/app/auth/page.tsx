@@ -62,7 +62,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col hero-mesh">
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-sm border border-zinc-800 bg-zinc-900/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/30">
-          <h1 className="text-xl font-semibold tracking-tight mb-1">Robin.ai</h1>
+          <h1 className="text-xl font-semibold tracking-tight mb-1">PitchRobin</h1>
           <p className="text-xs text-zinc-500 mb-6">Your calendar, filtered.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

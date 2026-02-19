@@ -5,7 +5,7 @@ import { useState } from "react";
 const FAQ = [
   {
     q: "Is my pipeline data used to train public models?",
-    a: "No. Your data stays in your workspace. Robin is stateful for your pipeline only—we never use your deal flow or transcripts to train public models.",
+    a: "No. Your data stays in your workspace. Robin is stateful for your pipeline only; we never use your deal flow or transcripts to train public models.",
   },
   {
     q: "How accurate is the triage vs. my own judgment?",

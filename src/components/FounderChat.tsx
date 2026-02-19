@@ -11,7 +11,7 @@ interface ChatMessage {
 }
 
 const SYSTEM_PROMPT = `
-You are a world-class venture capitalist with 20+ years of experience. You are the VC who says what their friends won't: short answers, real numbers, no fluff. Think Hemingway brevity, Wilde wit, and dry sarcasm when it exposes vagueness—never cruel, always sharp.
+You are a world-class venture capitalist with 20+ years of experience. You are the VC who says what their friends won't: short answers, real numbers, no fluff. Think Hemingway brevity, Wilde wit, and dry sarcasm when it exposes vagueness (never cruel, always sharp).
 
 You have seen thousands of pitches and invested in hundreds of companies. You are in Founder Coaching Mode. They have shared their pitch deck; your job is to stress-test it and help them improve it, not to be polite.
 
@@ -29,7 +29,7 @@ Personality & tone:
 Conversation structure:
 1) Session start: Brief warning that you're mean on purpose. Ask them to summarise the company in 1–2 sentences and what they want from this session.
 2) Deck: You have DECK_TEXT. If you need more, ask for specific slides or sections.
-3) Systematic teardown: For each section—diagnose what's weak, ask 1–3 precise questions, propose improved copy. End with a next action.
+3) Systematic teardown: For each section, diagnose what's weak, ask 1–3 precise questions, propose improved copy. End with a next action.
 
 Hard rules:
 - Never break character. Keep responses short, high-signal, and actionable.
@@ -105,12 +105,12 @@ export default function FounderChat({
     if (!deckText.trim()) return;
     if (messages.length > 0) return;
     setMessages([
-      {
-        role: "assistant",
-        content:
-          "I’ve read your deck. I’m the VC who says what your friends won't—short answers, real numbers, no fluff. I'll be blunt on purpose so we can harden this pitch. " +
-          "In one or two sentences: what are you building, and what do you want from this session (e.g. fix the seed deck, get ready for a partner meeting.)",
-      },
+          {
+            role: "assistant",
+            content:
+              "I’ve read your deck. I’m the VC who says what your friends won't: short answers, real numbers, no fluff. I'll be blunt on purpose so we can harden this pitch. " +
+              "In one or two sentences: what are you building, and what do you want from this session (e.g. fix the seed deck, get ready for a partner meeting.)",
+          },
     ]);
   }, [deckText, messages.length]);
 
@@ -301,7 +301,7 @@ export default function FounderChat({
             ← Back to inputs
           </button>
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Robin.ai — Founder Chat</h1>
+            <h1 className="text-lg font-semibold tracking-tight">PitchRobin · Founder Chat</h1>
             <p className="text-xs text-zinc-500">Mode 3: Pitch Stress-Test (live VC interrogation)</p>
           </div>
           <button
@@ -396,7 +396,7 @@ export default function FounderChat({
             )}
             {sendToInvestorResult.at_par && !sendToInvestorResult.vc_email && (
               <p className="text-xs text-zinc-500 pt-2 border-t border-amber-500/20">
-                You’re at par. This investor hasn’t set a contact email yet—submit your pitch using the button below to land in their queue.
+                You’re at par. This investor hasn’t set a contact email yet; submit your pitch using the button below to land in their queue.
               </p>
             )}
           </section>

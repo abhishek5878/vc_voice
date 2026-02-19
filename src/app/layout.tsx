@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Robin.ai",
+  title: "PitchRobin",
   description: "Multi-mode intelligence for high-stakes decision-makers. Find the truth in the conversation.",
 };
 

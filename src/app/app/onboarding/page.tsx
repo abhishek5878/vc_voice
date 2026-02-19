@@ -209,7 +209,7 @@ export default function OnboardingPage() {
           </div>
           <h1 className="text-xl font-semibold text-zinc-100 mb-2">Your personalised link is live</h1>
           <p className="text-sm text-zinc-400 mb-6">
-            Share this link with founders. They’ll interact with Robin in your voice—stress-test their pitch and submit to your pipeline.
+            Share this link with founders. They’ll interact with Robin in your voice, stress-test their pitch, and submit to your pipeline.
           </p>
           <div className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-700 mb-2">
             <a
@@ -246,7 +246,7 @@ export default function OnboardingPage() {
         </header>
         <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
           <p className="text-sm text-zinc-300 mb-4">
-            We scraped your links for up to 5 minutes but don&apos;t have enough yet to sound like you. Describe your investment style in 30 seconds — type below, or speak and paste the transcript.
+            We scraped your links for up to 5 minutes but don&apos;t have enough yet to sound like you. Describe your investment style in 30 seconds: type below, or speak and paste the transcript.
           </p>
           {error && (
             <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200 mb-4">

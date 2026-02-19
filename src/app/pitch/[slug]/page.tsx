@@ -16,7 +16,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const slug = params.slug;
   return {
-    title: `Pitch – ${slug} | Robin.ai`,
+    title: `Pitch – ${slug} | PitchRobin`,
   };
 }
 
@@ -84,7 +84,7 @@ export default async function PitchPage({ params }: PageProps) {
           ) : (
             <>
               <p className="text-xs text-zinc-500 italic">
-                This investor hasn’t set their evaluation style yet — Robin will use a generic VC voice. The stress-test will still use your deck.
+                This investor hasn’t set their evaluation style yet. Robin will use a generic VC voice. The stress-test will still use your deck.
               </p>
               <p className="text-xs text-zinc-400 mt-2">
                 Paste your deck or narrative below, upload a deck, or fetch from a URL. Robin will probe and help harden the pitch.
