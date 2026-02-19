@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { callLLMServer } from "@/lib/llm/callServer";
 import type { LLMProvider } from "@/lib/llm/types";
@@ -29,9 +30,12 @@ export interface RobinProfileRow {
   scrape_error: string | null;
 }
 
-export async function getRobinProfile(userId: string): Promise<RobinProfileRow | null> {
-  const supabase = await createServerSupabase();
-  const { data } = await supabase
+export async function getRobinProfile(
+  userId: string,
+  supabase?: SupabaseClient
+): Promise<RobinProfileRow | null> {
+  const client = supabase ?? (await createServerSupabase());
+  const { data } = await client
     .from("robin_profiles")
     .select("*")
     .eq("user_id", userId)
@@ -41,11 +45,12 @@ export async function getRobinProfile(userId: string): Promise<RobinProfileRow |
 
 export async function upsertRobinProfile(
   userId: string,
-  updates: Partial<Omit<RobinProfileRow, "user_id">>
+  updates: Partial<Omit<RobinProfileRow, "user_id">>,
+  supabase?: SupabaseClient
 ): Promise<RobinProfileRow> {
-  const supabase = await createServerSupabase();
+  const client = supabase ?? (await createServerSupabase());
   const payload = { user_id: userId, ...updates };
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("robin_profiles")
     .upsert(payload, { onConflict: "user_id" })
     .select()

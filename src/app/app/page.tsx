@@ -46,8 +46,20 @@ export default function AppPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/profile", { credentials: "include" });
-        if (res.status === 401 || !res.ok || cancelled) return;
+        const token = await getSupabaseAccessToken();
+        if (!token) {
+          if (!cancelled) window.location.replace("/auth");
+          return;
+        }
+        const res = await fetch("/api/profile", {
+          credentials: "include",
+          headers: { "x-supabase-access-token": token },
+        });
+        if (res.status === 401) {
+          if (!cancelled) window.location.replace("/auth");
+          return;
+        }
+        if (!res.ok || cancelled) return;
         const profile = (await res.json()) as { slug?: string | null };
         if (!cancelled && profile && !profile.slug?.trim()) {
           window.location.replace("/app/onboarding");
@@ -155,13 +167,15 @@ export default function AppPage() {
         const supabaseToken = await getSupabaseAccessToken();
         const res = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(supabaseToken && { "x-supabase-access-token": supabaseToken }),
+          },
           body: JSON.stringify({
             streamContext,
             mode,
             provider: "openai",
             companyName: metadata.companyName || undefined,
-            supabaseAccessToken: supabaseToken || undefined,
           }),
         });
         const data = await res.json();

@@ -1,14 +1,15 @@
 /**
  * POST /api/analyze
  * Body: { streamContext, mode: 1|2|3, provider?, model?, companyName? }
- * Auth: user from passcode cookie (ROBIN_USER_ID) or x-supabase-access-token. Uses server OPENAI_API_KEY for LLM.
- * Persists to deal + deal_runs when user and companyName present.
+ * Auth: x-supabase-access-token. Uses server OPENAI_API_KEY for LLM.
+ * Persists to deal + deal_runs when user and companyName present (user-scoped client for RLS).
  */
 import { NextRequest, NextResponse } from "next/server";
 import { runPipeline } from "@/lib/pipeline/run";
 import type { StreamContext } from "@/lib/ingest/types";
 import { MIN_INPUT_CHARS } from "@/lib/ingest/parse";
 import { getUserIdFromRequest, upsertDeal, insertDealRun, insertFounderClaims } from "@/lib/deals/db";
+import { createServerSupabaseWithToken } from "@/lib/supabase/server";
 import { getRobinProfile } from "@/lib/voice/profile";
 import { extractClaims } from "@/lib/deals/persist";
 
@@ -36,10 +37,12 @@ export async function POST(request: NextRequest) {
   const companyName = typeof body.companyName === "string" ? body.companyName.trim() : "";
 
   let voiceProfile: string | null = null;
+  const token = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   const userIdForDeals = await getUserIdFromRequest(request);
   if (userIdForDeals) {
     try {
-      const profile = await getRobinProfile(userIdForDeals);
+      const supabaseForProfile = token ? createServerSupabaseWithToken(token) : null;
+      const profile = await getRobinProfile(userIdForDeals, supabaseForProfile ?? undefined);
       if (profile?.voice_profile) {
         const vp = profile.voice_profile;
         const parts: string[] = [];
@@ -101,11 +104,12 @@ export async function POST(request: NextRequest) {
     });
 
     let dealId: string | null = null;
-    if (companyName && userIdForDeals) {
+    if (companyName && userIdForDeals && token) {
       try {
-        const deal = await upsertDeal(userIdForDeals, companyName || "Unknown");
+        const supabase = createServerSupabaseWithToken(token);
+        const deal = await upsertDeal(userIdForDeals, companyName || "Unknown", undefined, supabase);
         dealId = deal.id;
-        const run = await insertDealRun(deal.id, result);
+        const run = await insertDealRun(deal.id, result, supabase);
         const claims = extractClaims(result);
         await insertFounderClaims(
           deal.id,
@@ -114,7 +118,8 @@ export async function POST(request: NextRequest) {
             claim: c.claim,
             source_quote: c.source_quote,
             status: c.status,
-          }))
+          })),
+          supabase
         );
       } catch {
         // Persist failure does not fail the request; result still returned

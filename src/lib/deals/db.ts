@@ -5,15 +5,11 @@ import type { Deal, DealRun, FounderClaimRow } from "./types";
 import { pipelineResultToRunPayload } from "./persist";
 import type { PipelineResult } from "@/lib/pipeline/types";
 
-const PASSCODE_COOKIE = "robin_passcode_verified";
-
-/** Resolve user ID from passcode cookie (ROBIN_USER_ID) or from Supabase access token. */
+/**
+ * Resolve user ID from Supabase access token (anonymous or email user).
+ * After passcode, client signs in anonymously so each visitor gets their own user and profile.
+ */
 export async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
-  const passcodeVerified = request.cookies.get(PASSCODE_COOKIE)?.value === "1";
-  if (passcodeVerified) {
-    const fixedUserId = process.env.ROBIN_USER_ID?.trim();
-    if (fixedUserId) return fixedUserId;
-  }
   const accessToken = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   if (!accessToken) return null;
   const supabase = await createServerSupabase();
@@ -28,11 +24,12 @@ export async function getUserIdFromRequest(request: NextRequest): Promise<string
 export async function upsertDeal(
   userId: string,
   companyName: string,
-  convictionScore?: number | null
+  convictionScore?: number | null,
+  supabase?: SupabaseClient
 ): Promise<Deal> {
-  const supabase = await createServerSupabase();
+  const client = supabase ?? (await createServerSupabase());
   const name = (companyName || "").trim() || "Unknown";
-  const { data: existing } = await supabase
+  const { data: existing } = await client
     .from("deals")
     .select("*")
     .eq("user_id", userId)
@@ -41,7 +38,7 @@ export async function upsertDeal(
     .maybeSingle();
 
   if (existing) {
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await client
       .from("deals")
       .update({
         updated_at: new Date().toISOString(),
@@ -54,7 +51,7 @@ export async function upsertDeal(
     return updated as Deal;
   }
 
-  const { data: inserted, error } = await supabase
+  const { data: inserted, error } = await client
     .from("deals")
     .insert({
       user_id: userId,
@@ -67,9 +64,13 @@ export async function upsertDeal(
   return inserted as Deal;
 }
 
-export async function insertDealRun(dealId: string, result: PipelineResult): Promise<DealRun> {
-  const supabase = await createServerSupabase();
-  return insertDealRunWithClient(supabase, dealId, result);
+export async function insertDealRun(
+  dealId: string,
+  result: PipelineResult,
+  supabase?: SupabaseClient
+): Promise<DealRun> {
+  const client = supabase ?? (await createServerSupabase());
+  return insertDealRunWithClient(client, dealId, result);
 }
 
 /** Use with admin client for server-initiated writes (e.g. inbound pitch submit). */
@@ -118,10 +119,11 @@ function claimSimilarity(a: string, b: string): number {
 export async function insertFounderClaims(
   dealId: string,
   runId: string,
-  claims: { claim: string; source_quote: string | null; status: string }[]
+  claims: { claim: string; source_quote: string | null; status: string }[],
+  supabase?: SupabaseClient
 ): Promise<void> {
-  const supabase = await createServerSupabase();
-  return insertFounderClaimsWithClient(supabase, dealId, runId, claims);
+  const client = supabase ?? (await createServerSupabase());
+  return insertFounderClaimsWithClient(client, dealId, runId, claims);
 }
 
 /** Use with admin client for server-initiated writes (e.g. inbound pitch submit). */
@@ -159,9 +161,9 @@ export async function insertFounderClaimsWithClient(
   }
 }
 
-export async function listDeals(userId: string): Promise<Deal[]> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+export async function listDeals(userId: string, supabase?: SupabaseClient): Promise<Deal[]> {
+  const client = supabase ?? (await createServerSupabase());
+  const { data, error } = await client
     .from("deals")
     .select("*")
     .eq("user_id", userId)
@@ -170,9 +172,9 @@ export async function listDeals(userId: string): Promise<Deal[]> {
   return (data ?? []) as Deal[];
 }
 
-export async function getDeal(dealId: string, userId: string): Promise<Deal | null> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+export async function getDeal(dealId: string, userId: string, supabase?: SupabaseClient): Promise<Deal | null> {
+  const client = supabase ?? (await createServerSupabase());
+  const { data, error } = await client
     .from("deals")
     .select("*")
     .eq("id", dealId)
@@ -182,9 +184,9 @@ export async function getDeal(dealId: string, userId: string): Promise<Deal | nu
   return data as Deal;
 }
 
-export async function getDealRuns(dealId: string): Promise<DealRun[]> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+export async function getDealRuns(dealId: string, supabase?: SupabaseClient): Promise<DealRun[]> {
+  const client = supabase ?? (await createServerSupabase());
+  const { data, error } = await client
     .from("deal_runs")
     .select("*")
     .eq("deal_id", dealId)
@@ -193,16 +195,16 @@ export async function getDealRuns(dealId: string): Promise<DealRun[]> {
   return (data ?? []) as DealRun[];
 }
 
-export async function getClaimDrift(dealId: string, userId: string): Promise<FounderClaimRow[]> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+export async function getClaimDrift(dealId: string, userId: string, supabase?: SupabaseClient): Promise<FounderClaimRow[]> {
+  const client = supabase ?? (await createServerSupabase());
+  const { data, error } = await client
     .from("founder_claims")
     .select("*")
     .eq("deal_id", dealId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   const rows = (data ?? []) as FounderClaimRow[];
-  const deal = await getDeal(dealId, userId);
+  const deal = await getDeal(dealId, userId, client);
   if (!deal) return [];
   return rows;
 }
@@ -210,33 +212,36 @@ export async function getClaimDrift(dealId: string, userId: string): Promise<Fou
 export async function updateDealOutcome(
   dealId: string,
   userId: string,
-  outcome: Deal["outcome"]
+  outcome: Deal["outcome"],
+  supabase?: SupabaseClient
 ): Promise<void> {
-  const supabase = await createServerSupabase();
-  await supabase.from("deals").update({ outcome }).eq("id", dealId).eq("user_id", userId);
+  const client = supabase ?? (await createServerSupabase());
+  await client.from("deals").update({ outcome }).eq("id", dealId).eq("user_id", userId);
 }
 
 export async function updateDealStatus(
   dealId: string,
   userId: string,
-  status: Deal["status"]
+  status: Deal["status"],
+  supabase?: SupabaseClient
 ): Promise<void> {
-  const supabase = await createServerSupabase();
-  await supabase.from("deals").update({ status }).eq("id", dealId).eq("user_id", userId);
+  const client = supabase ?? (await createServerSupabase());
+  await client.from("deals").update({ status }).eq("id", dealId).eq("user_id", userId);
 }
 
 export async function updateDealVertical(
   dealId: string,
   userId: string,
-  vertical: string | null
+  vertical: string | null,
+  supabase?: SupabaseClient
 ): Promise<void> {
-  const supabase = await createServerSupabase();
-  await supabase.from("deals").update({ vertical }).eq("id", dealId).eq("user_id", userId);
+  const client = supabase ?? (await createServerSupabase());
+  await client.from("deals").update({ vertical }).eq("id", dealId).eq("user_id", userId);
 }
 
-export async function setDealSharePublic(dealId: string, userId: string, share: boolean): Promise<void> {
-  const supabase = await createServerSupabase();
-  await supabase.from("deals").update({ share_public: share }).eq("id", dealId).eq("user_id", userId);
+export async function setDealSharePublic(dealId: string, userId: string, share: boolean, supabase?: SupabaseClient): Promise<void> {
+  const client = supabase ?? (await createServerSupabase());
+  await client.from("deals").update({ share_public: share }).eq("id", dealId).eq("user_id", userId);
 }
 
 export async function getDealPublic(dealId: string): Promise<Deal | null> {
@@ -255,7 +260,7 @@ export async function getDealRunsForSnapshot(dealId: string): Promise<DealRun[]>
   return getDealRuns(dealId);
 }
 
-export async function getInsights(userId: string): Promise<{
+export async function getInsights(userId: string, supabase?: SupabaseClient): Promise<{
   redFlagFrequencyFailed: Record<string, number>;
   redFlagFrequencySuccess: Record<string, number>;
   avgClarityWinners: number;
@@ -264,7 +269,7 @@ export async function getInsights(userId: string): Promise<{
   avgRiskByOutcome: Record<string, number>;
   topGrueDimension: string | null;
 }> {
-  const deals = await listDeals(userId);
+  const deals = await listDeals(userId, supabase);
   const failedOutcomes = ["failed", "zombie"];
   const declinedOutcome = "declined";
   const winnerOutcomes = ["3x", "10x"];
@@ -281,7 +286,7 @@ export async function getInsights(userId: string): Promise<{
   const grueDimensionCount: Record<string, number> = {};
 
   for (const deal of deals) {
-    const runs = await getDealRuns(deal.id);
+    const runs = await getDealRuns(deal.id, supabase);
     const outcome = deal.outcome ?? "";
     const isFailed = failedOutcomes.includes(outcome);
     const isDeclined = outcome === declinedOutcome;
@@ -339,19 +344,19 @@ export async function getInsights(userId: string): Promise<{
   };
 }
 
-export async function getDealsByVertical(userId: string, vertical: string | null): Promise<Deal[]> {
-  const all = await listDeals(userId);
+export async function getDealsByVertical(userId: string, vertical: string | null, supabase?: SupabaseClient): Promise<Deal[]> {
+  const all = await listDeals(userId, supabase);
   if (!vertical?.trim()) return all;
   return all.filter((d) => (d.vertical ?? "").toLowerCase() === vertical.toLowerCase());
 }
 
-export async function getClarityPercentile(userId: string, dealId: string): Promise<number | null> {
+export async function getClarityPercentile(userId: string, dealId: string, supabase?: SupabaseClient): Promise<number | null> {
   const { computePercentile } = await import("@/lib/percentile");
-  const deals = await listDeals(userId);
+  const deals = await listDeals(userId, supabase);
   const values: number[] = [];
   let currentValue: number | null = null;
   for (const d of deals) {
-    const runs = await getDealRuns(d.id);
+    const runs = await getDealRuns(d.id, supabase);
     const last = runs[0];
     if (last?.clarity_score != null) {
       values.push(last.clarity_score);
@@ -362,13 +367,13 @@ export async function getClarityPercentile(userId: string, dealId: string): Prom
   return computePercentile(currentValue, values);
 }
 
-export async function getStrengthPercentile(userId: string, dealId: string): Promise<{ percentile: number | null; totalDeals: number }> {
+export async function getStrengthPercentile(userId: string, dealId: string, supabase?: SupabaseClient): Promise<{ percentile: number | null; totalDeals: number }> {
   const { computePercentile } = await import("@/lib/percentile");
-  const deals = await listDeals(userId);
+  const deals = await listDeals(userId, supabase);
   const values: number[] = [];
   let currentValue: number | null = null;
   for (const d of deals) {
-    const runs = await getDealRuns(d.id);
+    const runs = await getDealRuns(d.id, supabase);
     const last = runs[0];
     const strength = last?.deal_strength ?? (last?.risk_score != null ? 100 - last.risk_score : null);
     if (strength != null) {

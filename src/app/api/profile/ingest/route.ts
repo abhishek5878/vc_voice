@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/deals/db";
+import { createServerSupabaseWithToken } from "@/lib/supabase/server";
 import { buildVoiceProfileFromLinks, getRobinProfile, upsertRobinProfile } from "@/lib/voice/profile";
 
 export async function POST(request: NextRequest) {
+  const token = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   const userId = await getUserIdFromRequest(request);
-  if (!userId) {
+  if (!token || !userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const supabase = createServerSupabaseWithToken(token);
 
   let body: { manualText?: string | null } = {};
   try {
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
   const manualText = body.manualText?.trim() || undefined;
 
   try {
-    const existing = await getRobinProfile(userId);
+    const existing = await getRobinProfile(userId, supabase);
     const urls: string[] = [];
     const push = (v: string | null | undefined) => {
       if (v && v.trim()) urls.push(v.trim());
@@ -34,10 +37,7 @@ export async function POST(request: NextRequest) {
       extras.forEach((u) => push(u));
     }
 
-    await upsertRobinProfile(userId, {
-      scrape_status: "running",
-      scrape_error: null,
-    });
+    await upsertRobinProfile(userId, { scrape_status: "running", scrape_error: null }, supabase);
 
     const profile = await buildVoiceProfileFromLinks({
       urls,
@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!profile) {
-      await upsertRobinProfile(userId, {
-        scrape_status: "error",
-        scrape_error: "insufficient_content",
-        last_scraped_at: new Date().toISOString(),
-      });
+      await upsertRobinProfile(
+        userId,
+        { scrape_status: "error", scrape_error: "insufficient_content", last_scraped_at: new Date().toISOString() },
+        supabase
+      );
       return NextResponse.json(
         {
           user_id: userId,
@@ -61,12 +61,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const saved = await upsertRobinProfile(userId, {
-      voice_profile: profile,
-      scrape_status: "done",
-      scrape_error: null,
-      last_scraped_at: new Date().toISOString(),
-    });
+    const saved = await upsertRobinProfile(
+      userId,
+      { voice_profile: profile, scrape_status: "done", scrape_error: null, last_scraped_at: new Date().toISOString() },
+      supabase
+    );
 
     return NextResponse.json({
       user_id: userId,
@@ -75,11 +74,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    await upsertRobinProfile(userId, {
-      scrape_status: "error",
-      scrape_error: message,
-      last_scraped_at: new Date().toISOString(),
-    }).catch(() => undefined);
+    await upsertRobinProfile(
+      userId,
+      { scrape_status: "error", scrape_error: message, last_scraped_at: new Date().toISOString() },
+      supabase
+    ).catch(() => undefined);
     return NextResponse.json({ error: "Ingest failed", detail: message }, { status: 500 });
   }
 }

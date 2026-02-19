@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/deals/db";
+import { createServerSupabaseWithToken } from "@/lib/supabase/server";
 import { getRobinProfile, upsertRobinProfile } from "@/lib/voice/profile";
 
 export async function GET(request: NextRequest) {
+  const token = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   const userId = await getUserIdFromRequest(request);
-  if (!userId) {
+  if (!token || !userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const profile = await getRobinProfile(userId);
+    const supabase = createServerSupabaseWithToken(token);
+    const profile = await getRobinProfile(userId, supabase);
     return NextResponse.json(profile ?? { user_id: userId, voice_profile: null });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
@@ -17,8 +20,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const token = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   const userId = await getUserIdFromRequest(request);
-  if (!userId) {
+  if (!token || !userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   let body: {
@@ -78,7 +82,10 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const saved = await upsertRobinProfile(userId, updates);
+    const supabase = createServerSupabaseWithToken(
+      request.headers.get("x-supabase-access-token")!.trim()
+    );
+    const saved = await upsertRobinProfile(userId, updates, supabase);
     return NextResponse.json(saved);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

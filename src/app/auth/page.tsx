@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { createBrowserSupabase } from "@/lib/supabase/client";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -30,6 +31,16 @@ export default function AuthPage() {
           setError(data.error || "Incorrect passcode.");
           setLoading(false);
           return;
+        }
+        const supabase = createBrowserSupabase();
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          const { error: anonError } = await supabase.auth.signInAnonymously();
+          if (anonError) {
+            setError(anonError.message || "Could not sign in.");
+            setLoading(false);
+            return;
+          }
         }
         router.push("/app/onboarding");
       } catch {

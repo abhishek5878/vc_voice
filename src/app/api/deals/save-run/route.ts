@@ -5,14 +5,17 @@ import {
   insertDealRun,
   insertFounderClaims,
 } from "@/lib/deals/db";
+import { createServerSupabaseWithToken } from "@/lib/supabase/server";
 import { extractClaims } from "@/lib/deals/persist";
 import type { PipelineResult } from "@/lib/pipeline/types";
 
 export async function POST(request: NextRequest) {
+  const token = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   const userId = await getUserIdFromRequest(request);
-  if (!userId) {
+  if (!token || !userId) {
     return NextResponse.json({ error: "Sign in to save this deal." }, { status: 401 });
   }
+  const supabase = createServerSupabaseWithToken(token);
   let body: { companyName: string; report: PipelineResult };
   try {
     body = await request.json();
@@ -28,13 +31,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Valid report (pipeline result) is required" }, { status: 400 });
   }
   try {
-    const deal = await upsertDeal(userId, companyName);
-    const run = await insertDealRun(deal.id, report);
+    const deal = await upsertDeal(userId, companyName, undefined, supabase);
+    const run = await insertDealRun(deal.id, report, supabase);
     const claims = extractClaims(report);
     await insertFounderClaims(
       deal.id,
       run.id,
-      claims.map((c) => ({ claim: c.claim, source_quote: c.source_quote, status: c.status }))
+      claims.map((c) => ({ claim: c.claim, source_quote: c.source_quote, status: c.status })),
+      supabase
     );
     return NextResponse.json({ dealId: deal.id });
   } catch (e) {
