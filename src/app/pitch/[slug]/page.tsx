@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { unstable_noStore } from "next/cache";
 import type { Metadata } from "next";
 import PitchIntake from "@/components/PitchIntake";
 import { buildVoiceProfileText } from "@/lib/voice/profile";
@@ -50,6 +51,7 @@ async function getProfileBySlug(slug: string) {
 }
 
 export default async function PitchPage({ params }: PageProps) {
+  unstable_noStore();
   const rawSlug = params.slug?.toLowerCase().trim() ?? "";
   if (!rawSlug) notFound();
   const profile = await getProfileBySlug(rawSlug);
@@ -86,6 +88,9 @@ export default async function PitchPage({ params }: PageProps) {
               </p>
               <p className="text-xs text-zinc-400 mt-2">
                 Paste your deck or narrative below, upload a deck, or fetch from a URL. Robin will probe and help harden the pitch.
+              </p>
+              <p className="text-[11px] text-zinc-500 mt-2">
+                If you own this link: sign in at Robin → Settings → Save profile, then &quot;Rebuild from links&quot; so your style appears here.
               </p>
             </>
           )}

@@ -90,15 +90,39 @@ Corpus:
 ${corpus.slice(0, 60_000)}`;
 }
 
+/** Normalize voice_profile (DB may return object or JSON string). */
+function normalizeVoiceProfile(
+  raw: unknown
+): RobinVoiceProfile | null {
+  if (raw == null) return null;
+  let vp = raw;
+  if (typeof vp === "string") {
+    try {
+      vp = JSON.parse(vp) as RobinVoiceProfile;
+    } catch {
+      return null;
+    }
+  }
+  if (typeof vp !== "object" || vp === null) return null;
+  const o = vp as Record<string, unknown>;
+  const hasContent =
+    (typeof o.tone === "string" && o.tone.trim() !== "") ||
+    (Array.isArray(o.evaluation_heuristics) && o.evaluation_heuristics.length > 0) ||
+    (Array.isArray(o.green_flags) && o.green_flags.length > 0) ||
+    (Array.isArray(o.red_flags) && o.red_flags.length > 0) ||
+    (Array.isArray(o.favorite_phrases) && o.favorite_phrases.length > 0);
+  return hasContent ? (vp as RobinVoiceProfile) : null;
+}
+
 /** Build a single text block for system prompts from profile row (voice_profile + bio). */
 export function buildVoiceProfileText(profile: {
-  voice_profile: RobinVoiceProfile | null;
-  bio: string | null;
+  voice_profile?: RobinVoiceProfile | null;
+  bio?: string | null;
 }): string | null {
-  if (!profile?.voice_profile) return profile?.bio ?? null;
-  const vp = profile.voice_profile;
+  const vp = normalizeVoiceProfile(profile?.voice_profile);
+  if (!vp) return (profile?.bio?.trim() ?? "") || null;
   const parts: string[] = [];
-  if (vp.tone) parts.push(`Tone: ${vp.tone}`);
+  if (vp.tone?.trim()) parts.push(`Tone: ${vp.tone.trim()}`);
   if (vp.evaluation_heuristics?.length) {
     parts.push(`How they evaluate inbound:\n- ${vp.evaluation_heuristics.slice(0, 6).join("\n- ")}`);
   }
@@ -111,7 +135,7 @@ export function buildVoiceProfileText(profile: {
   if (vp.favorite_phrases?.length) {
     parts.push(`Typical phrases:\n- ${vp.favorite_phrases.slice(0, 4).join("\n- ")}`);
   }
-  return parts.length ? parts.join("\n\n") : profile.bio ?? null;
+  return parts.length ? parts.join("\n\n") : (profile?.bio?.trim() ?? "") || null;
 }
 
 const MIN_CORPUS_CHARS = 1000;
