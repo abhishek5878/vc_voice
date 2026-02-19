@@ -103,7 +103,7 @@ No server-side CRM, Slack webhooks, or Zapier yet—all current integrations are
 
 - **Landing:** Hero (“Screen inbound requests. Stress-test meetings. One workflow.”), **Two moments** (Meeting request / Post-meeting), **For founders** (3-step: paste → interrogated → tighten; CTA “Start stress-test →”), **What you get**, **Integrate with your stack** (Calendar, Email & Slack, Bookmark and go), **Why not ChatGPT**, **Pricing**, footer (Open Robin, Sign up, Terms, Privacy).
 - **Nav:** Robin.ai, “For founders” → `/app?mode=3`, “Open Robin” → `/app`, “Sign in” → `/auth`.
-- **Auth:** Supabase (email + password); sign up / log in; redirect to `/app` on success.
+- **Auth:** Supabase (email + password); we do not use email confirmation. After sign up / log in, user is sent to **Robin passcode** (`/auth/passcode`); correct passcode (env `ROBIN_PASSCODE`, default `42`) sets a cookie and redirects to onboarding. To avoid Supabase email confirmation: in Supabase Dashboard → Authentication → Providers → Email → turn off **Confirm email**.
 
 ---
 

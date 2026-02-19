@@ -62,12 +62,13 @@ export default function AuthPage() {
             return;
           }
           if (!data.session) {
-            // Email-confirmation flows can return null session. Still redirect to app with a notice.
-            // For now, just continue; Supabase will handle email confirmation if configured.
+            setError("Sign up succeeded. If email confirmation is enabled, check your inbox and then log in.");
+            setLoading(false);
+            return;
           }
         }
 
-        router.push("/app/onboarding");
+        router.push("/auth/passcode");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error.");
       } finally {
