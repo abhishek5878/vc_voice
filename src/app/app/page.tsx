@@ -139,12 +139,6 @@ export default function AppPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleStartMode = useCallback((m: 1 | 2 | 3) => {
-    setMode(m);
-    setInitialRunForInput(null);
-    setView("input");
-  }, []);
-
   const handleBackToMode = useCallback(() => {
     setView("mode");
     setResult(null);
