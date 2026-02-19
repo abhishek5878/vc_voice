@@ -77,6 +77,9 @@ export default function PitchIntake({
     }
   }, []);
 
+  const pitchCharCount = (companyName.trim() ? `Company: ${companyName.trim()}\n\n` : "").length + pitchText.length;
+  const hasPitchContent = pitchCharCount >= 50;
+
   const buildStreamContext = useCallback((): StreamContext => {
     const parts: string[] = [];
     if (companyName.trim()) {
@@ -243,15 +246,26 @@ export default function PitchIntake({
             </button>
           </div>
         </div>
+        {pitchCharCount > 0 && (
+          <p className="text-xs text-zinc-500">
+            {pitchCharCount.toLocaleString()} characters from your deck
+            {!hasPitchContent && " — add more (or paste/upload/fetch) for a better stress-test."}
+          </p>
+        )}
         {error && (
           <p className="text-sm text-amber-400/90">{error}</p>
         )}
         <button
           type="button"
           onClick={handleStartStressTest}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+          disabled={uploadDeckLoading || fetchUrlLoading}
+          className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400/50 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Start stress-test
+          {uploadDeckLoading || fetchUrlLoading
+            ? "Loading your deck…"
+            : hasPitchContent
+              ? `Start stress-test (${pitchCharCount.toLocaleString()} chars)`
+              : "Start stress-test"}
         </button>
       </section>
     </div>

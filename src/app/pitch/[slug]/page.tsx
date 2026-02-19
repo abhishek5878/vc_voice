@@ -54,7 +54,7 @@ export default async function PitchPage({ params }: PageProps) {
 
   const voiceProfileText = buildVoiceProfileText(profile);
   const headerSubtitle =
-    "Paste your deck or narrative below, or fetch from a URL. Robin will stress-test it using my evaluation style.";
+    "Paste your deck or narrative below, upload a PDF/PPT/DOCX, or fetch from a URL. Robin will stress-test it using my evaluation style.";
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -74,10 +74,18 @@ export default async function PitchPage({ params }: PageProps) {
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-4 sm:py-6">
         <section className="mb-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
           <h2 className="text-sm font-medium text-zinc-300 mb-2">How I evaluate inbound</h2>
-          <p className="text-xs text-zinc-400 whitespace-pre-wrap">
-            {voiceProfileText ??
-              "Paste your deck or narrative below. Robin will probe like I do in first meetings."}
-          </p>
+          {voiceProfileText ? (
+            <p className="text-xs text-zinc-400 whitespace-pre-wrap">{voiceProfileText}</p>
+          ) : (
+            <>
+              <p className="text-xs text-zinc-500 italic">
+                This investor hasn’t set their evaluation style yet — Robin will use a generic VC voice. The stress-test will still use your deck.
+              </p>
+              <p className="text-xs text-zinc-400 mt-2">
+                Paste your deck or narrative below, upload a deck, or fetch from a URL. Robin will probe and help harden the pitch.
+              </p>
+            </>
+          )}
         </section>
         <PitchIntake
           voiceProfileText={voiceProfileText}

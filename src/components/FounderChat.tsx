@@ -71,6 +71,8 @@ export default function FounderChat({
     initialStreamContext.PUBLIC_TRANSCRIPT ||
     initialStreamContext.PRIVATE_DICTATION ||
     "";
+  const hasDeck = deckText.trim().length > 0;
+  const hasInvestorVoice = Boolean(voiceProfile?.trim());
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -234,8 +236,6 @@ export default function FounderChat({
     }
   }, [messages, actionItemsLoading, onToast]);
 
-  const hasDeck = deckText.trim().length > 0;
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-between">
@@ -287,6 +287,14 @@ export default function FounderChat({
       </header>
 
       <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full p-4 sm:p-6 gap-4">
+        {hasDeck && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2 px-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50 text-xs text-zinc-400">
+            <span>Using {deckText.length.toLocaleString()} chars from your deck</span>
+            {hasInvestorVoice && (
+              <span className="text-amber-400/90">· Speaking in this investor&apos;s voice</span>
+            )}
+          </div>
+        )}
         {!hasDeck && (
           <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
             No pitch material found. Go back and paste or upload your deck first.
