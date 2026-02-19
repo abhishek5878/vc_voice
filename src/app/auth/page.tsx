@@ -67,7 +67,7 @@ export default function AuthPage() {
           }
         }
 
-        router.push("/app");
+        router.push("/app/onboarding");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error.");
       } finally {

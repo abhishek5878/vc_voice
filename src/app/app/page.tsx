@@ -43,6 +43,27 @@ export default function AppPage() {
   const urlRunFetched = useRef(false);
 
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const token = await getSupabaseAccessToken();
+      if (!token) return;
+      try {
+        const res = await fetch("/api/profile", { headers: { "x-supabase-access-token": token } });
+        if (!res.ok || cancelled) return;
+        const profile = (await res.json()) as { slug?: string | null };
+        if (!cancelled && profile && !profile.slug?.trim()) {
+          window.location.replace("/app/onboarding");
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     const m = searchParams.get("mode");
     const prep = searchParams.get("prep");
     if (m === "1" || m === "2" || m === "3") {
