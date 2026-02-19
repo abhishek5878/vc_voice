@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/deals/db";
 import { createServerSupabaseWithToken } from "@/lib/supabase/server";
+import { createAdminSupabase } from "@/lib/supabase/admin";
 import { getRobinProfile, upsertRobinProfile } from "@/lib/voice/profile";
 
 export async function GET(request: NextRequest) {
@@ -68,10 +69,11 @@ export async function PUT(request: NextRequest) {
   };
 
   try {
+    const admin = createAdminSupabase();
+
     // Enforce slug uniqueness (if provided)
     if (slug) {
-      const supabase = await (await import("@/lib/supabase/admin")).createAdminSupabase();
-      const { data: existing } = await supabase
+      const { data: existing } = await admin
         .from("robin_profiles")
         .select("user_id")
         .eq("slug", slug)
@@ -82,10 +84,8 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const supabase = createServerSupabaseWithToken(
-      request.headers.get("x-supabase-access-token")!.trim()
-    );
-    const saved = await upsertRobinProfile(userId, updates, supabase);
+    // Use admin client so the upsert always persists (RLS can block with user token e.g. anonymous)
+    const saved = await upsertRobinProfile(userId, updates, admin);
     return NextResponse.json(saved);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

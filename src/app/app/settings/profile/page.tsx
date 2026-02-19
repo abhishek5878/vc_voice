@@ -27,6 +27,7 @@ export default function ProfileSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
   const [ingesting, setIngesting] = useState(false);
   const [manualText, setManualText] = useState("");
 
@@ -41,6 +42,7 @@ export default function ProfileSettingsPage() {
       }
       try {
         const res = await fetch("/api/profile", {
+          credentials: "include",
           headers: { "x-supabase-access-token": token },
         });
         if (!res.ok) throw new Error("Failed to load profile");
@@ -63,11 +65,25 @@ export default function ProfileSettingsPage() {
 
   const handleChange = (field: keyof ProfileResponse, value: string) => {
     if (!profile) return;
+    if (field === "slug") {
+      value = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    }
     setProfile({ ...profile, [field]: value });
   };
 
+  const normalizeSlug = (s: string) =>
+    s
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "");
+
   const handleSave = async () => {
     if (!profile) return;
+    const slugValue = normalizeSlug(profile.slug ?? "");
+    if (slugValue && (slugValue.length < 3 || slugValue.length > 32)) {
+      setError("Slug must be 3–32 characters (letters, numbers, dashes only).");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -75,27 +91,32 @@ export default function ProfileSettingsPage() {
       if (!token) throw new Error("Not signed in");
       const res = await fetch("/api/profile", {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "x-supabase-access-token": token,
         },
         body: JSON.stringify({
-          slug: profile.slug,
-          bio: profile.bio,
-          tone: profile.tone,
-          decision_style: profile.decision_style,
-          twitter_url: profile.twitter_url,
-          linkedin_url: profile.linkedin_url,
-          substack_url: profile.substack_url,
-          blog_url: profile.blog_url,
-          podcast_url: profile.podcast_url,
-          extra_urls: profile.extra_urls ?? [],
+          slug: slugValue || null,
+          bio: profile.bio ?? null,
+          tone: profile.tone ?? null,
+          decision_style: profile.decision_style ?? null,
+          twitter_url: profile.twitter_url ?? null,
+          linkedin_url: profile.linkedin_url ?? null,
+          substack_url: profile.substack_url ?? null,
+          blog_url: profile.blog_url ?? null,
+          podcast_url: profile.podcast_url ?? null,
+          extra_urls: profile.extra_urls ?? null,
         }),
       });
+      const j = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j.error || "Failed to save profile");
+        throw new Error((j as { error?: string }).error || "Failed to save profile");
       }
+      setProfile({ ...profile, ...(j as ProfileResponse) });
+      setError(null);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save");
     } finally {
@@ -176,6 +197,11 @@ export default function ProfileSettingsPage() {
         {error && (
           <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-xs text-red-200">
             {error}
+          </div>
+        )}
+        {savedSuccess && (
+          <div className="p-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-xs text-emerald-200">
+            Profile saved.
           </div>
         )}
 
