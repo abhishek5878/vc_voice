@@ -6,6 +6,7 @@ import { createBrowserSupabase } from "@/lib/supabase/client";
 
 export default function AuthPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [passcode, setPasscode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export default function AuthPage() {
         const res = await fetch("/api/auth/passcode", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ passcode: trimmed }),
+          body: JSON.stringify({ passcode: trimmed, email: email.trim() || undefined }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -42,19 +43,19 @@ export default function AuthPage() {
             return;
           }
         }
-        // Ensure session is in storage before navigation; full reload so next page sees it
+        // Next step: social links to build their voice (onboarding). Returning users get redirected to /app from there.
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.access_token) {
-          window.location.assign("/app");
+          window.location.assign("/app/onboarding");
         } else {
-          router.push("/app");
+          router.push("/app/onboarding");
         }
       } catch {
         setError("Something went wrong.");
         setLoading(false);
       }
     },
-    [passcode, router]
+    [passcode, email, router]
   );
 
   return (
@@ -65,6 +66,20 @@ export default function AuthPage() {
           <p className="text-xs text-zinc-500 mb-6">Your calendar, filtered.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs text-zinc-400" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
+                placeholder="you@example.com"
+              />
+            </div>
             <div className="space-y-1.5">
               <label className="block text-xs text-zinc-400" htmlFor="passcode">
                 Passcode
