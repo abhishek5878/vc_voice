@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/deals/db";
-import { createServerSupabaseWithToken } from "@/lib/supabase/server";
+import { createAdminSupabase } from "@/lib/supabase/admin";
 import { buildVoiceProfileFromLinks, getRobinProfile, upsertRobinProfile } from "@/lib/voice/profile";
 
 export async function POST(request: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   if (!token || !userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const supabase = createServerSupabaseWithToken(token);
+  const admin = createAdminSupabase();
 
   let body: { manualText?: string | null } = {};
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const manualText = body.manualText?.trim() || undefined;
 
   try {
-    const existing = await getRobinProfile(userId, supabase);
+    const existing = await getRobinProfile(userId, admin);
     const urls: string[] = [];
     const push = (v: string | null | undefined) => {
       if (v && v.trim()) urls.push(v.trim());
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       extras.forEach((u) => push(u));
     }
 
-    await upsertRobinProfile(userId, { scrape_status: "running", scrape_error: null }, supabase);
+    await upsertRobinProfile(userId, { scrape_status: "running", scrape_error: null }, admin);
 
     const maxCrawlMs = 5 * 60 * 1000; // 5 minutes
     const profile = await buildVoiceProfileFromLinks({
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       await upsertRobinProfile(
         userId,
         { scrape_status: "error", scrape_error: "insufficient_content", last_scraped_at: new Date().toISOString() },
-        supabase
+        admin
       );
       return NextResponse.json(
         {
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const saved = await upsertRobinProfile(
       userId,
       { voice_profile: profile, scrape_status: "done", scrape_error: null, last_scraped_at: new Date().toISOString() },
-      supabase
+      admin
     );
 
     return NextResponse.json({
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     await upsertRobinProfile(
       userId,
       { scrape_status: "error", scrape_error: message, last_scraped_at: new Date().toISOString() },
-      supabase
+      admin
     ).catch(() => undefined);
     return NextResponse.json({ error: "Ingest failed", detail: message }, { status: 500 });
   }
