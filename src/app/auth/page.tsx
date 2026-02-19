@@ -42,7 +42,13 @@ export default function AuthPage() {
             return;
           }
         }
-        router.push("/app/onboarding");
+        // Ensure session is in storage before navigation; full reload so next page sees it
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          window.location.assign("/app/onboarding");
+        } else {
+          router.push("/app/onboarding");
+        }
       } catch {
         setError("Something went wrong.");
         setLoading(false);

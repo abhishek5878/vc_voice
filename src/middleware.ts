@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   if (request.cookies.get(PASSCODE_COOKIE)?.value === "1") {
     return NextResponse.next();
   }
-  const url = new URL("/auth/passcode", request.url);
+  const url = new URL("/auth", request.url);
   return NextResponse.redirect(url);
 }
 
