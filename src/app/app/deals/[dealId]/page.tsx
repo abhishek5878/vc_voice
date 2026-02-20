@@ -172,7 +172,7 @@ export default function DealDetailPage() {
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/app/deals" className="text-zinc-400 hover:text-zinc-200 text-sm">← Deals</Link>
-            <h1 className="text-lg font-semibold tracking-tight">{deal.company_name}</h1>
+            <h1 className="text-lg font-semibold tracking-tight">{deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company"}</h1>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-500">Mark outcome</label>
@@ -300,7 +300,7 @@ export default function DealDetailPage() {
                 <span className="text-zinc-500 shrink-0">
                   {new Date(r.created_at).toLocaleString()}
                 </span>
-                <span className="text-zinc-500">Mode {r.mode}</span>
+                <span className="text-zinc-500">{r.mode === 1 ? "Post-meeting" : r.mode === 2 ? "Pre-meeting" : "Founder stress-test"}</span>
                 <span className="text-zinc-400">
                   {(r.red_flags as unknown[]).length} red · {(r.yellow_flags as unknown[]).length} yellow
                 </span>
@@ -338,9 +338,9 @@ export default function DealDetailPage() {
                 <p className="text-xs text-zinc-500 mb-1">
                   Run {runs.length - i} · {new Date(r.created_at).toLocaleDateString()}
                 </p>
-                <ul className="list-disc list-inside text-sm text-zinc-400">
-                  {reds.slice(0, 3).map((f, j) => (
-                    <li key={j}>{f.question?.slice(0, 80)}{f.question && f.question.length > 80 ? "…" : ""}</li>
+                <ul className="list-disc list-inside text-sm text-zinc-400 space-y-1">
+                  {reds.slice(0, 5).map((f, j) => (
+                    <li key={j} className="leading-relaxed">{f.question ?? ""}</li>
                   ))}
                 </ul>
               </div>
@@ -359,12 +359,14 @@ export default function DealDetailPage() {
             />
             {shareToggleLoading ? "Updating…" : "Allow public snapshot"}
           </label>
-          <Link
-            href={`/snapshot/${deal.id}`}
-            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm"
-          >
-            View public snapshot
-          </Link>
+          {sharePublic && (
+            <Link
+              href={`/snapshot/${deal.id}`}
+              className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm"
+            >
+              View public snapshot
+            </Link>
+          )}
         </div>
       </main>
     </div>

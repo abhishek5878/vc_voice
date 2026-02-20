@@ -279,9 +279,7 @@ export default function PitchIntake({
         >
           {uploadDeckLoading || fetchUrlLoading
             ? "Loading your deck…"
-            : hasPitchContent
-              ? `Start stress-test → (${pitchCharCount.toLocaleString()} chars)`
-              : "Start stress-test →"}
+            : "Start stress-test →"}
         </button>
       </section>
     </div>

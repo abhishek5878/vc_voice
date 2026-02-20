@@ -241,6 +241,9 @@ export default function ProfileSettingsPage() {
             placeholder="you@firm.com"
             className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
           />
+          {!(profile.email ?? "").trim() && (
+            <p className="text-xs text-amber-400/90">Add your email so founders can reach you when they&apos;re at par.</p>
+          )}
         </section>
 
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">

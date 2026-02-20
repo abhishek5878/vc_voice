@@ -93,14 +93,9 @@ export default async function PitchPage({ params }: PageProps) {
           <CollapsibleHowIEvaluate
             voiceProfileText={voiceProfileText}
             noProfileCopy={
-              <>
-                <p className="text-[15px] text-zinc-400 italic">
-                  I haven’t set my evaluation style yet. The stress-test will still use your deck.
-                </p>
-                <p className="text-sm text-zinc-500 mt-2">
-                  Sign in at pitchrobin.work → Settings → &quot;Rebuild from links&quot; to add your style.
-                </p>
-              </>
+              <p className="text-[15px] text-zinc-400">
+                Robin will stress-test your pitch against proven VC heuristics: evidence, unit economics, and clarity. Paste your deck below to start.
+              </p>
             }
           />
         </section>

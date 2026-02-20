@@ -33,8 +33,13 @@ export async function POST(request: NextRequest) {
   }
 
   const slug = typeof body.slug === "string" ? body.slug.toLowerCase().trim() : "";
-  const companyName = typeof body.companyName === "string" ? body.companyName.trim() || "Unknown" : "Unknown";
+  let companyName = typeof body.companyName === "string" ? body.companyName.trim() : "";
   const pitchText = typeof body.pitchText === "string" ? body.pitchText.trim() : "";
+  if (!companyName && pitchText) {
+    const firstLine = pitchText.split(/\n/).find((l) => l.trim().length > 0)?.trim().slice(0, 80) ?? "";
+    companyName = firstLine || "Unnamed company";
+  }
+  if (!companyName) companyName = "Unnamed company";
 
   if (!slug) {
     return NextResponse.json({ error: "Missing slug" }, { status: 400 });

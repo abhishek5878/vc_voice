@@ -36,7 +36,7 @@ export default function ModeSelect({ onStart }: { onStart: (mode: Mode) => void 
         </nav>
       </header>
       <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8">
-        <p className="text-cyan-500/90 text-sm font-medium uppercase tracking-widest mb-2">Your calendar, filtered.</p>
+        <p className="text-cyan-500/90 text-sm font-medium uppercase tracking-widest mb-2">Your Investment Bar, Automated.</p>
         <h2 className="text-2xl sm:text-3xl font-semibold text-zinc-100 mb-2 text-center">What are we analyzing?</h2>
         <p className="text-zinc-500 text-sm mb-6 max-w-md text-center">
           Triage inbound requests or stress-test a meeting. Give transcript + optional voice note for the best signal.

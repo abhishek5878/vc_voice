@@ -100,7 +100,7 @@ export default function DealsPage() {
                   className="block p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-800/50 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-zinc-200">{d.company_name}</span>
+                    <span className="font-medium text-zinc-200">{d.company_name && d.company_name !== "Unknown" ? d.company_name : "Unnamed company"}</span>
                     <span className="text-xs text-zinc-500">
                       {new Date(d.updated_at).toLocaleDateString()} · {d.status}
                       {d.outcome ? ` · ${d.outcome}` : ""}

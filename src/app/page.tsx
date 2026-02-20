@@ -149,7 +149,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it works: visual cards */}
-      <section className="py-16 sm:py-20 border-t border-slate-800/60">
+      <section id="how-it-works" className="py-16 sm:py-20 border-t border-slate-800/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <p className="text-xs uppercase tracking-wider text-cyan-400/90 mb-2">How it works</p>
           <h2 className="text-2xl sm:text-3xl font-semibold text-slate-100 mb-12">
@@ -349,7 +349,7 @@ export default function LandingPage() {
               </Link>
             </div>
             <div className="flex flex-wrap items-center gap-6 text-sm">
-              <Link href="/auth" className="text-slate-400 hover:text-cyan-400 transition-colors">Features</Link>
+              <Link href="/#how-it-works" className="text-slate-400 hover:text-cyan-400 transition-colors">Features</Link>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400 transition-colors">Twitter</a>
               <Link href="/terms.html" className="text-slate-400 hover:text-cyan-400 transition-colors">Terms</Link>
               <Link href="/privacy.html" className="text-slate-400 hover:text-cyan-400 transition-colors">Privacy</Link>

@@ -267,6 +267,14 @@ export default function AppPage() {
                 Settings
               </Link>
             </div>
+            <div className="mt-12 p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-left max-w-md w-full">
+              <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Get the most out of Robin</p>
+              <ul className="text-sm text-zinc-300 space-y-1.5">
+                <li>1. Share your pitch link above with founders.</li>
+                <li>2. <Link href="/app/settings/profile" className="text-cyan-400 hover:text-cyan-300">Complete your voice in Settings</Link> so Robin sounds like you.</li>
+                <li>3. <Link href="/app/deals" className="text-cyan-400 hover:text-cyan-300">Review inbound in Deals</Link> and mark outcomes to unlock Insights.</li>
+              </ul>
+            </div>
           </main>
         </div>
       )}
