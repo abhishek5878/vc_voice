@@ -26,13 +26,14 @@ async function getProfileBySlug(slug: string) {
   const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("robin_profiles")
-    .select("user_id, bio, tone, decision_style, twitter_url, linkedin_url, substack_url, blog_url, podcast_url, extra_urls, voice_profile")
+    .select("user_id, display_name, bio, tone, decision_style, twitter_url, linkedin_url, substack_url, blog_url, podcast_url, extra_urls, voice_profile")
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
   return data as {
     user_id: string;
+    display_name: string | null;
     bio: string | null;
     tone: string | null;
     decision_style: string | null;
@@ -60,20 +61,22 @@ export default async function PitchPage({ params }: PageProps) {
   if (!profile) notFound();
 
   const voiceProfileText = buildVoiceProfileText(profile);
-  const displayName = profile.bio ? profile.bio.split(/[,·]| at /)[0]?.trim() || profile.bio.slice(0, 40).trim() : rawSlug;
+  const displayName = profile.display_name?.trim() || rawSlug;
   const headerSubtitle =
     "Paste your deck or narrative below, upload a PDF/PPT/DOCX, or fetch from a URL. I’ll stress-test it in my voice and style.";
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      <div className="w-full py-1.5 bg-zinc-900/80 border-b border-zinc-800/80">
+        <p className="text-center text-[11px] font-semibold text-cyan-400/90 uppercase tracking-[0.2em]">
+          Pitch to {displayName.toUpperCase()}
+        </p>
+      </div>
       <header className="relative w-full overflow-hidden border-b border-zinc-800/80">
         <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent" aria-hidden />
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <p className="text-[11px] font-medium text-cyan-400/90 uppercase tracking-[0.25em] mb-2">
-            Pitch to {displayName}
-          </p>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-50 mb-2">
-            Stress-test your pitch in my voice
+            Stress-test your pitch with {displayName}
           </h1>
           <p className="text-sm text-zinc-400 max-w-xl">
             Before we meet, my AI will run your deck through my real evaluation style: the same heuristics, tone, and questions I use on first calls.
@@ -103,7 +106,7 @@ export default async function PitchPage({ params }: PageProps) {
           voiceProfileText={voiceProfileText}
           headerSubtitle={headerSubtitle}
           slug={rawSlug}
-          investorDisplayName={profile.bio ? profile.bio.slice(0, 50).trim() : rawSlug}
+          investorDisplayName={displayName}
         />
       </main>
       <footer className="py-4 border-t border-zinc-800/60">

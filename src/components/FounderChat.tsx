@@ -380,7 +380,7 @@ export default function FounderChat({
           <div>
             <h1 className="text-lg font-semibold tracking-tight">
               {investorDisplayName && slug
-                ? `Stress-test in ${investorDisplayName.split(/[,·]| at /)[0]?.trim() || investorDisplayName}'s voice`
+                ? `Stress-test with ${investorShortName}`
                 : "PitchRobin · Founder Chat"}
             </h1>
             <p className="text-xs text-zinc-500">

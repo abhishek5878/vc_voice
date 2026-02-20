@@ -9,6 +9,7 @@ import VoiceStyleInput from "@/components/VoiceStyleInput";
 interface ProfileResponse {
   user_id: string;
   slug?: string | null;
+  display_name?: string | null;
   bio: string | null;
   twitter_url: string | null;
   linkedin_url: string | null;
@@ -21,6 +22,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
+  const [displayName, setDisplayName] = useState("");
   const [slug, setSlug] = useState("");
   const [bio, setBio] = useState("");
   const [twitterUrl, setTwitterUrl] = useState("");
@@ -67,6 +69,7 @@ export default function OnboardingPage() {
           router.replace("/app");
           return;
         }
+        setDisplayName(json.display_name ?? "");
         setSlug(json.slug ?? "");
         setBio(json.bio ?? "");
         setTwitterUrl(json.twitter_url ?? "");
@@ -112,6 +115,7 @@ export default function OnboardingPage() {
           "x-supabase-access-token": token,
         },
         body: JSON.stringify({
+          display_name: displayName.trim() || null,
           slug: trimmedSlug,
           bio: bio.trim() || null,
           twitter_url: twitterUrl.trim() || null,
@@ -180,6 +184,7 @@ export default function OnboardingPage() {
           "x-supabase-access-token": token,
         },
         body: JSON.stringify({
+          display_name: displayName.trim() || null,
           slug: trimmedSlug,
           bio: bio.trim() || null,
           twitter_url: twitterUrl.trim() || null,
@@ -328,7 +333,8 @@ export default function OnboardingPage() {
     );
   }
 
-  const canProceedStep1 = /^[a-z0-9-]{3,32}$/.test(slug.trim().toLowerCase());
+  const canProceedStep1 =
+    displayName.trim().length > 0 && /^[a-z0-9-]{3,32}$/.test(slug.trim().toLowerCase());
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -364,7 +370,19 @@ export default function OnboardingPage() {
 
           {onboardingStep === 1 && (
             <section className="space-y-3">
-              <h2 className="text-sm font-medium text-zinc-300">Your pitch link</h2>
+              <h2 className="text-sm font-medium text-zinc-300">Your name</h2>
+              <p className="text-xs text-zinc-500">
+                This is how you&apos;ll appear to founders on your pitch page and in the chat.
+              </p>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="e.g. Priya Mehta"
+                className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                required
+              />
+              <h2 className="text-sm font-medium text-zinc-300 pt-2">Your pitch link</h2>
               <p className="text-xs text-zinc-500">
                 Founders will use this URL to pitch you. Choose a unique slug (e.g. your name or firm).
               </p>
@@ -385,6 +403,10 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => {
+                  if (!displayName.trim()) {
+                    setError("Enter your name.");
+                    return;
+                  }
                   const t = slug.trim().toLowerCase();
                   if (!t) {
                     setError("Choose a URL slug for your pitch link (e.g. your-name).");

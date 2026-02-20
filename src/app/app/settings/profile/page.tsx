@@ -9,6 +9,7 @@ import type { RobinVoiceProfile } from "@/lib/voice/profile";
 interface ProfileResponse {
   user_id: string;
   slug?: string | null;
+  display_name?: string | null;
   email?: string | null;
   bio: string | null;
   tone: string | null;
@@ -100,6 +101,7 @@ export default function ProfileSettingsPage() {
         },
         body: JSON.stringify({
           slug: slugValue || null,
+          display_name: (profile.display_name ?? "").trim() || null,
           email: profile.email ?? null,
           bio: profile.bio ?? null,
           tone: profile.tone ?? null,
@@ -207,6 +209,20 @@ export default function ProfileSettingsPage() {
             Profile saved.
           </div>
         )}
+
+        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
+          <h2 className="text-sm font-medium text-zinc-300">Display name</h2>
+          <p className="text-xs text-zinc-500 mb-1">
+            How you appear to founders on your pitch page and in the chat (e.g. Priya Mehta).
+          </p>
+          <input
+            type="text"
+            value={profile.display_name ?? ""}
+            onChange={(e) => handleChange("display_name", e.target.value)}
+            placeholder="e.g. Priya Mehta"
+            className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+          />
+        </section>
 
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
           <h2 className="text-sm font-medium text-zinc-300">Public pitch link</h2>

@@ -28,6 +28,7 @@ export async function PUT(request: NextRequest) {
   }
   let body: {
     slug?: string | null;
+    display_name?: string | null;
     email?: string | null;
     bio?: string | null;
     tone?: string | null;
@@ -58,6 +59,7 @@ export async function PUT(request: NextRequest) {
 
   const updates = {
     slug: slug || null,
+    display_name: typeof body.display_name === "string" ? (body.display_name.trim() || null) : null,
     email: typeof body.email === "string" ? (body.email.trim() || null) : null,
     bio: body.bio ?? null,
     tone: body.tone ?? null,

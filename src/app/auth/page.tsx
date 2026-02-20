@@ -54,7 +54,13 @@ export default function AuthPage() {
         if (signInError) {
           const code = (signInError as { code?: string }).code;
           const msg = signInError.message || "Could not sign in.";
-          setError(code ? `${msg} (${code})` : msg);
+          const displayError =
+            code === "email_provider_disabled"
+              ? "Email logins are disabled."
+              : code
+                ? `${msg} (${code})`
+                : msg;
+          setError(displayError);
           setLoading(false);
           return;
         }
