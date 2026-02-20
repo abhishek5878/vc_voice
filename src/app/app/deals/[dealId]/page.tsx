@@ -6,7 +6,16 @@ import { useParams } from "next/navigation";
 import { getSupabaseAccessToken } from "@/lib/deals/supabase-auth";
 import type { Deal, DealRun, FounderClaimRow } from "@/lib/deals/types";
 import type { PipelineResult } from "@/lib/pipeline/types";
+import type { DebriefAnalysis } from "@/lib/debrief/types";
 import { buildEvidenceFirstMarkdown } from "@/lib/reportMarkdown";
+
+interface DealDebrief {
+  id: string;
+  deal_id: string;
+  transcript_text: string;
+  result_json: DebriefAnalysis | null;
+  created_at: string;
+}
 
 interface DealDetail {
   deal: Deal;
@@ -15,6 +24,8 @@ interface DealDetail {
   clarityPercentile: number | null;
   strengthPercentile: number | null;
   totalDeals: number;
+  debrief: DealDebrief | null;
+  pitchSlug: string | null;
 }
 
 function riskLevel(score: number | null): string {
@@ -40,6 +51,197 @@ function resistanceLevel(score: number | null): string {
   return "Weak";
 }
 
+function highStakesQuestionsFromRun(run: DealRun): string[] {
+  const report = run.report_json as PipelineResult | undefined;
+  const fromBrief = report?.pre_meeting_attack_brief?.red_list_framed?.slice(0, 3).map((r) => r?.question).filter(Boolean) as string[] | undefined;
+  const fromLayer4 = report?.layer_4?.red_list?.slice(0, 3).map((r) => r?.question).filter(Boolean) as string[] | undefined;
+  return fromBrief?.length ? fromBrief : fromLayer4 ?? [];
+}
+
+function PostCallTab({
+  dealId,
+  latestRun,
+  debrief,
+  pitchSlug,
+  debriefLinkCopied,
+  onDebriefLinkCopy,
+}: {
+  dealId: string;
+  latestRun: DealRun | undefined;
+  debrief: DealDebrief | null;
+  pitchSlug: string | null;
+  debriefLinkCopied?: boolean;
+  onDebriefLinkCopy?: () => void;
+}) {
+  const debriefUrl =
+    typeof window !== "undefined" && pitchSlug
+      ? `${window.location.origin}/pitch/${pitchSlug}/debrief/${dealId}`
+      : pitchSlug
+        ? `/pitch/${pitchSlug}/debrief/${dealId}`
+        : null;
+  const result = debrief?.result_json;
+  const highStakes = latestRun ? highStakesQuestionsFromRun(latestRun) : [];
+
+  return (
+    <div className="space-y-6">
+      <section className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+        <h2 className="text-sm font-medium text-zinc-400 mb-3">Pre-meeting (Robin&apos;s prediction)</h2>
+        {latestRun ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                <p className="text-zinc-500 text-xs uppercase">Clarity</p>
+                <p className="font-medium text-zinc-200">
+                  {latestRun.clarity_score != null ? `${Math.round(latestRun.clarity_score)}/100` : "—"}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                <p className="text-zinc-500 text-xs uppercase">Risk</p>
+                <p className="font-medium text-zinc-200">{riskLevel(latestRun.risk_score ?? null)}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
+                <p className="text-zinc-500 text-xs uppercase">Resistance</p>
+                <p className="font-medium text-zinc-200">{resistanceLevel(latestRun.resistance_score ?? null)}</p>
+              </div>
+            </div>
+            {highStakes.length > 0 && (
+              <div className="pt-2 border-t border-zinc-700/50">
+                <p className="text-zinc-500 text-xs uppercase mb-1">High-stakes questions for the call</p>
+                <ol className="list-decimal list-inside text-sm text-zinc-400 space-y-0.5">
+                  {highStakes.map((q, i) => (
+                    <li key={i}>{String(q).replace(/\n/g, " ")}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-zinc-500 text-sm">No pre-meeting run for this deal.</p>
+        )}
+      </section>
+
+      {debriefUrl && (
+        <section className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
+          <h2 className="text-sm font-medium text-zinc-400 mb-2">Debrief link for founder</h2>
+          <p className="text-xs text-zinc-500 mb-2">
+            Send this link to the founder after the call. They can paste their transcript and see what landed.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="px-2 py-1 rounded bg-zinc-800 text-cyan-400 text-xs break-all">{debriefUrl}</code>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(debriefUrl);
+                onDebriefLinkCopy?.();
+              }}
+              className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm"
+            >
+              {debriefLinkCopied ? "Copied!" : "Copy link"}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {result ? (
+        <>
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+            <h2 className="text-sm font-medium text-zinc-400 mb-2">Post-call analysis</h2>
+            <p className="text-lg font-medium text-zinc-100">{result.headline}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-sm">
+              <div>
+                <p className="text-zinc-500 text-xs">Overall</p>
+                <p className="font-medium text-zinc-200">{result.scores.overall}/100</p>
+              </div>
+              <div>
+                <p className="text-zinc-500 text-xs">Clarity</p>
+                <p className="font-medium text-zinc-200">{result.scores.clarity}/100</p>
+              </div>
+              <div>
+                <p className="text-zinc-500 text-xs">Vision</p>
+                <p className="font-medium text-zinc-200">{result.scores.vision}/100</p>
+              </div>
+              <div>
+                <p className="text-zinc-500 text-xs">Unfair edge</p>
+                <p className="font-medium text-zinc-200">{result.scores.unfair_edge}/100</p>
+              </div>
+            </div>
+          </section>
+          <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+            <h2 className="text-sm font-medium text-zinc-400 mb-2">What resonated / Where you lost them</h2>
+            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-emerald-400/90 text-xs mb-1">Resonated</p>
+                <ul className="list-disc list-inside text-zinc-400 space-y-0.5">
+                  {(result.narrative.resonated ?? []).map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-amber-400/90 text-xs mb-1">Lost them</p>
+                <ul className="list-disc list-inside text-zinc-400 space-y-0.5">
+                  {(result.narrative.lost_them ?? []).map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+          {((result.key_moments?.nailed?.length ?? 0) > 0 || (result.key_moments?.needs_work?.length ?? 0) > 0) && (
+            <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+              <h2 className="text-sm font-medium text-zinc-400 mb-3">Key moments</h2>
+              <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-emerald-400/90 text-xs font-semibold mb-2">NAILED IT</p>
+                  <ul className="space-y-2">
+                    {(result.key_moments?.nailed ?? []).map((m, i) => (
+                      <li key={i} className="p-2 rounded-lg bg-zinc-800/60 border border-zinc-700">
+                        <p className="text-zinc-200 italic">&ldquo;{m.quote}&rdquo;</p>
+                        <p className="text-zinc-500 text-xs mt-0.5">{m.summary}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-amber-400/90 text-xs font-semibold mb-2">NEEDS WORK</p>
+                  <ul className="space-y-2">
+                    {(result.key_moments?.needs_work ?? []).map((m, i) => (
+                      <li key={i} className="p-2 rounded-lg bg-zinc-800/60 border border-zinc-700">
+                        <p className="text-zinc-200 italic">&ldquo;{m.quote}&rdquo;</p>
+                        <p className="text-zinc-500 text-xs mt-0.5">{m.summary}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          )}
+          {(result.recommended_vcs ?? []).length > 0 && (
+            <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+              <h2 className="text-sm font-medium text-zinc-400 mb-2">Recommended next VCs</h2>
+              <ul className="space-y-3 text-sm">
+                {(result.recommended_vcs ?? []).map((vc, i) => (
+                  <li key={i} className="p-2 rounded-lg bg-zinc-800/60 border border-zinc-700">
+                    <p className="font-medium text-zinc-200">{vc.display_name} · {vc.fit_pct}% fit</p>
+                    <p className="text-zinc-500 text-xs mt-0.5">{vc.reason}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      ) : (
+        <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+          <p className="text-zinc-500 text-sm">
+            No post-call debrief yet. Share the debrief link above with the founder so they can paste their call
+            transcript after the meeting.
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}
+
 export default function DealDetailPage() {
   const params = useParams();
   const dealId = params?.dealId as string;
@@ -51,6 +253,8 @@ export default function DealDetailPage() {
   const [sharePublic, setSharePublic] = useState(false);
   const [shareToggleLoading, setShareToggleLoading] = useState(false);
   const [exportCopied, setExportCopied] = useState(false);
+  const [debriefLinkCopied, setDebriefLinkCopied] = useState(false);
+  const [tab, setTab] = useState<"overview" | "postcall">("overview");
 
   useEffect(() => {
     if (!dealId) return;
@@ -194,6 +398,39 @@ export default function DealDetailPage() {
         </div>
       </header>
       <main className="max-w-4xl mx-auto w-full p-4 sm:p-6 space-y-8">
+        <div className="flex gap-2 border-b border-zinc-800 pb-2">
+          <button
+            type="button"
+            onClick={() => setTab("overview")}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${tab === "overview" ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-400 hover:text-zinc-200"}`}
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("postcall")}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${tab === "postcall" ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-400 hover:text-zinc-200"}`}
+          >
+            Post-call
+          </button>
+        </div>
+
+        {tab === "postcall" && (
+          <PostCallTab
+            dealId={dealId}
+            latestRun={latestRun}
+            debrief={data.debrief}
+            pitchSlug={data.pitchSlug}
+            debriefLinkCopied={debriefLinkCopied}
+            onDebriefLinkCopy={() => {
+              setDebriefLinkCopied(true);
+              setTimeout(() => setDebriefLinkCopied(false), 2000);
+            }}
+          />
+        )}
+
+        {tab === "overview" && (
+          <>
         {(strengthPercentile != null && totalDeals > 0) && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-1">Ranking</h2>
@@ -373,6 +610,8 @@ export default function DealDetailPage() {
             </Link>
           )}
         </div>
+          </>
+        )}
       </main>
     </div>
   );

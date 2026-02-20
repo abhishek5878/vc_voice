@@ -10,7 +10,9 @@ import {
   setDealSharePublic,
   getClarityPercentile,
   getStrengthPercentile,
+  getSlugByUserId,
 } from "@/lib/deals/db";
+import { getLatestDebriefForDeal } from "@/lib/debrief/db";
 import { createServerSupabaseWithToken } from "@/lib/supabase/server";
 
 export async function GET(
@@ -28,10 +30,15 @@ export async function GET(
   try {
     const deal = await getDeal(dealId, userId, supabase);
     if (!deal) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const runs = await getDealRuns(dealId, supabase);
-    const claimDrift = await getClaimDrift(dealId, userId, supabase);
-    const clarityPercentile = await getClarityPercentile(userId, dealId, supabase);
-    const { percentile: strengthPercentile, totalDeals } = await getStrengthPercentile(userId, dealId, supabase);
+    const [runs, claimDrift, clarityPercentile, strengthResult, debrief, pitchSlug] = await Promise.all([
+      getDealRuns(dealId, supabase),
+      getClaimDrift(dealId, userId, supabase),
+      getClarityPercentile(userId, dealId, supabase),
+      getStrengthPercentile(userId, dealId, supabase),
+      getLatestDebriefForDeal(supabase, dealId),
+      getSlugByUserId(userId),
+    ]);
+    const { percentile: strengthPercentile, totalDeals } = strengthResult;
     return NextResponse.json({
       deal,
       runs,
@@ -39,6 +46,8 @@ export async function GET(
       clarityPercentile,
       strengthPercentile,
       totalDeals,
+      debrief: debrief ?? null,
+      pitchSlug: pitchSlug ?? null,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

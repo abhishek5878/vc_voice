@@ -166,6 +166,18 @@ export default function PitchIntake({
           companyName={companyName}
           submitted={submitted}
           singleColumnLayout={Boolean(slug)}
+          partnerCopyContext={
+            submitted && resultDealId && beliefMap
+              ? {
+                  snapshotUrl: `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/snapshot/${resultDealId}`,
+                  companyName: companyName.trim() || "Our pitch",
+                  investorName: investorDisplayName ?? "the investor",
+                  clarityScore: beliefMap.clarity_score,
+                  riskLabel: beliefMap.risk_label,
+                  resistanceLabel: beliefMap.resistance_label,
+                }
+              : undefined
+          }
         />
         {showSubmit && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
@@ -232,6 +244,21 @@ export default function PitchIntake({
                             Resubmit with changes
                           </button>
                         </div>
+                        {slug && resultDealId && (
+                          <p className="text-sm text-zinc-400 mt-2">
+                            Had the call?{" "}
+                            <a
+                              href={`/pitch/${slug}/debrief/${resultDealId}`}
+                              className="text-cyan-400 hover:text-cyan-300 underline"
+                            >
+                              Drop your transcript →
+                            </a>
+                            <br />
+                            <span className="text-xs text-zinc-500">
+                              Come back after your meeting. Paste the transcript and see what actually landed.
+                            </span>
+                          </p>
+                        )}
                         {investorDisplayName && slug && (
                           <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
                             <p className="text-sm text-zinc-300 mb-2">

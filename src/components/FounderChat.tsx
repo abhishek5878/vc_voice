@@ -63,6 +63,7 @@ export default function FounderChat({
   companyName,
   submitted,
   singleColumnLayout = false,
+  partnerCopyContext,
 }: {
   initialStreamContext: StreamContext;
   voiceProfile?: string | null;
@@ -78,6 +79,15 @@ export default function FounderChat({
   submitted?: boolean;
   /** When true (e.g. on VC pitch page), single column: chat only, no deck sidebar; better for founders */
   singleColumnLayout?: boolean;
+  /** When set, "Copy for my Partner" copies a WhatsApp/Slack-ready summary with snapshot URL and scores instead of calling the vibe-check API */
+  partnerCopyContext?: {
+    snapshotUrl: string;
+    companyName: string;
+    investorName: string;
+    clarityScore: number | null;
+    riskLabel: string;
+    resistanceLabel: string;
+  };
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -220,9 +230,35 @@ export default function FounderChat({
   };
 
   const copyForPartner = useCallback(async () => {
-    if (messages.length < 2 || vibeCheckLoading) return;
-    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
+    if (vibeCheckLoading) return;
     setError(null);
+
+    if (partnerCopyContext) {
+      const { snapshotUrl, companyName: name, investorName, clarityScore, riskLabel, resistanceLabel } = partnerCopyContext;
+      const scoreLine = [
+        clarityScore != null ? `Clarity: ${clarityScore}/100` : null,
+        riskLabel ? `Risk: ${riskLabel}` : null,
+        resistanceLabel ? `Resistance: ${resistanceLabel}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      const prepLine =
+        sendToInvestorResult?.pointers?.trim().split(/\n/).filter(Boolean).slice(0, 2).join("; ") ||
+        "key gaps before the call";
+      const message = `I ran ${name} through ${investorName}'s investment bar on PitchRobin. ${scoreLine}. Check the full breakdown: ${snapshotUrl}. Prepping on ${prepLine}.`;
+      try {
+        await navigator.clipboard.writeText(message);
+        onToast?.("Partner summary copied — paste into WhatsApp or Slack");
+        setVibeCheckCopied(true);
+        setTimeout(() => setVibeCheckCopied(false), 2000);
+      } catch {
+        setError("Couldn't copy — please try clicking manually.");
+      }
+      return;
+    }
+
+    if (messages.length < 2) return;
+    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
     setVibeCheckLoading(true);
     try {
       const conversation = messages.map((m) => ({ role: m.role, content: m.content }));
@@ -263,7 +299,7 @@ export default function FounderChat({
       setVibeCheckLoading(false);
       if (typeof window !== "undefined") requestAnimationFrame(() => window.scrollTo(0, scrollY));
     }
-  }, [messages, vibeCheckLoading, onToast]);
+  }, [messages, vibeCheckLoading, onToast, partnerCopyContext, sendToInvestorResult?.pointers]);
 
   const copyActionItems = useCallback(async () => {
     if (messages.length < 2 || actionItemsLoading) return;
