@@ -14,9 +14,14 @@ export default function AuthPage() {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      const trimmed = passcode.trim();
-      if (!trimmed) {
+      const trimmedPasscode = passcode.trim();
+      const trimmedEmail = email.trim();
+      if (!trimmedPasscode) {
         setError("Enter the passcode.");
+        return;
+      }
+      if (!trimmedEmail) {
+        setError("Enter your email so your account stays private.");
         return;
       }
       setError(null);
@@ -25,7 +30,7 @@ export default function AuthPage() {
         const res = await fetch("/api/auth/passcode", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ passcode: trimmed, email: email.trim() || undefined }),
+          body: JSON.stringify({ passcode: trimmedPasscode, email: trimmedEmail }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -34,22 +39,17 @@ export default function AuthPage() {
           return;
         }
         const supabase = createBrowserSupabase();
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          const { error: anonError } = await supabase.auth.signInAnonymously();
-          if (anonError) {
-            setError(anonError.message || "Could not sign in.");
-            setLoading(false);
-            return;
-          }
+        await supabase.auth.signOut();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: trimmedPasscode,
+        });
+        if (signInError) {
+          setError(signInError.message || "Could not sign in.");
+          setLoading(false);
+          return;
         }
-        // Next step: social links to build their voice (onboarding). Returning users get redirected to /app from there.
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-          window.location.assign("/app/onboarding");
-        } else {
-          router.push("/app/onboarding");
-        }
+        window.location.assign("/app/onboarding");
       } catch {
         setError("Something went wrong.");
         setLoading(false);

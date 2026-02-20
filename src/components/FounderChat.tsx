@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import type { StreamContext } from "@/lib/ingest/types";
 
 type ChatRole = "user" | "assistant";
@@ -383,7 +384,7 @@ export default function FounderChat({
                 : "PitchRobin · Founder Chat"}
             </h1>
             <p className="text-xs text-zinc-500">
-              {investorDisplayName && slug ? "Live Q&A in this investor’s style" : "Mode 3: Pitch Stress-Test (live VC interrogation)"}
+              {investorDisplayName && slug ? "Live Q&A in this investor’s style" : "Live VC simulation"}
             </p>
           </div>
           <button
@@ -408,7 +409,7 @@ export default function FounderChat({
                   className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-xs font-medium border border-cyan-400/50 disabled:opacity-50"
                   title={`Get pointers from ${investorDisplayName} and optionally email them`}
                 >
-                  {sendToInvestorLoading ? "Generating…" : `Send to ${investorDisplayName}`}
+                  {sendToInvestorLoading ? "Generating…" : "Send to investor"}
                 </button>
               )}
               <button
@@ -437,7 +438,9 @@ export default function FounderChat({
       <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full p-4 sm:p-6 gap-4">
         {hasDeck && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5 px-3 rounded-xl bg-zinc-800/60 border border-zinc-700/50 text-xs">
-            <span className="text-zinc-400">Using {deckText.length.toLocaleString()} chars from your deck</span>
+            {companyName?.trim() ? (
+              <span className="text-zinc-400">Stress-testing: {companyName}</span>
+            ) : null}
             {hasInvestorVoice && (
               <span className="inline-flex items-center gap-1.5 font-medium text-cyan-400/95">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400/90" aria-hidden />
@@ -590,13 +593,17 @@ export default function FounderChat({
                       )}
                     </span>
                     <div
-                      className={`whitespace-pre-wrap leading-relaxed rounded-2xl px-4 py-3.5 text-[15px] ${signalBorder} ${
+                      className={`leading-relaxed rounded-2xl px-4 py-3.5 text-[15px] ${signalBorder} ${
                         m.role === "user"
-                          ? "bg-cyan-500 text-zinc-950"
-                          : "bg-zinc-800 text-zinc-100 border border-zinc-600/60"
+                          ? "bg-cyan-500 text-zinc-950 whitespace-pre-wrap"
+                          : "bg-zinc-800 text-zinc-100 border border-zinc-600/60 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_h3]:font-semibold [&_h3]:mt-2 [&_h3]:mb-1"
                       }`}
                     >
-                      {m.content}
+                      {m.role === "assistant" ? (
+                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                      ) : (
+                        m.content
+                      )}
                     </div>
                   </div>
                 </div>

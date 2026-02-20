@@ -36,6 +36,7 @@ export default function OnboardingPage() {
   const [needManualStep, setNeedManualStep] = useState(false);
   const [manualStepMessage, setManualStepMessage] = useState<string | null>(null);
   const [manualDescription, setManualDescription] = useState("");
+  const [onboardingStep, setOnboardingStep] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -327,16 +328,28 @@ export default function OnboardingPage() {
     );
   }
 
+  const canProceedStep1 = /^[a-z0-9-]{3,32}$/.test(slug.trim().toLowerCase());
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="border-b border-zinc-800/80 bg-zinc-950/95 p-4">
         <div className="max-w-lg mx-auto">
-          <div className="flex items-center gap-2 text-[11px] font-medium text-cyan-400/90 uppercase tracking-wider mb-1">
-            <span>Step 1</span><span className="text-zinc-600">·</span><span>Step 2</span><span className="text-zinc-600">·</span><span>Step 3</span>
+          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider mb-1">
+            <span className={onboardingStep >= 1 ? "text-cyan-400/90" : "text-zinc-600"}>1. Pick your link</span>
+            <span className="text-zinc-600">·</span>
+            <span className={onboardingStep >= 2 ? "text-cyan-400/90" : "text-zinc-600"}>2. How you evaluate</span>
+            <span className="text-zinc-600">·</span>
+            <span className={onboardingStep >= 3 ? "text-cyan-400/90" : "text-zinc-600"}>3. Your voice from links</span>
           </div>
-          <h1 className="text-lg font-semibold tracking-tight">Set up your Robin</h1>
+          <h1 className="text-lg font-semibold tracking-tight">
+            {onboardingStep === 1 ? "Welcome to PitchRobin" : "Set up your Robin"}
+          </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Social links → your pitch link → we build your voice. You can get your link first and add voice later.
+            {onboardingStep === 1
+              ? "Your investment bar, automated. Set up in 3 steps—first, choose the URL founders will use to pitch you."
+              : onboardingStep === 2
+                ? "Describe how you evaluate inbound so Robin can mirror your bar."
+                : "Add links to your writing so we can build your voice. At least one recommended."}
           </p>
         </div>
       </header>
@@ -349,100 +362,154 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">Step 1 · Social links (build your voice)</h2>
-            <p className="text-xs text-zinc-500">
-              Add your public writing so Robin can learn your tone and how you evaluate founders. We’ll read these to build your voice. Add at least one.
-            </p>
-            <input
-              type="url"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
-              placeholder="LinkedIn profile URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
-            />
-            <input
-              type="url"
-              value={twitterUrl}
-              onChange={(e) => setTwitterUrl(e.target.value)}
-              placeholder="Twitter / X profile URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
-            />
-            <input
-              type="url"
-              value={substackUrl}
-              onChange={(e) => setSubstackUrl(e.target.value)}
-              placeholder="Substack or newsletter URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
-            />
-            <input
-              type="url"
-              value={blogUrl}
-              onChange={(e) => setBlogUrl(e.target.value)}
-              placeholder="Personal blog or firm blog URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
-            />
-            <input
-              type="url"
-              value={podcastUrl}
-              onChange={(e) => setPodcastUrl(e.target.value)}
-              placeholder="Podcast or YouTube playlist URL"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
-            />
-          </section>
+          {onboardingStep === 1 && (
+            <section className="space-y-3">
+              <h2 className="text-sm font-medium text-zinc-300">Your pitch link</h2>
+              <p className="text-xs text-zinc-500">
+                Founders will use this URL to pitch you. Choose a unique slug (e.g. your name or firm).
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-zinc-500 text-sm whitespace-nowrap">
+                  {typeof window !== "undefined" ? `${window.location.origin}/pitch/` : "/pitch/"}
+                </span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  placeholder="your-name"
+                  className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                  required
+                />
+              </div>
+              <p className="text-[11px] text-zinc-500">3–32 characters; lowercase letters, numbers, and dashes only.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const t = slug.trim().toLowerCase();
+                  if (!t) {
+                    setError("Choose a URL slug for your pitch link (e.g. your-name).");
+                    return;
+                  }
+                  if (!/^[a-z0-9-]{3,32}$/.test(t)) {
+                    setError("Slug must be 3–32 characters: only lowercase letters, numbers, and dashes.");
+                    return;
+                  }
+                  setError(null);
+                  setOnboardingStep(2);
+                }}
+                disabled={!canProceedStep1}
+                className="w-full px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
+              >
+                Next →
+              </button>
+            </section>
+          )}
 
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium text-zinc-300">Step 2 · Your personalised pitch link</h2>
-            <p className="text-xs text-zinc-500">
-              Founders will use this URL to pitch you. Choose a unique slug (e.g. your name or firm).
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-zinc-500 text-sm whitespace-nowrap">
-                {typeof window !== "undefined" ? `${window.location.origin}/pitch/` : "/pitch/"}
-              </span>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                placeholder="your-name"
-                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
-                required
+          {onboardingStep === 2 && (
+            <section className="space-y-3">
+              <h2 className="text-sm font-medium text-zinc-300">How you evaluate inbound</h2>
+              <p className="text-xs text-zinc-500">
+                Optional but helpful: a short description of your bar, what you look for, and what makes you pass. We'll use this to tune your voice.
+              </p>
+              <VoiceStyleInput
+                value={bio}
+                onChange={setBio}
+                rows={4}
+                getAccessToken={getSupabaseAccessToken}
+                label=""
+                hint=""
+                placeholder="e.g. I look for repeat founders with clear metrics. I pass when it's pre-product or when TAM is hand-waved..."
               />
-            </div>
-            <p className="text-[11px] text-zinc-500">3–32 characters; lowercase letters, numbers, and dashes only.</p>
-          </section>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setOnboardingStep(1)}
+                  className="px-5 py-3 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 font-medium text-sm"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOnboardingStep(3)}
+                  className="flex-1 px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm"
+                >
+                  Next →
+                </button>
+              </div>
+            </section>
+          )}
 
-          <section className="space-y-3">
-            <VoiceStyleInput
-              value={bio}
-              onChange={setBio}
-              rows={4}
-              getAccessToken={getSupabaseAccessToken}
-              label="Step 3 · How you evaluate inbound (optional)"
-              hint="If your links don’t give enough signal, or to make your voice stronger: type below, or record / upload a short voice note."
-              placeholder="e.g. I look for repeat founders with clear metrics. I pass when..."
-            />
-          </section>
+          {onboardingStep === 3 && (
+            <>
+              <section className="space-y-3">
+                <h2 className="text-sm font-medium text-zinc-300">Rebuild your voice from links</h2>
+                <p className="text-xs text-zinc-500">
+                  Add your public writing so Robin can learn your tone and how you evaluate founders. At least one link recommended.
+                </p>
+                <input
+                  type="url"
+                  value={linkedinUrl}
+                  onChange={(e) => setLinkedinUrl(e.target.value)}
+                  placeholder="LinkedIn profile URL"
+                  className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                />
+                <input
+                  type="url"
+                  value={twitterUrl}
+                  onChange={(e) => setTwitterUrl(e.target.value)}
+                  placeholder="Twitter / X profile URL"
+                  className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                />
+                <input
+                  type="url"
+                  value={substackUrl}
+                  onChange={(e) => setSubstackUrl(e.target.value)}
+                  placeholder="Substack or newsletter URL"
+                  className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                />
+                <input
+                  type="url"
+                  value={blogUrl}
+                  onChange={(e) => setBlogUrl(e.target.value)}
+                  placeholder="Personal blog or firm blog URL"
+                  className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                />
+                <input
+                  type="url"
+                  value={podcastUrl}
+                  onChange={(e) => setPodcastUrl(e.target.value)}
+                  placeholder="Podcast or YouTube playlist URL"
+                  className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/70"
+                />
+              </section>
+              <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setOnboardingStep(2)}
+                  className="px-5 py-3 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 font-medium text-sm"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving || building}
+                  className="flex-1 px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
+                >
+                  {building ? "Building your voice…" : saving ? "Saving…" : "Build my voice & get my pitch link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGetLinkOnly}
+                  disabled={saving || building || !slug.trim()}
+                  className="px-5 py-3 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 font-medium text-sm disabled:opacity-50"
+                >
+                  Get my link now (add voice later)
+                </button>
+              </div>
+              <p className="text-[11px] text-zinc-500">Building voice can take up to 5 minutes while we read your links.</p>
+            </>
+          )}
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              type="submit"
-              disabled={saving || building}
-              className="flex-1 px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold text-sm disabled:opacity-60"
-            >
-              {building ? "Building your voice…" : saving ? "Saving…" : "Build my voice & get my pitch link"}
-            </button>
-            <p className="text-[11px] text-zinc-500 text-center sm:text-left">Building voice can take up to 5 minutes while we read your links.</p>
-            <button
-              type="button"
-              onClick={handleGetLinkOnly}
-              disabled={saving || building || !slug.trim()}
-              className="px-5 py-3 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 font-medium text-sm disabled:opacity-50"
-            >
-              Get my link now (add voice later)
-            </button>
-          </div>
-        </form>
       </main>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import FounderChat from "@/components/FounderChat";
+import Toast from "@/components/Toast";
 import type { StreamContext } from "@/lib/ingest/types";
 
 export default function PitchIntake({
@@ -36,6 +37,7 @@ export default function PitchIntake({
     red_flags: string[];
   } | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleFetchUrl = useCallback(async () => {
     const url = fetchUrlValue.trim();
@@ -147,12 +149,16 @@ export default function PitchIntake({
     const shareablePitchLink =
       typeof window !== "undefined" && slug ? `${window.location.origin}/pitch/${slug}` : null;
     return (
+      <>
       <div className="space-y-4">
         <FounderChat
           initialStreamContext={initialStreamContext}
           voiceProfile={voiceProfileText}
           onBack={() => setPhase("form")}
-          onToast={undefined}
+          onToast={(msg) => {
+            setToastMessage(msg);
+            setTimeout(() => setToastMessage(null), 2000);
+          }}
           shareablePitchLink={shareablePitchLink}
           slug={slug}
           investorDisplayName={investorDisplayName}
@@ -246,6 +252,10 @@ export default function PitchIntake({
           </section>
         )}
       </div>
+      {toastMessage && (
+        <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} dismissAfterMs={2000} />
+      )}
+      </>
     );
   }
 
