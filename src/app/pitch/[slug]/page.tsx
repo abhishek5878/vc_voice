@@ -3,6 +3,7 @@ import { unstable_noStore } from "next/cache";
 import type { Metadata } from "next";
 import PitchIntake from "@/components/PitchIntake";
 import CopyablePitchLink from "@/components/CopyablePitchLink";
+import CollapsibleHowIEvaluate from "@/components/CollapsibleHowIEvaluate";
 import { buildVoiceProfileText } from "@/lib/voice/profile";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 
@@ -87,23 +88,21 @@ export default async function PitchPage({ params }: PageProps) {
         </div>
       </header>
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
-        <section className="mb-6 p-5 sm:p-6 rounded-2xl border border-zinc-800/90 bg-zinc-900/50 shadow-lg shadow-black/20">
-          <h2 className="text-sm font-semibold text-zinc-200 mb-3">How I evaluate inbound</h2>
-          {voiceProfileText ? (
-            <div className="text-sm text-zinc-400 whitespace-pre-wrap leading-relaxed">{voiceProfileText}</div>
-          ) : (
-            <>
-              <p className="text-sm text-zinc-500 italic">
-                I haven’t set my evaluation style yet. The stress-test will still use your deck with a generic VC voice.
-              </p>
-              <p className="text-sm text-zinc-400 mt-3">
-                Paste your deck or narrative below, upload a deck, or fetch from a URL. You’ll get blunt feedback and concrete next steps.
-              </p>
-              <p className="text-xs text-zinc-500 mt-3">
-                If this is your link: sign in at pitchrobin.work → Settings → &quot;Rebuild from links&quot; so your style appears here.
-              </p>
-            </>
-          )}
+        <section className="mb-8 p-4 sm:p-5 rounded-xl border border-zinc-800 bg-zinc-900/40">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">How I evaluate</h2>
+          <CollapsibleHowIEvaluate
+            voiceProfileText={voiceProfileText}
+            noProfileCopy={
+              <>
+                <p className="text-[15px] text-zinc-400 italic">
+                  I haven’t set my evaluation style yet. The stress-test will still use your deck.
+                </p>
+                <p className="text-sm text-zinc-500 mt-2">
+                  Sign in at pitchrobin.work → Settings → &quot;Rebuild from links&quot; to add your style.
+                </p>
+              </>
+            }
+          />
         </section>
         <PitchIntake
           voiceProfileText={voiceProfileText}

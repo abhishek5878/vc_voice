@@ -287,15 +287,12 @@ export default function OnboardingPage() {
         <header className="border-b border-zinc-800/80 bg-zinc-950/95 p-4">
           <div className="max-w-lg mx-auto">
             <h1 className="text-lg font-semibold tracking-tight">Almost there</h1>
-            <p className="text-xs text-zinc-500 mt-1">
-              We need a bit more to build your voice.
+            <p className="text-sm text-zinc-400 mt-1">
+              We need a bit more to build your voice. Speak or type below.
             </p>
           </div>
         </header>
         <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
-          <p className="text-sm text-zinc-300 mb-4">
-            We scraped your links but need a bit more to sound like you. Type below, or record / upload a short voice note and we&apos;ll use the transcript.
-          </p>
           {error && (
             <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200 mb-4">
               {error}
@@ -307,9 +304,10 @@ export default function OnboardingPage() {
             rows={5}
             getAccessToken={getSupabaseAccessToken}
             label="Describe your investment style"
-            hint="Type, or use Record voice / Upload audio. We'll add the transcript here."
+            hint="Speak (record or upload a voice note) or type. We'll use your words to build your voice."
             placeholder="e.g. I look for repeat founders with clear metrics. I pass when it's pre-product..."
-            className="mb-4"
+            className="mb-6"
+            prominentVoice
           />
           <button
             type="button"

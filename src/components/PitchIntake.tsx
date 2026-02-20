@@ -146,6 +146,7 @@ export default function PitchIntake({
           investorDisplayName={investorDisplayName}
           companyName={companyName}
           submitted={submitted}
+          singleColumnLayout={Boolean(slug)}
         />
         {showSubmit && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">

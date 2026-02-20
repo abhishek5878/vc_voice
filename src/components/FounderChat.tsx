@@ -65,6 +65,7 @@ export default function FounderChat({
   investorDisplayName,
   companyName,
   submitted,
+  singleColumnLayout = false,
 }: {
   initialStreamContext: StreamContext;
   voiceProfile?: string | null;
@@ -78,6 +79,8 @@ export default function FounderChat({
   companyName?: string;
   /** When true (e.g. after founder submitted pitch), auto-fetch pointers and show prominently */
   submitted?: boolean;
+  /** When true (e.g. on VC pitch page), single column: chat only, no deck sidebar; better for founders */
+  singleColumnLayout?: boolean;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -485,7 +488,8 @@ export default function FounderChat({
             )}
           </section>
         )}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4 flex-1 min-h-0">
+        <div className={`flex-1 min-h-0 ${singleColumnLayout ? "flex flex-col max-w-3xl mx-auto w-full" : "grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-4"}`}>
+          {!singleColumnLayout && (
           <section className="hidden lg:flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-xs text-zinc-400 overflow-hidden min-h-0">
             <div className="flex items-center justify-between mb-2 shrink-0">
               <div>
@@ -505,35 +509,35 @@ export default function FounderChat({
               )}
             </div>
           </section>
-
-          <section className="flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 min-h-0 overflow-hidden">
-            <div className="px-3 py-2 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-1 shrink-0">
-              <span className="text-[11px] text-zinc-500">
+          )}
+          <section className={`flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/30 min-h-0 overflow-hidden ${singleColumnLayout ? "flex-1" : ""}`}>
+            <div className="px-4 py-3 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-1 shrink-0">
+              <span className="text-sm text-zinc-400">
                 Reply below. Enter to send, Shift+Enter for new line.
               </span>
             </div>
             <div
               ref={scrollRef}
-              className="flex-1 min-h-[200px] overflow-y-auto p-4 space-y-4 text-sm"
+              className={`flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 ${singleColumnLayout ? "min-h-[320px]" : "min-h-[200px]"}`}
             >
               {messages.map((m, idx) => (
                 <div
                   key={idx}
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`max-w-[90%] sm:max-w-[85%] flex flex-col space-y-1.5 ${m.role === "user" ? "items-end" : "items-start"}`}>
+                  <div className={`max-w-[92%] sm:max-w-[85%] flex flex-col space-y-2 ${m.role === "user" ? "items-end" : "items-start"}`}>
                     <span
-                      className={`text-[10px] font-medium tracking-wide ${
-                        m.role === "user" ? "text-cyan-400" : "text-zinc-500"
+                      className={`text-xs font-semibold tracking-wide ${
+                        m.role === "user" ? "text-cyan-400" : "text-zinc-400"
                       }`}
                     >
                       {m.role === "user" ? "You" : "VC"}
                     </span>
                     <div
-                      className={`whitespace-pre-wrap leading-relaxed rounded-2xl px-4 py-3 text-sm ${
+                      className={`whitespace-pre-wrap leading-relaxed rounded-2xl px-4 py-3.5 text-[15px] ${
                         m.role === "user"
                           ? "bg-cyan-500 text-zinc-950"
-                          : "bg-zinc-800 text-zinc-100 border border-zinc-700/50"
+                          : "bg-zinc-800 text-zinc-100 border border-zinc-600/60"
                       }`}
                     >
                       {m.content}
@@ -542,13 +546,13 @@ export default function FounderChat({
                 </div>
               ))}
               {messages.length === 0 && (
-                <div className="text-zinc-500 text-sm py-2">
+                <div className="text-zinc-400 text-[15px] py-4">
                   Reply with your one-line summary, or ask to focus on Problem, Market, Traction, Team, or Moat.
                 </div>
               )}
             </div>
-            <div className="border-t border-zinc-800 p-3 shrink-0 bg-zinc-900/50">
-              <div className="flex gap-2 items-end">
+            <div className="border-t border-zinc-800 p-4 shrink-0 bg-zinc-900/50">
+              <div className="flex gap-3 items-end">
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -558,15 +562,15 @@ export default function FounderChat({
                       ? "Type your reply…"
                       : "No deck text found. Go back and add your pitch."
                   }
-                  rows={2}
-                  className="flex-1 min-h-[44px] max-h-32 px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y"
+                  rows={singleColumnLayout ? 3 : 2}
+                  className="flex-1 min-h-[52px] max-h-40 px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 text-[15px] text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y"
                   aria-label="Message"
                 />
                 <button
                   type="button"
                   onClick={() => void sendMessage()}
                   disabled={loading || !input.trim()}
-                  className="shrink-0 px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:pointer-events-none text-sm font-semibold text-zinc-950 h-[44px]"
+                  className="shrink-0 px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:pointer-events-none text-[15px] font-semibold text-zinc-950 min-h-[52px]"
                 >
                   {loading ? "…" : "Send"}
                 </button>

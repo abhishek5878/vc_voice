@@ -36,6 +36,8 @@ interface VoiceStyleInputProps {
   hint?: string;
   className?: string;
   textareaClassName?: string;
+  /** When true, show voice options prominently above the textarea (for manual-step flow) */
+  prominentVoice?: boolean;
 }
 
 export default function VoiceStyleInput({
@@ -49,6 +51,7 @@ export default function VoiceStyleInput({
   hint = "Type below, or record / upload a short voice note and we'll use the transcript.",
   className = "",
   textareaClassName = "",
+  prominentVoice = false,
 }: VoiceStyleInputProps) {
   const [recording, setRecording] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -138,49 +141,85 @@ export default function VoiceStyleInput({
     [getAccessToken, appendText]
   );
 
+  const voiceButtons = (
+    <div className="flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        onClick={recording ? stopRecording : startRecording}
+        disabled={disabled || uploading}
+        className={
+          prominentVoice
+            ? "inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-medium border border-cyan-400/50 disabled:opacity-50"
+            : "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium disabled:opacity-50"
+        }
+      >
+        {recording ? (
+          <>
+            <span className="inline-block w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+            Stop recording
+          </>
+        ) : (
+          <>Record voice</>
+        )}
+      </button>
+      <label
+        className={
+          prominentVoice
+            ? "inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-medium border border-cyan-400/50 cursor-pointer disabled:opacity-50"
+            : "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium cursor-pointer disabled:opacity-50"
+        }
+      >
+        <input
+          type="file"
+          accept="audio/*,.mp3,.m4a,.wav,.webm,.mpga,.mpeg"
+          onChange={handleUpload}
+          disabled={disabled || uploading}
+          className="hidden"
+        />
+        {uploading ? "Transcribing…" : "Upload audio"}
+      </label>
+    </div>
+  );
+
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div className={`space-y-4 ${className}`}>
       {label && (
         <label className="block text-sm font-medium text-zinc-300">{label}</label>
       )}
-      {hint && <p className="text-xs text-zinc-500">{hint}</p>}
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        disabled={disabled}
-        className={`w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y ${textareaClassName}`}
-      />
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={recording ? stopRecording : startRecording}
-          disabled={disabled || uploading}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium disabled:opacity-50"
-        >
-          {recording ? (
-            <>
-              <span className="inline-block w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-              Stop recording
-            </>
-          ) : (
-            <>Record voice</>
-          )}
-        </button>
-        <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium cursor-pointer disabled:opacity-50">
-          <input
-            type="file"
-            accept="audio/*,.mp3,.m4a,.wav,.webm,.mpga,.mpeg"
-            onChange={handleUpload}
-            disabled={disabled || uploading}
-            className="hidden"
+      {hint && <p className="text-sm text-zinc-500">{hint}</p>}
+      {prominentVoice ? (
+        <>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-zinc-200">Speak your answer</p>
+            {voiceButtons}
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-zinc-200">Or type below</p>
+            <textarea
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={placeholder}
+              rows={rows}
+              disabled={disabled}
+              className={`w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y ${textareaClassName}`}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={rows}
+            disabled={disabled}
+            className={`w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 resize-y ${textareaClassName}`}
           />
-          {uploading ? "Transcribing…" : "Upload audio"}
-        </label>
-      </div>
+          {voiceButtons}
+        </>
+      )}
       {recognitionError && (
-        <p className="text-xs text-cyan-400/90">{recognitionError}</p>
+        <p className="text-sm text-cyan-400/90">{recognitionError}</p>
       )}
     </div>
   );

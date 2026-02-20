@@ -54,11 +54,15 @@ export async function POST(request: NextRequest) {
         { scrape_status: "error", scrape_error: "insufficient_content", last_scraped_at: new Date().toISOString() },
         admin
       );
+      const noLinks = urls.length === 0;
+      const message = noLinks
+        ? "Add at least one link (LinkedIn, Twitter, blog, etc.) above, or describe your style below. You can type or use the voice option (record or upload)."
+        : "We couldn't get enough from your links yet. Describe your investment style below—you can type or use the voice option (record or upload a short clip).";
       return NextResponse.json(
         {
           user_id: userId,
           status: "insufficient_content",
-          message: "We scraped your links for up to 5 minutes but need a bit more. Describe your investment style in 30 seconds (type or speak and paste the transcript).",
+          message,
         },
         { status: 200 }
       );
