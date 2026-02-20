@@ -327,7 +327,7 @@ export default function PitchIntake({
         </div>
         <div>
           <label htmlFor="pitch-company" className="block text-sm font-medium text-zinc-400 mb-1.5">
-            Company name <span className="text-zinc-600">(optional)</span>
+            Company name
           </label>
           <input
             id="pitch-company"
@@ -337,6 +337,7 @@ export default function PitchIntake({
             placeholder="Acme Inc."
             className="w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-shadow"
           />
+          <p className="text-xs text-zinc-500 mt-1">Helps Robin ask smarter questions and personalise your Belief Map.</p>
         </div>
         <div>
           <label htmlFor="pitch-text" className="block text-sm font-medium text-zinc-400 mb-1.5">

@@ -72,34 +72,46 @@ function GrueRadar({ runs }: { runs: DealRun[] }) {
   });
   const size = 120;
   const center = size / 2;
+  const maxR = center - 10;
   const points = data.map((d, i) => {
     const angle = (i / data.length) * 2 * Math.PI - Math.PI / 2;
-    const r = (d.value / 100) * (center - 10);
+    const r = (d.value / 100) * maxR;
     return `${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`;
   });
   const poly = points.join(" ");
+  const tx = 20;
+  const ty = 20;
 
   return (
-    <svg width={size + 40} height={size + 40} className="mx-auto">
-      <polygon
-        points={poly}
-        fill="rgba(245, 158, 11, 0.2)"
-        stroke="rgb(245, 158, 11)"
-        strokeWidth="1.5"
-        transform={`translate(20, 20)`}
-      />
-      {data.map((d, i) => (
-        <text
-          key={d.domain}
-          x={20 + center + (center - 5) * Math.cos((i / data.length) * 2 * Math.PI - Math.PI / 2)}
-          y={20 + center + (center - 5) * Math.sin((i / data.length) * 2 * Math.PI - Math.PI / 2)}
-          textAnchor="middle"
-          className="fill-zinc-400 text-[10px]"
-        >
-          {d.domain}
-        </text>
-      ))}
-    </svg>
+    <div className="mx-auto">
+      <svg width={size + 80} height={size + 56} className="mx-auto">
+        <g transform={`translate(${tx}, ${ty})`}>
+          {/* Scale: concentric circles at 50% and 100% */}
+          <circle cx={center} cy={center} r={maxR} fill="none" stroke="rgb(113, 113, 122)" strokeWidth="0.5" strokeDasharray="2,2" />
+          <circle cx={center} cy={center} r={maxR * 0.5} fill="none" stroke="rgb(113, 113, 122)" strokeWidth="0.5" strokeDasharray="2,2" />
+          <circle cx={center} cy={center} r={2} fill="rgb(113, 113, 122)" />
+          <polygon
+            points={poly}
+            fill="rgba(245, 158, 11, 0.2)"
+            stroke="rgb(245, 158, 11)"
+            strokeWidth="1.5"
+          />
+          {data.map((d, i) => (
+            <text
+              key={d.domain}
+              x={center + (center - 5) * Math.cos((i / data.length) * 2 * Math.PI - Math.PI / 2)}
+              y={center + (center - 5) * Math.sin((i / data.length) * 2 * Math.PI - Math.PI / 2)}
+              textAnchor="middle"
+              className="fill-zinc-400 text-[10px]"
+            >
+              {d.domain}
+            </text>
+          ))}
+        </g>
+        {/* Axis label: 100% at top */}
+      </svg>
+      <p className="text-[10px] text-zinc-500 text-center mt-1">Coverage: 0% = not covered, 50% = partial, 100% = covered</p>
+    </div>
   );
 }
 

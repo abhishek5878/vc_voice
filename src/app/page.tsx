@@ -77,7 +77,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                  Meet, Refer, or Pass in one click
+                  Mark outcome per deal in one click (Invested, Declined, 3x, 10x…)
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
@@ -178,7 +178,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-semibold text-slate-100 mb-2">3. High-Signal Triage</h3>
               <p className="text-sm text-slate-400 mb-3">Review a Belief Map for every pitch.</p>
-              <p className="text-xs text-cyan-300/90">See where narrative collapsed and evidence held. Meet, Refer, or Pass in one click.</p>
+              <p className="text-xs text-cyan-300/90">See where narrative collapsed and evidence held. Mark outcome per deal in one click.</p>
             </div>
           </div>
           <div className="mt-10 text-center">
@@ -218,19 +218,19 @@ export default function LandingPage() {
               </div>
               <div className="p-4">
                 <p className="text-sm font-medium text-slate-200">VC dashboard</p>
-                <p className="text-xs text-slate-500 mt-1">Belief Map + one-click triage (Meet / Refer / Pass).</p>
+                <p className="text-xs text-slate-500 mt-1">Belief Map + mark outcome per deal in one click.</p>
               </div>
             </div>
             <div className="rounded-2xl border border-slate-700/80 bg-slate-800/40 overflow-hidden shadow-xl">
               <div className="aspect-video bg-slate-800 flex items-center justify-center border-b border-slate-700/80">
                 <div className="text-center p-4">
                   <div className="w-16 h-16 rounded-xl bg-amber-500/20 border border-amber-400/30 mx-auto mb-2 flex items-center justify-center text-amber-400 text-2xl">!</div>
-                  <span className="text-xs text-slate-500">Conflict Report</span>
+                  <span className="text-xs text-slate-500">Post-call debrief</span>
                 </div>
               </div>
               <div className="p-4">
                 <p className="text-sm font-medium text-slate-200">Transcript upload</p>
-                <p className="text-xs text-slate-500 mt-1">Drop transcript → Conflict Report + GRUE checklist + next-call script.</p>
+                <p className="text-xs text-slate-500 mt-1">Drop transcript → verdict, scores, what resonated vs. where you lost them, key moments, and VC recs for next conversations.</p>
               </div>
             </div>
           </div>
@@ -242,23 +242,31 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">Post-meeting</p>
           <h2 className="text-2xl font-semibold text-slate-100 mb-4">
-            Don&apos;t just take notes. Stress-test the truth.
+            Don&apos;t just take notes. See what actually landed.
           </h2>
           <p className="text-slate-400 text-sm leading-relaxed mb-6">
-            After the call, drop the transcript into Robin. Blind spots and evidence gaps you might have missed:
+            After the call, drop the transcript into Robin. You get:
           </p>
           <ul className="space-y-3 text-slate-400 text-sm">
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-              <span><strong className="text-slate-300">Conflict Report</strong>: where did claims contradict the data?</span>
+              <span><strong className="text-slate-300">Verdict + scores</strong>: overall, clarity, vision, unfair edge — with one-line reasons.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-              <span><strong className="text-slate-300">GRUE Checklist</strong>: Growth, Retention, Unit economics, Execution.</span>
+              <span><strong className="text-slate-300">PRE/POST delta</strong>: compare Robin&apos;s pre-call prediction to what the transcript showed.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-              <span><strong className="text-slate-300">Next-call script</strong>: the 3 toughest questions for the second partner meeting.</span>
+              <span><strong className="text-slate-300">What resonated / Where you lost them</strong>: narrative bullets pulled from the call.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
+              <span><strong className="text-slate-300">Key moments</strong>: NAILED IT vs. NEEDS WORK, with quotes from the transcript.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
+              <span><strong className="text-slate-300">Investors to reach out to next</strong>: matched VCs with fit % and links.</span>
             </li>
           </ul>
         </div>
