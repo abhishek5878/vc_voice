@@ -231,66 +231,68 @@ export default function DealDetailPage() {
           </section>
         )}
 
-        {latestRun?.report_json && (() => {
-          const report = latestRun.report_json as PipelineResult;
-          const brief = report?.pre_meeting_attack_brief;
-          const highStakesQuestions =
-            brief?.red_list_framed?.slice(0, 3).map((r) => r?.question) ??
-            report?.layer_4?.red_list?.slice(0, 3).map((r) => r?.question) ??
-            [];
-          const claims = report?.layer_1?.claims ?? [];
-          const evidenceGaps = claims.filter((c) => c?.status === "unverified");
-          const handleExport = () => {
-            const md = buildEvidenceFirstMarkdown(report, deal.company_name);
-            void navigator.clipboard.writeText(md).then(() => {
-              setExportCopied(true);
-              setTimeout(() => setExportCopied(false), 2000);
-            });
-          };
-          return (
-            <>
-              <section className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
-                <h2 className="text-sm font-medium text-zinc-400 mb-3">TL;DR — 3 High-Stakes Questions for Meeting 2</h2>
-                {highStakesQuestions.length ? (
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-zinc-200">
-                    {highStakesQuestions.map((q, i) => (
-                      <li key={i}>{q?.replace(/\n/g, " ") ?? ""}</li>
-                    ))}
-                  </ol>
-                ) : (
-                  <p className="text-zinc-500 text-sm">No red-list questions in this run.</p>
-                )}
-              </section>
-              <section className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-                <h2 className="text-sm font-medium text-zinc-400 mb-3">Evidence Gap Report</h2>
-                <p className="text-xs text-zinc-500 mb-2">Claims made by the founder not backed by deck or transcript.</p>
-                {evidenceGaps.length ? (
-                  <ul className="space-y-2 text-sm">
-                    {evidenceGaps.map((c, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-amber-400/90 shrink-0">☐</span>
-                        <span className="text-zinc-200">{c?.claim}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-zinc-500 text-sm">No unverified claims.</p>
-                )}
-              </section>
-              <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
-                <h2 className="text-sm font-medium text-zinc-400 mb-3">Export</h2>
-                <button
-                  type="button"
-                  onClick={handleExport}
-                  className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium"
-                >
-                  {exportCopied ? "Copied" : "Export to Slack / Notion"}
-                </button>
-                <p className="text-xs text-zinc-500 mt-2">Copies an evidence-first markdown brief (high-stakes questions + evidence gaps) to paste into Slack or a Notion doc.</p>
-              </section>
-            </>
-          );
-        })()}
+        {latestRun?.report_json
+          ? (() => {
+              const report = latestRun.report_json as PipelineResult;
+              const brief = report?.pre_meeting_attack_brief;
+              const highStakesQuestions =
+                brief?.red_list_framed?.slice(0, 3).map((r) => r?.question) ??
+                report?.layer_4?.red_list?.slice(0, 3).map((r) => r?.question) ??
+                [];
+              const claims = report?.layer_1?.claims ?? [];
+              const evidenceGaps = claims.filter((c) => c?.status === "unverified");
+              const handleExport = () => {
+                const md = buildEvidenceFirstMarkdown(report, deal.company_name);
+                void navigator.clipboard.writeText(md).then(() => {
+                  setExportCopied(true);
+                  setTimeout(() => setExportCopied(false), 2000);
+                });
+              };
+              return (
+                <>
+                  <section className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
+                    <h2 className="text-sm font-medium text-zinc-400 mb-3">TL;DR — 3 High-Stakes Questions for Meeting 2</h2>
+                    {highStakesQuestions.length ? (
+                      <ol className="list-decimal list-inside space-y-2 text-sm text-zinc-200">
+                        {highStakesQuestions.map((q, i) => (
+                          <li key={i}>{q?.replace(/\n/g, " ") ?? ""}</li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className="text-zinc-500 text-sm">No red-list questions in this run.</p>
+                    )}
+                  </section>
+                  <section className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+                    <h2 className="text-sm font-medium text-zinc-400 mb-3">Evidence Gap Report</h2>
+                    <p className="text-xs text-zinc-500 mb-2">Claims made by the founder not backed by deck or transcript.</p>
+                    {evidenceGaps.length ? (
+                      <ul className="space-y-2 text-sm">
+                        {evidenceGaps.map((c, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-amber-400/90 shrink-0">☐</span>
+                            <span className="text-zinc-200">{c?.claim}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-zinc-500 text-sm">No unverified claims.</p>
+                    )}
+                  </section>
+                  <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
+                    <h2 className="text-sm font-medium text-zinc-400 mb-3">Export</h2>
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium"
+                    >
+                      {exportCopied ? "Copied" : "Export to Slack / Notion"}
+                    </button>
+                    <p className="text-xs text-zinc-500 mt-2">Copies an evidence-first markdown brief (high-stakes questions + evidence gaps) to paste into Slack or a Notion doc.</p>
+                  </section>
+                </>
+              );
+            })()
+          : null}
 
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
           <h2 className="text-sm font-medium text-zinc-400 mb-3">Timeline</h2>

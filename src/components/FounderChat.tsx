@@ -175,7 +175,7 @@ export default function FounderChat({
         throw new Error("Empty response from LLM");
       }
 
-      const nextMessagesWithReply = [...nextMessages, { role: "assistant", content: reply }];
+      const nextMessagesWithReply: ChatMessage[] = [...nextMessages, { role: "assistant", content: reply }];
       setMessages(nextMessagesWithReply);
 
       // Update conviction bar and heat map (fire-and-forget).

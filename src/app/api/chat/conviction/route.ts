@@ -40,10 +40,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const conversationText = messages
-    .map((m, i) => `${m.role === "user" ? "Founder" : "VC"}: ${(m.content || "").trim()}`)
-    .join("\n\n");
-
   const systemPrompt = `You are evaluating a founder pitch stress-test conversation. Output ONLY valid JSON, no markdown.
 
 1) confidence_score: number 0-100. How much does the VC (Robin) have conviction in this founder based on the conversation so far? 0 = narrative collapsed, 100 = strong evidence and clarity.

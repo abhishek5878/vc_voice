@@ -409,7 +409,7 @@ export default function OnboardingPage() {
             <section className="space-y-3">
               <h2 className="text-sm font-medium text-zinc-300">How you evaluate inbound</h2>
               <p className="text-xs text-zinc-500">
-                Optional but helpful: a short description of your bar, what you look for, and what makes you pass. We'll use this to tune your voice.
+                Optional but helpful: a short description of your bar, what you look for, and what makes you pass. We&apos;ll use this to tune your voice.
               </p>
               <VoiceStyleInput
                 value={bio}
@@ -509,7 +509,7 @@ export default function OnboardingPage() {
               <p className="text-[11px] text-zinc-500">Building voice can take up to 5 minutes while we read your links.</p>
             </>
           )}
-
+        </form>
       </main>
     </div>
   );

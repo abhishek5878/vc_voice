@@ -55,7 +55,7 @@ export default function AuthPage() {
         setLoading(false);
       }
     },
-    [passcode, email, router]
+    [passcode, email]
   );
 
   return (

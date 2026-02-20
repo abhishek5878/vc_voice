@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     try {
       const supabaseForProfile = token ? createServerSupabaseWithToken(token) : null;
       const profile = await getRobinProfile(userIdForDeals, supabaseForProfile ?? undefined);
-      voiceProfile = buildVoiceProfileText(profile ?? undefined) ?? null;
+      voiceProfile = profile ? (buildVoiceProfileText(profile) ?? null) : null;
     } catch {
       // Voice profile fetch failure should not break analysis
     }
