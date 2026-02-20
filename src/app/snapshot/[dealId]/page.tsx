@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getDealPublic, getDealRunsForSnapshot } from "@/lib/deals/db";
+import { getDealPublicForSnapshot, getDealRunsForResult } from "@/lib/deals/db";
 import type { DealRun } from "@/lib/deals/types";
 
 function riskLabel(riskScore: number | null): string {
@@ -66,9 +66,9 @@ export default async function SnapshotPage({
   params: Promise<{ dealId: string }>;
 }) {
   const { dealId } = await params;
-  const deal = await getDealPublic(dealId);
+  const deal = await getDealPublicForSnapshot(dealId);
   if (!deal) notFound();
-  const runs = await getDealRunsForSnapshot(dealId);
+  const runs = await getDealRunsForResult(dealId);
   const lastRun = runs[0];
   const redFlags = (lastRun?.red_flags ?? []) as { question: string }[];
   const topRed = redFlags.slice(0, 3).map((r) => (r.question ?? "").replace(/\n/g, " ").trim().slice(0, 160));

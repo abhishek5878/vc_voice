@@ -37,6 +37,7 @@ export default function PitchIntake({
     red_flags: string[];
   } | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleFetchUrl = useCallback(async () => {
@@ -201,16 +202,22 @@ export default function PitchIntake({
                         <button
                           type="button"
                           onClick={() => {
-                            const url = `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/result/${resultDealId}`;
-                            void navigator.clipboard.writeText(url).then(() => {
+                            const url = `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/snapshot/${resultDealId}`;
+                            navigator.clipboard.writeText(url).then(() => {
                               setShareCopied(true);
+                              setShareError(null);
                               setTimeout(() => setShareCopied(false), 2000);
+                            }).catch(() => {
+                              setShareError("Couldn't copy — please try clicking manually.");
                             });
                           }}
                           className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-semibold"
                         >
                           {shareCopied ? "Link copied" : "Share your results"}
                         </button>
+                        {shareError && (
+                          <p className="text-xs text-amber-400">{shareError}</p>
+                        )}
                         <button
                           type="button"
                           onClick={() => {

@@ -257,6 +257,19 @@ export async function getDealPublic(dealId: string): Promise<Deal | null> {
   return data as Deal;
 }
 
+/** Public snapshot page: load deal by id when share_public (uses admin so unauthenticated visitors see data). */
+export async function getDealPublicForSnapshot(dealId: string): Promise<Deal | null> {
+  const supabase = createAdminSupabase();
+  const { data, error } = await supabase
+    .from("deals")
+    .select("*")
+    .eq("id", dealId)
+    .eq("share_public", true)
+    .single();
+  if (error || !data) return null;
+  return data as Deal;
+}
+
 /** For /result/[sessionId]: get deal by id only (no auth). Uses admin so public result page works without user session. */
 export async function getDealByIdForResult(dealId: string): Promise<{ id: string; company_name: string; share_public: boolean; user_id: string } | null> {
   const supabase = createAdminSupabase();

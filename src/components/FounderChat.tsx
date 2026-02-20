@@ -253,7 +253,8 @@ export default function FounderChat({
       setVibeCheckCopied(true);
       setTimeout(() => setVibeCheckCopied(false), 2000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Vibe check failed");
+      const msg = e instanceof Error ? e.message : "Vibe check failed";
+      setError(/clipboard|writeText/i.test(msg) ? "Couldn't copy — please try clicking manually." : msg);
     } finally {
       setVibeCheckLoading(false);
       if (typeof window !== "undefined") requestAnimationFrame(() => window.scrollTo(0, scrollY));
@@ -294,7 +295,8 @@ export default function FounderChat({
       setActionItemsCopied(true);
       setTimeout(() => setActionItemsCopied(false), 2000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Action items failed");
+      const msg = e instanceof Error ? e.message : "Action items failed";
+      setError(/clipboard|writeText/i.test(msg) ? "Couldn't copy — please try clicking manually." : msg);
     } finally {
       setActionItemsLoading(false);
       if (typeof window !== "undefined") requestAnimationFrame(() => window.scrollTo(0, scrollY));
