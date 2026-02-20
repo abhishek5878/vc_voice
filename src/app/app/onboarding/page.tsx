@@ -151,7 +151,8 @@ export default function OnboardingPage() {
       setLiveLink(`${origin}/pitch/${trimmedSlug}`);
       setDone(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      const msg = e instanceof Error ? e.message : "Something went wrong.";
+      setError(msg === "[object Object]" ? "Something went wrong. Try again." : msg);
     } finally {
       setSaving(false);
       setBuilding(false);
@@ -200,7 +201,8 @@ export default function OnboardingPage() {
       }
       window.location.assign("/app");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      const msg = e instanceof Error ? e.message : "Something went wrong.";
+      setError(msg === "[object Object]" ? "Something went wrong. Try again." : msg);
     } finally {
       setSaving(false);
     }
@@ -242,7 +244,8 @@ export default function OnboardingPage() {
       setLiveLink(`${origin}/pitch/${slug.trim().toLowerCase()}`);
       setDone(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      const msg = e instanceof Error ? e.message : "Something went wrong.";
+      setError(msg === "[object Object]" ? "Something went wrong. Try again." : msg);
     } finally {
       setBuilding(false);
     }
@@ -364,7 +367,7 @@ export default function OnboardingPage() {
           {error && (
             <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200" role="alert" aria-live="assertive" aria-atomic="true">
               <p>{error}</p>
-              <Link href="/" className="inline-block mt-2 text-xs text-cyan-400 hover:text-cyan-300">Back to home</Link>
+              <Link href="/app" className="inline-block mt-2 text-xs text-cyan-400 hover:text-cyan-300">Back to dashboard</Link>
             </div>
           )}
 

@@ -4,6 +4,12 @@ import { createServerSupabaseWithToken } from "@/lib/supabase/server";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 import { getRobinProfile, upsertRobinProfile } from "@/lib/voice/profile";
 
+function toErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (e != null && typeof e === "object" && "message" in e) return String((e as { message: unknown }).message);
+  return String(e);
+}
+
 export async function GET(request: NextRequest) {
   const token = request.headers.get("x-supabase-access-token")?.trim() ?? null;
   const userId = await getUserIdFromRequest(request);
@@ -15,8 +21,7 @@ export async function GET(request: NextRequest) {
     const profile = await getRobinProfile(userId, supabase);
     return NextResponse.json(profile ?? { user_id: userId, voice_profile: null });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: toErrorMessage(e) }, { status: 500 });
   }
 }
 
@@ -75,15 +80,14 @@ export async function PUT(request: NextRequest) {
   try {
     const admin = createAdminSupabase();
 
-    // Enforce slug uniqueness (if provided)
+    // Enforce slug uniqueness: only reject if a different user already has this slug
     if (slug) {
       const { data: existing } = await admin
         .from("robin_profiles")
         .select("user_id")
         .eq("slug", slug)
-        .neq("user_id", userId)
         .maybeSingle();
-      if (existing) {
+      if (existing && existing.user_id !== userId) {
         return NextResponse.json({ error: "This slug is already taken. Try another." }, { status: 400 });
       }
     }
@@ -92,8 +96,7 @@ export async function PUT(request: NextRequest) {
     const saved = await upsertRobinProfile(userId, updates, admin);
     return NextResponse.json(saved);
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: toErrorMessage(e) }, { status: 500 });
   }
 }
 
