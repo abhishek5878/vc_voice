@@ -310,7 +310,7 @@ export default function DealDetailPage() {
                   {(r.red_flags as unknown[]).length} red · {(r.yellow_flags as unknown[]).length} yellow
                 </span>
                 {r.risk_score != null && (
-                  <span className="text-cyan-400/90">risk {Math.round(r.risk_score)}</span>
+                  <span className="text-cyan-400/90">{riskLevel(r.risk_score)}</span>
                 )}
               </li>
             ))}

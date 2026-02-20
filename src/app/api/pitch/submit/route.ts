@@ -50,8 +50,14 @@ export async function POST(request: NextRequest) {
   const pitchText = typeof body.pitchText === "string" ? body.pitchText.trim() : "";
   if (!companyName && pitchText) {
     const firstLine = pitchText.split(/\n/).find((l) => l.trim().length > 0)?.trim() ?? "";
-    const beforeDash = firstLine.split(/\s*[—\-–]\s*/)[0].trim();
-    companyName = (beforeDash || firstLine).slice(0, 80) || "Unnamed company";
+    const companyPrefix = firstLine.match(/^Company:\s+(.+)$/i);
+    if (companyPrefix) {
+      companyName = companyPrefix[1].trim().slice(0, 80);
+    } else {
+      const beforeIs = firstLine.split(/\s+is\s+/i)[0].trim();
+      const beforeDash = firstLine.split(/\s*[—\-–]\s*/)[0].trim();
+      companyName = (beforeIs || beforeDash || firstLine).slice(0, 50) || "Unnamed company";
+    }
   }
   if (!companyName) companyName = "Unnamed company";
   companyName = companyName.slice(0, 100);
