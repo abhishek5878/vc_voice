@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
@@ -10,12 +10,14 @@ export default function AuthPage() {
   const [passcode, setPasscode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passcodeRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      const trimmedPasscode = passcode.trim();
-      const trimmedEmail = email.trim();
+      const trimmedEmail = (emailRef.current?.value ?? email).trim();
+      const trimmedPasscode = (passcodeRef.current?.value ?? passcode).trim();
       if (!trimmedPasscode) {
         setError("Enter the passcode.");
         return;
@@ -24,6 +26,8 @@ export default function AuthPage() {
         setError("Enter your email so your account stays private.");
         return;
       }
+      setEmail(trimmedEmail);
+      setPasscode(trimmedPasscode);
       setError(null);
       setLoading(true);
       try {
@@ -46,7 +50,8 @@ export default function AuthPage() {
         const supabase = createBrowserSupabase();
         await supabase.auth.signOut();
         // Supabase requires password length >= 6; same normalization as passcode API
-        const password = trimmedPasscode.length >= 6 ? trimmedPasscode : trimmedPasscode.padEnd(6, "0");
+        const password =
+          trimmedPasscode.length >= 6 ? trimmedPasscode : trimmedPasscode.padEnd(6, "0");
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
           password,
@@ -86,6 +91,7 @@ export default function AuthPage() {
                 Email
               </label>
               <input
+                ref={emailRef}
                 id="email"
                 type="email"
                 autoComplete="email"
@@ -100,6 +106,7 @@ export default function AuthPage() {
                 Passcode
               </label>
               <input
+                ref={passcodeRef}
                 id="passcode"
                 type="password"
                 inputMode="numeric"

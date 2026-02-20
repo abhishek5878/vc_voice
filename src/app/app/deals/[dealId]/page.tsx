@@ -198,7 +198,9 @@ export default function DealDetailPage() {
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-1">Ranking</h2>
             <p className="text-zinc-200">
-              This deal ranks in the top <span className="text-cyan-400 font-medium">{100 - strengthPercentile}%</span> of your {totalDeals} deals by strength.
+              {totalDeals === 1
+                ? "#1 of 1 deal. Add more to see strength ranking."
+                : `#${Math.min(totalDeals, 1 + Math.round((strengthPercentile / 100) * (totalDeals - 1)))} of ${totalDeals} deals by strength.`}
             </p>
             {clarityPercentile != null && (
               <p className="text-zinc-400 text-sm mt-1">

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { unstable_noStore } from "next/cache";
 import type { Metadata } from "next";
 import PitchIntake from "@/components/PitchIntake";
-import CopyablePitchLink from "@/components/CopyablePitchLink";
 import CollapsibleHowIEvaluate from "@/components/CollapsibleHowIEvaluate";
 import { buildVoiceProfileText } from "@/lib/voice/profile";
 import { createAdminSupabase } from "@/lib/supabase/admin";
@@ -84,10 +83,6 @@ export default async function PitchPage({ params }: PageProps) {
           <p className="text-xs text-zinc-500 mt-2">
             What happens next: you’ll answer a few questions in my style, then you can submit to my pipeline or get pointers to sharpen the pitch.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-zinc-500">Your link:</span>
-            <CopyablePitchLink slug={rawSlug} />
-          </div>
         </div>
       </header>
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">

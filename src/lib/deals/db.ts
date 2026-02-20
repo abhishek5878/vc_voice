@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { createAdminSupabase } from "@/lib/supabase/admin";
 import type { Deal, DealRun, FounderClaimRow } from "./types";
 import { pipelineResultToRunPayload } from "./persist";
 import type { PipelineResult } from "@/lib/pipeline/types";
@@ -256,9 +257,9 @@ export async function getDealPublic(dealId: string): Promise<Deal | null> {
   return data as Deal;
 }
 
-/** For /result/[sessionId]: get deal by id only (no auth). Returns minimal fields to decide public vs private. */
+/** For /result/[sessionId]: get deal by id only (no auth). Uses admin so public result page works without user session. */
 export async function getDealByIdForResult(dealId: string): Promise<{ id: string; company_name: string; share_public: boolean; user_id: string } | null> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("deals")
     .select("id, company_name, share_public, user_id")
@@ -268,9 +269,9 @@ export async function getDealByIdForResult(dealId: string): Promise<{ id: string
   return data as { id: string; company_name: string; share_public: boolean; user_id: string };
 }
 
-/** Get VC pitch page slug by user_id (for result page CTA). */
+/** Get VC pitch page slug by user_id (for result page CTA). Uses admin so result page works without session. */
 export async function getSlugByUserId(userId: string): Promise<string | null> {
-  const supabase = await createServerSupabase();
+  const supabase = createAdminSupabase();
   const { data, error } = await supabase
     .from("robin_profiles")
     .select("slug")
@@ -282,6 +283,18 @@ export async function getSlugByUserId(userId: string): Promise<string | null> {
 
 export async function getDealRunsForSnapshot(dealId: string): Promise<DealRun[]> {
   return getDealRuns(dealId);
+}
+
+/** Deal runs for public /result page (bypasses RLS via admin). */
+export async function getDealRunsForResult(dealId: string): Promise<DealRun[]> {
+  const client = createAdminSupabase();
+  const { data, error } = await client
+    .from("deal_runs")
+    .select("*")
+    .eq("deal_id", dealId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as DealRun[];
 }
 
 export async function getInsights(userId: string, supabase?: SupabaseClient): Promise<{

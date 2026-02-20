@@ -85,6 +85,8 @@ export default function FounderChat({
   const [loading, setLoading] = useState(false);
   const [vibeCheckLoading, setVibeCheckLoading] = useState(false);
   const [actionItemsLoading, setActionItemsLoading] = useState(false);
+  const [actionItemsCopied, setActionItemsCopied] = useState(false);
+  const [vibeCheckCopied, setVibeCheckCopied] = useState(false);
   const [sendToInvestorLoading, setSendToInvestorLoading] = useState(false);
   const [sendToInvestorResult, setSendToInvestorResult] = useState<SendToInvestorResult | null>(null);
   const [convictionScore, setConvictionScore] = useState<number | null>(null);
@@ -219,6 +221,7 @@ export default function FounderChat({
 
   const copyForPartner = useCallback(async () => {
     if (messages.length < 2 || vibeCheckLoading) return;
+    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
     setError(null);
     setVibeCheckLoading(true);
     try {
@@ -247,15 +250,19 @@ export default function FounderChat({
       if (!summary) throw new Error("Empty summary");
       await navigator.clipboard.writeText(summary);
       onToast?.("Vibe check copied to clipboard");
+      setVibeCheckCopied(true);
+      setTimeout(() => setVibeCheckCopied(false), 2000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Vibe check failed");
     } finally {
       setVibeCheckLoading(false);
+      if (typeof window !== "undefined") requestAnimationFrame(() => window.scrollTo(0, scrollY));
     }
   }, [messages, vibeCheckLoading, onToast]);
 
   const copyActionItems = useCallback(async () => {
     if (messages.length < 2 || actionItemsLoading) return;
+    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
     setError(null);
     setActionItemsLoading(true);
     try {
@@ -284,10 +291,13 @@ export default function FounderChat({
       if (!summary) throw new Error("Empty action items");
       await navigator.clipboard.writeText(summary);
       onToast?.("3 action items copied to clipboard");
+      setActionItemsCopied(true);
+      setTimeout(() => setActionItemsCopied(false), 2000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Action items failed");
     } finally {
       setActionItemsLoading(false);
+      if (typeof window !== "undefined") requestAnimationFrame(() => window.scrollTo(0, scrollY));
     }
   }, [messages, actionItemsLoading, onToast]);
 
@@ -414,21 +424,27 @@ export default function FounderChat({
               )}
               <button
                 type="button"
-                onClick={() => void copyActionItems()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  void copyActionItems();
+                }}
                 disabled={actionItemsLoading}
                 className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 text-xs border border-cyan-500/40 disabled:opacity-50"
                 title="Your 3 action items from this session"
               >
-                {actionItemsLoading ? "Generating…" : "Copy your 3 action items"}
+                {actionItemsCopied ? "Copied!" : actionItemsLoading ? "Generating…" : "Copy your 3 action items"}
               </button>
               <button
                 type="button"
-                onClick={() => void copyForPartner()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  void copyForPartner();
+                }}
                 disabled={vibeCheckLoading}
                 className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs border border-zinc-700/50 disabled:opacity-50"
                 title="3-bullet vibe check for your partner"
               >
-                {vibeCheckLoading ? "Generating…" : "Copy for my Partner"}
+                {vibeCheckCopied ? "Copied!" : vibeCheckLoading ? "Generating…" : "Copy for my Partner"}
               </button>
             </>
           )}

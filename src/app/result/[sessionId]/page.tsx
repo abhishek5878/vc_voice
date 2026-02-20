@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getDealByIdForResult,
-  getDealRunsForSnapshot,
+  getDealRunsForResult,
   getSlugByUserId,
 } from "@/lib/deals/db";
 
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!deal || !deal.share_public) {
     return { title: "Result · PitchRobin" };
   }
-  const runs = await getDealRunsForSnapshot(sessionId);
+  const runs = await getDealRunsForResult(sessionId);
   const lastRun = runs[0];
   const redFlags = (lastRun?.red_flags ?? []) as { question: string }[];
   const topRed = redFlags[0]?.question?.replace(/\n/g, " ").slice(0, 160) ?? "";
@@ -87,7 +87,7 @@ export default async function ResultPage({ params }: PageProps) {
     );
   }
 
-  const runs = await getDealRunsForSnapshot(sessionId);
+  const runs = await getDealRunsForResult(sessionId);
   const lastRun = runs[0];
   const redFlags = (lastRun?.red_flags ?? []) as { question: string }[];
   const topRed = redFlags.slice(0, 3).map((r) => (r.question ?? "").replace(/\n/g, " ").trim().slice(0, 120));

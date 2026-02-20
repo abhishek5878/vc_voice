@@ -193,7 +193,7 @@ export default function ProfileSettingsPage() {
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto flex items-center gap-4">
           <Link href="/app" className="text-zinc-400 hover:text-zinc-200 text-sm">
-            ← Back to Robin
+            ← Dashboard
           </Link>
           <h1 className="text-lg font-semibold tracking-tight">Your Robin profile</h1>
         </div>
@@ -265,7 +265,7 @@ export default function ProfileSettingsPage() {
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-3">
           <h2 className="text-sm font-medium text-zinc-300">How you evaluate inbound</h2>
           <p className="text-xs text-zinc-500 mb-1">
-            Tell Robin how you think. This is used when your public content is thin or ambiguous.
+            Short description saved on your profile. Shown to founders and used when your voice profile from links is thin.
           </p>
           <textarea
             value={profile.bio ?? ""}
@@ -318,7 +318,7 @@ export default function ProfileSettingsPage() {
         <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 space-y-4">
           <h2 className="text-sm font-medium text-zinc-300">Build your Robin voice</h2>
           <p className="text-xs text-zinc-500">
-            We crawl your links and compress them into a voice profile. Rebuilding can take up to 5 minutes. If that isn&apos;t enough, add text or a voice note below and we&apos;ll use it when you rebuild.
+            We crawl your links and compress them into a voice profile. Rebuilding can take up to 5 minutes. The box below is <strong>only for rebuilds</strong>—add extra text or a voice note here when you click &quot;Rebuild from links&quot; (not saved separately; it feeds into the next build).
           </p>
           <div className="flex flex-wrap gap-3 items-center">
             <button

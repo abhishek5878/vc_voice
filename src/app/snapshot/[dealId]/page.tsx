@@ -2,11 +2,18 @@ import { notFound } from "next/navigation";
 import { getDealPublic, getDealRunsForSnapshot } from "@/lib/deals/db";
 import type { DealRun } from "@/lib/deals/types";
 
-function riskLevel(riskScore: number | null): "Low" | "Medium" | "High" {
-  if (riskScore == null) return "Medium";
-  if (riskScore <= 0.33) return "Low";
-  if (riskScore <= 0.66) return "Medium";
-  return "High";
+function riskLabel(riskScore: number | null): string {
+  if (riskScore == null) return "—";
+  if (riskScore <= 25) return "Low";
+  if (riskScore <= 50) return "Medium";
+  if (riskScore <= 75) return "High";
+  return "Fragile";
+}
+function resistanceLabel(resistanceScore: number | null): string {
+  if (resistanceScore == null) return "—";
+  if (resistanceScore > 75) return "Strong";
+  if (resistanceScore >= 50) return "Mixed";
+  return "Weak";
 }
 
 function GrueRadar({ runs }: { runs: DealRun[] }) {
@@ -64,10 +71,10 @@ export default async function SnapshotPage({
   const runs = await getDealRunsForSnapshot(dealId);
   const lastRun = runs[0];
   const redFlags = (lastRun?.red_flags ?? []) as { question: string }[];
-  const topRed = redFlags.slice(0, 5);
-  const risk = riskLevel(lastRun?.risk_score ?? null);
+  const topRed = redFlags.slice(0, 3).map((r) => (r.question ?? "").replace(/\n/g, " ").trim().slice(0, 160));
+  const riskScore = lastRun?.risk_score ?? null;
   const clarityScore = lastRun?.clarity_score != null ? Math.round(lastRun.clarity_score) : null;
-  const resistanceScore = lastRun?.resistance_score != null ? Math.round(lastRun.resistance_score) : null;
+  const resistanceScore = lastRun?.resistance_score ?? null;
   const companyDisplay = deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company";
 
   return (
@@ -76,38 +83,38 @@ export default async function SnapshotPage({
         <h1 className="text-xl font-semibold text-zinc-200">{companyDisplay}</h1>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
-            <p className="text-zinc-500 text-xs uppercase mb-0.5">Risk level</p>
-            <p
-              className={
-                risk === "Low"
-                  ? "text-emerald-400 font-medium"
-                  : risk === "Medium"
-                    ? "text-cyan-400 font-medium"
-                    : "text-red-400 font-medium"
-              }
-            >
-              {risk}
+            <p className="text-zinc-500 text-xs uppercase mb-0.5">Clarity</p>
+            <p className="text-zinc-200 font-medium">
+              {clarityScore != null ? `${clarityScore} / 100` : "—"}
             </p>
           </div>
-          {clarityScore != null && (
-            <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
-              <p className="text-zinc-500 text-xs uppercase mb-0.5">Clarity score</p>
-              <p className="text-zinc-200 font-medium">{clarityScore}</p>
-            </div>
-          )}
-          {resistanceScore != null && (
-            <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
-              <p className="text-zinc-500 text-xs uppercase mb-0.5">Resistance level</p>
-              <p className="text-zinc-200 font-medium">{resistanceScore}</p>
-            </div>
-          )}
+          <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
+            <p className="text-zinc-500 text-xs uppercase mb-0.5">Risk</p>
+            <p
+              className={
+                riskScore != null && riskScore > 75
+                  ? "text-red-400 font-medium"
+                  : riskScore != null && riskScore > 50
+                    ? "text-amber-400 font-medium"
+                    : riskScore != null && riskScore > 25
+                      ? "text-cyan-400 font-medium"
+                      : "text-emerald-400 font-medium"
+              }
+            >
+              {riskLabel(riskScore)}
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
+            <p className="text-zinc-500 text-xs uppercase mb-0.5">Resistance</p>
+            <p className="text-zinc-200 font-medium">{resistanceLabel(resistanceScore)}</p>
+          </div>
         </div>
         {topRed.length > 0 && (
           <div>
-            <h2 className="text-sm font-medium text-zinc-400 mb-2">Red flags</h2>
+            <h2 className="text-sm font-medium text-zinc-400 mb-2">Top red flags</h2>
             <ul className="list-disc list-inside space-y-1 text-sm text-zinc-300">
-              {topRed.map((r, i) => (
-                <li key={i}>{r.question ?? ""}</li>
+              {topRed.map((line, i) => (
+                <li key={i}>{line}{line.length >= 160 ? "…" : ""}</li>
               ))}
             </ul>
           </div>

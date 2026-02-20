@@ -80,7 +80,7 @@ export default function InsightsPage() {
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <Link href="/app" className="text-zinc-400 hover:text-zinc-200 text-sm">← Back to Robin</Link>
+          <Link href="/app" className="text-zinc-400 hover:text-zinc-200 text-sm">← Dashboard</Link>
           <h1 className="text-lg font-semibold tracking-tight">Insights</h1>
         </div>
       </header>

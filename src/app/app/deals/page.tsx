@@ -54,20 +54,22 @@ export default function DealsPage() {
               href="/app"
               className="text-zinc-400 hover:text-zinc-200 text-sm transition-colors"
             >
-              ← Back to Robin
+              ← Dashboard
             </Link>
             <h1 className="text-lg font-semibold tracking-tight">Deal History</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-zinc-500">Vertical</label>
-            <input
-              type="text"
-              value={vertical}
-              onChange={(e) => setVertical(e.target.value)}
-              placeholder="Filter..."
-              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-200 text-sm w-32"
-            />
-          </div>
+          {deals.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-zinc-500">Vertical</label>
+              <input
+                type="text"
+                value={vertical}
+                onChange={(e) => setVertical(e.target.value)}
+                placeholder="Filter..."
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-200 text-sm w-32"
+              />
+            </div>
+          )}
         </div>
       </header>
       <main className="max-w-4xl mx-auto w-full p-4 sm:p-6 flex-1">
