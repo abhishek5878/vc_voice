@@ -124,18 +124,18 @@ export default async function SnapshotPage({
   const resistanceScore = lastRun?.resistance_score ?? null;
   const companyDisplay = deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company";
   const vcName = vc.display_name || (vc.slug ? vc.slug.replace(/-/g, " ") : null);
-  const topPct =
+  const betterThanPct =
     strength.percentile != null && strength.totalDeals > 0
-      ? Math.round(100 - strength.percentile)
+      ? Math.round(strength.percentile)
       : null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 flex flex-col items-center">
       <div className="max-w-lg w-full rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-6">
         <h1 className="text-xl font-semibold text-zinc-200">{companyDisplay}</h1>
-        {topPct != null && vcName && strength.totalDeals > 1 && (
+        {betterThanPct != null && vcName && strength.totalDeals > 1 && (
           <p className="text-sm text-cyan-400/90">
-            Your pitch ranked in the top {topPct}% of pitches submitted to {vcName}.
+            Your pitch ranked better than {betterThanPct}% of pitches submitted to {vcName}.
           </p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">

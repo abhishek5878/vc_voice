@@ -248,6 +248,10 @@ export default function FounderChat({
       if (!res.ok) throw new Error(data.detail || data.error || `Failed (${res.status})`);
       const summary = (data.content ?? "").trim();
       if (!summary) throw new Error("Empty summary");
+      if (/^https?:\/\/[^\s]+$/i.test(summary)) {
+        setError("Couldn't generate summary. Use \"Copy your 3 action items\" or share your results link from below instead.");
+        return;
+      }
       await navigator.clipboard.writeText(summary);
       onToast?.("Vibe check copied to clipboard");
       setVibeCheckCopied(true);
