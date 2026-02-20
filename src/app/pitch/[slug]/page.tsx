@@ -94,7 +94,7 @@ export default async function PitchPage({ params }: PageProps) {
             voiceProfileText={voiceProfileText}
             noProfileCopy={
               <p className="text-[15px] text-zinc-400">
-                Robin will stress-test your pitch against proven VC heuristics: evidence, unit economics, and clarity. Paste your deck below to start.
+                Robin will stress-test your pitch against proven VC heuristics and flag gaps in your narrative.
               </p>
             }
           />

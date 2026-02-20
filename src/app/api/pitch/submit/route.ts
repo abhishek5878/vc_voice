@@ -13,8 +13,21 @@ import {
   insertDealRunWithClient,
   insertFounderClaimsWithClient,
 } from "@/lib/deals/db";
-import { extractClaims } from "@/lib/deals/persist";
+import { extractClaims, pipelineResultToRunPayload } from "@/lib/deals/persist";
 import type { StreamContext } from "@/lib/ingest/types";
+
+function riskLabel(riskScore: number): string {
+  if (riskScore >= 75) return "Fragile";
+  if (riskScore >= 50) return "High";
+  if (riskScore >= 25) return "Medium";
+  return "Low";
+}
+
+function resistanceLabel(resistanceScore: number): string {
+  if (resistanceScore >= 75) return "Strong";
+  if (resistanceScore >= 50) return "Mixed";
+  return "Weak";
+}
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -101,9 +114,21 @@ export async function POST(request: NextRequest) {
       status: c.status,
     })));
 
+    const payload = pipelineResultToRunPayload(result);
+    const redFlags = (payload.red_flags ?? []) as { question: string }[];
+    const topRed = redFlags.slice(0, 3).map((r) => (r.question ?? "").replace(/\n/g, " ").trim().slice(0, 120));
+
     return NextResponse.json({
       dealId: deal.id,
       message: "Pitch submitted. The investor will review it in their dashboard.",
+      beliefMap: {
+        clarity_score: payload.clarity_score != null ? Math.round(payload.clarity_score) : null,
+        risk_score: payload.risk_score ?? null,
+        resistance_score: payload.resistance_score ?? null,
+        risk_label: riskLabel(payload.risk_score ?? 0),
+        resistance_label: resistanceLabel(payload.resistance_score ?? 0),
+        red_flags: topRed,
+      },
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

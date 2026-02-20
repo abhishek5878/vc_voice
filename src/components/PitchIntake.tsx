@@ -26,6 +26,16 @@ export default function PitchIntake({
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [resultDealId, setResultDealId] = useState<string | null>(null);
+  const [beliefMap, setBeliefMap] = useState<{
+    clarity_score: number | null;
+    risk_score: number | null;
+    resistance_score: number | null;
+    risk_label: string;
+    resistance_label: string;
+    red_flags: string[];
+  } | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const handleFetchUrl = useCallback(async () => {
     const url = fetchUrlValue.trim();
@@ -115,13 +125,15 @@ export default function PitchIntake({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slug,
-          companyName: companyName.trim() || "Unknown",
+          companyName: companyName.trim(),
           pitchText: pitchMaterial,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.detail || "Submit failed");
       setSubmitted(true);
+      if (data.dealId) setResultDealId(data.dealId);
+      if (data.beliefMap) setBeliefMap(data.beliefMap);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Submit failed");
     } finally {
@@ -151,10 +163,64 @@ export default function PitchIntake({
         {showSubmit && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
             {submitted ? (
-              <div className="space-y-1">
+              <div className="space-y-4">
                 <p className="text-sm text-emerald-400/90">
                   Pitch submitted. The investor will review it in their dashboard.
                 </p>
+                {beliefMap && (
+                  <>
+                    <div className="rounded-xl border border-zinc-700 bg-zinc-800/60 p-4 space-y-3">
+                      <p className="text-xs font-medium uppercase tracking-wider text-cyan-400/90">
+                        Your Belief Map is ready
+                      </p>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase">Clarity</p>
+                          <p className="text-lg font-semibold text-zinc-100">
+                            {beliefMap.clarity_score != null ? `${beliefMap.clarity_score} / 100` : "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase">Risk</p>
+                          <p className="text-lg font-semibold text-amber-400/90">{beliefMap.risk_label}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase">Resistance</p>
+                          <p className="text-lg font-semibold text-zinc-200">{beliefMap.resistance_label}</p>
+                        </div>
+                      </div>
+                    </div>
+                    {resultDealId && (
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const url = `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/result/${resultDealId}`;
+                            void navigator.clipboard.writeText(url).then(() => {
+                              setShareCopied(true);
+                              setTimeout(() => setShareCopied(false), 2000);
+                            });
+                          }}
+                          className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-semibold"
+                        >
+                          {shareCopied ? "Link copied" : "Share your results"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPhase("form");
+                            setSubmitted(false);
+                            setResultDealId(null);
+                            setBeliefMap(null);
+                          }}
+                          className="px-4 py-2 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm font-medium"
+                        >
+                          Resubmit with changes
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
                 <p className="text-xs text-zinc-500">
                   Your personalized pointers appear above so you can work on them before the meeting.
                 </p>
@@ -265,7 +331,8 @@ export default function PitchIntake({
         {pitchCharCount > 0 && (
           <p className="text-xs text-zinc-500">
             {pitchCharCount.toLocaleString()} characters
-            {!hasPitchContent && " — add more for a better stress-test."}
+            {pitchCharCount >= 400 && ` · ~${Math.max(1, Math.round(pitchCharCount / 800))} slide${Math.round(pitchCharCount / 800) !== 1 ? "s" : ""}`}
+            {!hasPitchContent && " · add more for a better stress-test."}
           </p>
         )}
         {error && (

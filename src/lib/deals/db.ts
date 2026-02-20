@@ -256,6 +256,30 @@ export async function getDealPublic(dealId: string): Promise<Deal | null> {
   return data as Deal;
 }
 
+/** For /result/[sessionId]: get deal by id only (no auth). Returns minimal fields to decide public vs private. */
+export async function getDealByIdForResult(dealId: string): Promise<{ id: string; company_name: string; share_public: boolean; user_id: string } | null> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("deals")
+    .select("id, company_name, share_public, user_id")
+    .eq("id", dealId)
+    .single();
+  if (error || !data) return null;
+  return data as { id: string; company_name: string; share_public: boolean; user_id: string };
+}
+
+/** Get VC pitch page slug by user_id (for result page CTA). */
+export async function getSlugByUserId(userId: string): Promise<string | null> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("robin_profiles")
+    .select("slug")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error || !data?.slug) return null;
+  return (data.slug as string) ?? null;
+}
+
 export async function getDealRunsForSnapshot(dealId: string): Promise<DealRun[]> {
   return getDealRuns(dealId);
 }
