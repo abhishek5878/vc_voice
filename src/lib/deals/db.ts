@@ -432,21 +432,26 @@ export async function getClarityPercentile(userId: string, dealId: string, supab
   return computePercentile(currentValue, values);
 }
 
-export async function getStrengthPercentile(userId: string, dealId: string, supabase?: SupabaseClient): Promise<{ percentile: number | null; totalDeals: number }> {
+export async function getStrengthPercentile(userId: string, dealId: string, supabase?: SupabaseClient): Promise<{ percentile: number | null; totalDeals: number; rank: number | null }> {
   const { computePercentile } = await import("@/lib/percentile");
   const deals = await listDeals(userId, supabase);
-  const values: number[] = [];
-  let currentValue: number | null = null;
+  const entries: { dealId: string; strength: number; clarity: number }[] = [];
   for (const d of deals) {
     const runs = await getDealRuns(d.id, supabase);
     const last = runs[0];
     const strength = last?.deal_strength ?? (last?.risk_score != null ? 100 - last.risk_score : null);
+    const clarity = last?.clarity_score ?? 0;
     if (strength != null) {
-      values.push(strength);
-      if (d.id === dealId) currentValue = strength;
+      entries.push({ dealId: d.id, strength, clarity });
     }
   }
-  const totalDeals = values.length;
+  const totalDeals = entries.length;
+  const values = entries.map((e) => e.strength);
+  const currentValue = entries.find((e) => e.dealId === dealId)?.strength ?? null;
   const percentile = currentValue != null ? computePercentile(currentValue, values) : null;
-  return { percentile, totalDeals };
+  // Ordinal rank with tie-break: strength desc, then clarity desc, then dealId
+  entries.sort((a, b) => b.strength - a.strength || b.clarity - a.clarity || a.dealId.localeCompare(b.dealId));
+  const rankIndex = entries.findIndex((e) => e.dealId === dealId);
+  const rank = rankIndex >= 0 ? rankIndex + 1 : null;
+  return { percentile, totalDeals, rank };
 }

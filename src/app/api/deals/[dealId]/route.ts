@@ -38,13 +38,14 @@ export async function GET(
       getLatestDebriefForDeal(supabase, dealId),
       getSlugByUserId(userId),
     ]);
-    const { percentile: strengthPercentile, totalDeals } = strengthResult;
+    const { percentile: strengthPercentile, totalDeals, rank: strengthRank } = strengthResult;
     return NextResponse.json({
       deal,
       runs,
       claimDrift,
       clarityPercentile,
       strengthPercentile,
+      strengthRank: strengthRank ?? null,
       totalDeals,
       debrief: debrief ?? null,
       pitchSlug: pitchSlug ?? null,

@@ -23,6 +23,7 @@ interface DealDetail {
   claimDrift: FounderClaimRow[];
   clarityPercentile: number | null;
   strengthPercentile: number | null;
+  strengthRank: number | null;
   totalDeals: number;
   debrief: DealDebrief | null;
   pitchSlug: string | null;
@@ -346,7 +347,7 @@ export default function DealDetailPage() {
     );
   }
 
-  const { deal, runs, claimDrift, clarityPercentile, strengthPercentile, totalDeals } = data;
+  const { deal, runs, claimDrift, clarityPercentile, strengthPercentile, strengthRank, totalDeals } = data;
   const latestRun = runs[0];
   const riskVal = latestRun?.risk_score ?? null;
   const clarityVal = latestRun?.clarity_score ?? null;
@@ -373,12 +374,12 @@ export default function DealDetailPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <header className="sticky top-0 z-10 p-4 sm:p-6 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link href="/app/deals" className="text-zinc-400 hover:text-zinc-200 text-sm">← Deals</Link>
-            <h1 className="text-lg font-semibold tracking-tight">{deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company"}</h1>
+        <div className="max-w-4xl mx-auto flex flex-nowrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <Link href="/app/deals" className="text-zinc-400 hover:text-zinc-200 text-sm shrink-0">← Deals</Link>
+            <h1 className="text-lg font-semibold tracking-tight truncate">{deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company"}</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <label className="text-xs text-zinc-500">Mark outcome</label>
             <select
               value={outcome}
@@ -431,13 +432,15 @@ export default function DealDetailPage() {
 
         {tab === "overview" && (
           <>
-        {(strengthPercentile != null && totalDeals > 0) && (
+        {(totalDeals > 0 && (strengthRank != null || strengthPercentile != null)) && (
           <section className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30">
             <h2 className="text-sm font-medium text-zinc-400 mb-1">Ranking</h2>
             <p className="text-zinc-200">
               {totalDeals === 1
                 ? "#1 of 1 deal. Add more to see strength ranking."
-                : `#${Math.min(totalDeals, 1 + Math.round((strengthPercentile / 100) * (totalDeals - 1)))} of ${totalDeals} deals by strength.`}
+                : strengthRank != null
+                  ? `#${strengthRank} of ${totalDeals} deals by strength.`
+                  : `#— of ${totalDeals} deals by strength.`}
             </p>
             {clarityPercentile != null && (
               <p className="text-zinc-400 text-sm mt-1">
@@ -546,8 +549,8 @@ export default function DealDetailPage() {
                 <span className="text-zinc-400">
                   {(r.red_flags as unknown[]).length} red · {(r.yellow_flags as unknown[]).length} yellow
                 </span>
-                {r.risk_score != null && (
-                  <span className="text-cyan-400/90">{riskLevel(r.risk_score)}</span>
+                {r.risk_score != null && typeof r.risk_score === "number" && !Number.isNaN(Number(r.risk_score)) && (
+                  <span className="text-cyan-400/90">Risk: {riskLevel(Number(r.risk_score))}</span>
                 )}
               </li>
             ))}

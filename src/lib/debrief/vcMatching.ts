@@ -93,6 +93,13 @@ fit_pct is 1-100. Use the exact slug from the list.`;
   } catch {
     return [];
   }
+  /** Format slug as readable name when display_name is missing (e.g. "priya-mehta" → "Priya Mehta"). */
+  function slugToDisplayName(s: string): string {
+    return s
+      .split(/[-_]/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  }
   const recs = parsed.recommendations ?? [];
   const bySlug = new Map(vcList.map((v) => [String(v.slug).toLowerCase(), v]));
   const result: RecommendedVC[] = [];
@@ -100,9 +107,11 @@ fit_pct is 1-100. Use the exact slug from the list.`;
     const slug = String(r.slug ?? "").trim().toLowerCase();
     const vc = bySlug.get(slug);
     if (!vc) continue;
+    const rawName = (vc.display_name ?? "").trim();
+    const displayName = rawName || slugToDisplayName((vc.slug as string) || slug);
     result.push({
       slug: (vc.slug as string) ?? slug,
-      display_name: (vc.display_name ?? vc.slug ?? "VC").trim(),
+      display_name: displayName,
       twitter_url: vc.twitter_url ?? null,
       linkedin_url: vc.linkedin_url ?? null,
       fit_pct: Math.min(100, Math.max(0, Number(r.fit_pct) || 0)),
