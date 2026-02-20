@@ -49,10 +49,12 @@ export async function POST(request: NextRequest) {
   let companyName = typeof body.companyName === "string" ? body.companyName.trim() : "";
   const pitchText = typeof body.pitchText === "string" ? body.pitchText.trim() : "";
   if (!companyName && pitchText) {
-    const firstLine = pitchText.split(/\n/).find((l) => l.trim().length > 0)?.trim().slice(0, 80) ?? "";
-    companyName = firstLine || "Unnamed company";
+    const firstLine = pitchText.split(/\n/).find((l) => l.trim().length > 0)?.trim() ?? "";
+    const beforeDash = firstLine.split(/\s*[—\-–]\s*/)[0].trim();
+    companyName = (beforeDash || firstLine).slice(0, 80) || "Unnamed company";
   }
   if (!companyName) companyName = "Unnamed company";
+  companyName = companyName.slice(0, 100);
 
   if (!slug) {
     return NextResponse.json({ error: "Missing slug" }, { status: 400 });
@@ -93,8 +95,9 @@ export async function POST(request: NextRequest) {
       .from("deals")
       .insert({
         user_id: userId,
-        company_name: companyName,
+        company_name: companyName.slice(0, 100),
         status: "inbound",
+        share_public: true,
       })
       .select("id")
       .single();

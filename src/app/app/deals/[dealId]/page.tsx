@@ -218,7 +218,6 @@ export default function DealDetailPage() {
                 <p className="text-zinc-500 text-xs uppercase">Risk level</p>
                 <p className={`font-medium ${riskVal != null && riskVal > 50 ? "text-cyan-400" : "text-zinc-200"}`}>
                   {riskLevel(riskVal != null ? riskVal : null)}
-                  {riskVal != null && <span className="text-zinc-500 font-normal text-xs ml-1">(score {riskVal.toFixed(0)})</span>}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
