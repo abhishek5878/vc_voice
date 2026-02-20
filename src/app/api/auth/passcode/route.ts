@@ -5,21 +5,87 @@ const PASSCODE = process.env.ROBIN_PASSCODE ?? "42";
 const COOKIE_NAME = "robin_passcode_verified";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
+function getAuthAdminConfig() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url?.trim() || !key?.trim()) throw new Error("Missing Supabase URL or service role key");
+  return {
+    baseUrl: `${url.replace(/\/$/, "")}/auth/v1`,
+    headers: {
+      Authorization: `Bearer ${key}`,
+      apikey: key,
+      "Content-Type": "application/json",
+    },
+  };
+}
+
 /** Ensure a Supabase user exists for this email with password = passcode, so client can sign in with email+passcode. */
-async function ensureUserForEmail(supabase: ReturnType<typeof createAdminSupabase>, email: string, passcode: string) {
-  // Service-role client exposes auth.admin (createUser, listUsers, updateUserById)
-  const admin = (supabase.auth as unknown as { admin?: { listUsers: (p?: { perPage?: number }) => Promise<{ data: { users: { id: string; email?: string }[] } }>; createUser: (a: { email: string; password: string; email_confirm?: boolean }) => Promise<{ error: Error | null }>; updateUserById: (id: string, a: { password: string }) => Promise<{ error: Error | null }> } }).admin;
-  if (!admin) throw new Error("Admin API not available");
-  const { data: listData } = await admin.listUsers({ perPage: 1000 });
-  const users = listData?.users ?? [];
-  const existing = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupabase>, email: string, passcode: string) {
+  const { baseUrl, headers } = getAuthAdminConfig();
+
+  // List users and find by email (paginate if needed)
+  let existing: { id: string } | null = null;
+  let page = 1;
+  const perPage = 1000;
+  while (true) {
+    const listRes = await fetch(`${baseUrl}/admin/users?page=${page}&per_page=${perPage}`, { headers });
+    if (!listRes.ok) {
+      const errText = await listRes.text();
+      throw new Error(`listUsers failed: ${listRes.status} ${errText}`);
+    }
+    const listJson = (await listRes.json()) as { users?: { id: string; email?: string }[] };
+    const users = listJson?.users ?? [];
+    const found = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    if (found) {
+      existing = { id: found.id };
+      break;
+    }
+    if (users.length < perPage) break;
+    page += 1;
+  }
+
   if (existing) {
-    const { error } = await admin.updateUserById(existing.id, { password: passcode });
-    if (error) throw error;
+    const updateRes = await fetch(`${baseUrl}/admin/users/${existing.id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ password: passcode }),
+    });
+    if (!updateRes.ok) {
+      const errText = await updateRes.text();
+      throw new Error(`updateUser failed: ${updateRes.status} ${errText}`);
+    }
     return;
   }
-  const { error } = await admin.createUser({ email, password: passcode, email_confirm: true });
-  if (error) throw error;
+
+  const createRes = await fetch(`${baseUrl}/admin/users`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ email, password: passcode, email_confirm: true }),
+  });
+  if (!createRes.ok) {
+    const errBody = await createRes.text();
+    // If user already exists (e.g. created between list and create), update password
+    const alreadyExists =
+      createRes.status === 422 ||
+      /already registered|already exists|duplicate/i.test(errBody);
+    if (alreadyExists) {
+      // Retry list once and update
+      const retryList = await fetch(`${baseUrl}/admin/users?page=1&per_page=1000`, { headers });
+      if (retryList.ok) {
+        const retryJson = (await retryList.json()) as { users?: { id: string; email?: string }[] };
+        const user = retryJson?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+        if (user) {
+          const updateRes2 = await fetch(`${baseUrl}/admin/users/${user.id}`, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify({ password: passcode }),
+          });
+          if (updateRes2.ok) return;
+        }
+      }
+    }
+    throw new Error(`createUser failed: ${createRes.status} ${errBody}`);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -48,8 +114,12 @@ export async function POST(request: NextRequest) {
       // Don't fail sign-in if storage fails
     }
   } catch (e) {
-    console.error("Passcode ensureUserForEmail:", e);
-    return NextResponse.json({ error: "Could not set up your account. Try again." }, { status: 500 });
+    const message = e instanceof Error ? e.message : String(e);
+    console.error("Passcode ensureUserForEmail:", message);
+    return NextResponse.json(
+      { error: "Could not set up your account. Try again." },
+      { status: 500 }
+    );
   }
 
   const res = NextResponse.json({ ok: true });
