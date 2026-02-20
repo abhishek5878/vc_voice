@@ -50,12 +50,11 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
     page += 1;
   }
 
-  const now = new Date().toISOString();
   if (existing) {
     const updateRes = await fetch(`${baseUrl}/admin/users/${existing.id}`, {
       method: "PUT",
       headers,
-      body: JSON.stringify({ password, email_confirm: true, email_confirmed_at: now }),
+      body: JSON.stringify({ password, email_confirm: true }),
     });
     if (!updateRes.ok) {
       const errText = await updateRes.text();
@@ -67,7 +66,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
   const createRes = await fetch(`${baseUrl}/admin/users`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ email, password, email_confirm: true, email_confirmed_at: now }),
+    body: JSON.stringify({ email, password, email_confirm: true }),
   });
   if (!createRes.ok) {
     const errBody = await createRes.text();
@@ -85,7 +84,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
           const updateRes2 = await fetch(`${baseUrl}/admin/users/${user.id}`, {
             method: "PUT",
             headers,
-            body: JSON.stringify({ password, email_confirm: true, email_confirmed_at: new Date().toISOString() }),
+            body: JSON.stringify({ password, email_confirm: true }),
           });
           if (updateRes2.ok) return;
         }
@@ -129,7 +128,28 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const res = NextResponse.json({ ok: true });
+  // Generate magic link so client can sign in without hitting the password token endpoint (avoids 422)
+  let signInLink: string | null = null;
+  try {
+    const { baseUrl, headers } = getAuthAdminConfig();
+    const origin = request.headers.get("x-forwarded-host")
+      ? `${request.headers.get("x-forwarded-proto") || "https"}://${request.headers.get("x-forwarded-host")}`
+      : new URL(request.url).origin;
+    const redirectTo = `${origin}/app/onboarding`;
+    const genRes = await fetch(`${baseUrl}/admin/generate_link`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ type: "magiclink", email, redirectTo }),
+    });
+    if (genRes.ok) {
+      const genJson = (await genRes.json()) as { properties?: { action_link?: string } };
+      signInLink = genJson?.properties?.action_link ?? null;
+    }
+  } catch {
+    // Fall back to password sign-in if magic link fails
+  }
+
+  const res = NextResponse.json(signInLink ? { ok: true, signInLink } : { ok: true });
   res.cookies.set(COOKIE_NAME, "1", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

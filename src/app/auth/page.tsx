@@ -38,6 +38,11 @@ export default function AuthPage() {
           setLoading(false);
           return;
         }
+        // If server returned a magic link, use it to sign in (avoids 422 on password token)
+        if (data.signInLink) {
+          window.location.href = data.signInLink;
+          return;
+        }
         const supabase = createBrowserSupabase();
         await supabase.auth.signOut();
         // Supabase requires password length >= 6; same normalization as passcode API
@@ -47,8 +52,9 @@ export default function AuthPage() {
           password,
         });
         if (signInError) {
+          const code = (signInError as { code?: string }).code;
           const msg = signInError.message || "Could not sign in.";
-          setError(msg.includes("Email not confirmed") ? "Your account isn’t confirmed yet. Try again in a moment, or contact support." : msg);
+          setError(code ? `${msg} (${code})` : msg);
           setLoading(false);
           return;
         }
