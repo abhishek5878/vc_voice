@@ -40,9 +40,11 @@ export default function AuthPage() {
         }
         const supabase = createBrowserSupabase();
         await supabase.auth.signOut();
+        // Supabase requires password length >= 6; same normalization as passcode API
+        const password = trimmedPasscode.length >= 6 ? trimmedPasscode : trimmedPasscode.padEnd(6, "0");
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
-          password: trimmedPasscode,
+          password,
         });
         if (signInError) {
           setError(signInError.message || "Could not sign in.");

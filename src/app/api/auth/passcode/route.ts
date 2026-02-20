@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase } from "@/lib/supabase/admin";
 
-const PASSCODE = process.env.ROBIN_PASSCODE ?? "42";
+const PASSCODE = process.env.ROBIN_PASSCODE ?? "420000";
 const COOKIE_NAME = "robin_passcode_verified";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+/** Supabase requires password length >= 6. Normalize passcode so server and client use the same value. */
+function toPassword(passcode: string): string {
+  return passcode.length >= 6 ? passcode : passcode.padEnd(6, "0");
+}
 
 function getAuthAdminConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -19,8 +24,9 @@ function getAuthAdminConfig() {
   };
 }
 
-/** Ensure a Supabase user exists for this email with password = passcode, so client can sign in with email+passcode. */
+/** Ensure a Supabase user exists for this email with password = normalized passcode (min 6 chars for Supabase). */
 async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupabase>, email: string, passcode: string) {
+  const password = toPassword(passcode);
   const { baseUrl, headers } = getAuthAdminConfig();
 
   // List users and find by email (paginate if needed)
@@ -48,7 +54,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
     const updateRes = await fetch(`${baseUrl}/admin/users/${existing.id}`, {
       method: "PUT",
       headers,
-      body: JSON.stringify({ password: passcode }),
+      body: JSON.stringify({ password }),
     });
     if (!updateRes.ok) {
       const errText = await updateRes.text();
@@ -60,7 +66,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
   const createRes = await fetch(`${baseUrl}/admin/users`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ email, password: passcode, email_confirm: true }),
+    body: JSON.stringify({ email, password, email_confirm: true }),
   });
   if (!createRes.ok) {
     const errBody = await createRes.text();
@@ -78,7 +84,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
           const updateRes2 = await fetch(`${baseUrl}/admin/users/${user.id}`, {
             method: "PUT",
             headers,
-            body: JSON.stringify({ password: passcode }),
+            body: JSON.stringify({ password }),
           });
           if (updateRes2.ok) return;
         }
