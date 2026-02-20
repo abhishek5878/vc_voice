@@ -283,3 +283,55 @@ export function pipelineResultToMarkdown(
 
   return lines.join("\n");
 }
+
+/** Evidence-first markdown for Slack/Notion: high-stakes questions first, then evidence gaps, then brief summary. */
+export function buildEvidenceFirstMarkdown(
+  result: PipelineResult,
+  companyName?: string | null
+): string {
+  const lines: string[] = ["# Evidence-first brief", ""];
+  if (companyName) {
+    lines.push(`**Company:** ${esc(companyName)}`, "");
+  }
+
+  // 1) 3 High-Stakes Questions for Meeting 2
+  lines.push("## 3 High-Stakes Questions for Meeting 2", "");
+  const brief = result?.pre_meeting_attack_brief;
+  const redQuestions =
+    brief?.red_list_framed?.slice(0, 3).map((r) => r?.question) ??
+    result?.layer_4?.red_list?.slice(0, 3).map((r) => r?.question) ??
+    [];
+  if (redQuestions.length) {
+    redQuestions.forEach((q, i) => {
+      lines.push(`${i + 1}. ${esc(q)}`);
+    });
+    lines.push("");
+  } else {
+    lines.push("(No red-list questions from this run.)", "");
+  }
+
+  // 2) Evidence Gap Report — claims not backed by deck/transcript
+  lines.push("## Evidence Gap Report", "");
+  lines.push("Claims made by the founder that were **not** backed by the uploaded deck or transcript:", "");
+  const claims = result?.layer_1?.claims ?? [];
+  const unverified = claims.filter((c) => c?.status === "unverified");
+  if (unverified.length) {
+    unverified.forEach((c) => {
+      lines.push(`- [ ] ${esc(c?.claim)}`);
+      if (c?.source_quote) lines.push(`  - *Quote:* \"${esc(c.source_quote)}\"`);
+    });
+    lines.push("");
+  } else {
+    lines.push("(No unverified claims.)", "");
+  }
+
+  // 3) One-line summary
+  const red = result?.layer_4?.red_list ?? [];
+  const yellow = result?.layer_4?.yellow_list ?? [];
+  lines.push("## Summary", "");
+  lines.push(
+    `${red.length} red, ${yellow.length} yellow. ${unverified.length} evidence gap(s). Use the questions above to probe in Meeting 2.`,
+    ""
+  );
+  return lines.join("\n");
+}

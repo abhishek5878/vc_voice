@@ -7,6 +7,7 @@ import type { SessionMetadata } from "@/lib/sessionMetadata";
 import { getSupabaseAccessToken } from "@/lib/deals/supabase-auth";
 import {
   pipelineResultToMarkdown,
+  buildEvidenceFirstMarkdown,
   buildCalendarDescription,
   buildGoogleCalendarEventUrl,
   buildOutlookCalendarEventUrl,
@@ -39,6 +40,7 @@ export default function AnalysisReport({
   const [copied, setCopied] = useState(false);
   const [calendarCopied, setCalendarCopied] = useState(false);
   const [slackCopied, setSlackCopied] = useState(false);
+  const [evidenceExportCopied, setEvidenceExportCopied] = useState(false);
   const [snapshotLoading, setSnapshotLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveCompanyName, setSaveCompanyName] = useState(metadata?.companyName ?? "");
@@ -88,6 +90,14 @@ export default function AnalysisReport({
       setTimeout(() => setSlackCopied(false), 2000);
     });
   }, [result, metadata]);
+
+  const copyEvidenceFirstExport = useCallback(() => {
+    const md = buildEvidenceFirstMarkdown(result, metadata?.companyName ?? undefined);
+    void navigator.clipboard.writeText(md).then(() => {
+      setEvidenceExportCopied(true);
+      setTimeout(() => setEvidenceExportCopied(false), 2000);
+    });
+  }, [result, metadata?.companyName]);
 
   const emailBrief = useCallback(() => {
     const md = pipelineResultToMarkdown(result, metadata);
@@ -327,6 +337,14 @@ export default function AnalysisReport({
           </button>
           <button
             type="button"
+            onClick={copyEvidenceFirstExport}
+            className="px-3 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm border border-cyan-500/40 transition-colors"
+            title="Evidence-first brief: 3 high-stakes questions + evidence gaps (Slack/Notion)"
+          >
+            {evidenceExportCopied ? "Copied" : "Export to Slack/Notion"}
+          </button>
+          <button
+            type="button"
             onClick={emailBrief}
             className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors border border-zinc-700/50"
           >
@@ -381,7 +399,7 @@ export default function AnalysisReport({
           <ul className="text-xs text-zinc-500 space-y-1">
             <li><strong className="text-zinc-400">Calendar:</strong> Use the buttons above to open Google Calendar or Outlook with the brief prefilled, or copy and paste into any event.</li>
             <li><strong className="text-zinc-400">Email:</strong> Email brief sends a mailto with the full report. Add your co-investor&apos;s address before sending.</li>
-            <li><strong className="text-zinc-400">Slack / Notion:</strong> Copy for Slack (short summary) or Copy markdown (Notion-ready). Paste into a channel or a doc.</li>
+            <li><strong className="text-zinc-400">Slack / Notion:</strong> Copy for Slack (short summary), Export to Slack/Notion (evidence-first brief), or Copy markdown (full report). Paste into a channel or a doc.</li>
             <li><strong className="text-zinc-400">Bookmarks:</strong> <span className="font-mono text-zinc-400">/app?mode=1</span> for post-call, <span className="font-mono text-zinc-400">/app?mode=2</span> for prep, <span className="font-mono text-zinc-400">/app?mode=3</span> for founder stress-test.</li>
           </ul>
         </section>

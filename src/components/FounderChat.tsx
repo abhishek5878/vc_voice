@@ -11,28 +11,24 @@ interface ChatMessage {
 }
 
 const SYSTEM_PROMPT = `
-You are a world-class venture capitalist with 20+ years of experience. You are the VC who says what their friends won't: short answers, real numbers, no fluff. Think Hemingway brevity, Wilde wit, and dry sarcasm when it exposes vagueness (never cruel, always sharp).
+You are the VC's direct proxy—a high-tier associate who thinks and speaks as they would. Skeptical, data-driven, concise. You never say "I am an AI" or break the fiction that you are the investor's digital twin.
 
-You have seen thousands of pitches and invested in hundreds of companies. You are in Founder Coaching Mode. They have shared their pitch deck; your job is to stress-test it and help them improve it, not to be polite.
+Core behavior — hunt for "Belief Collapse":
+- When a founder makes any claim (e.g. "Our CAC is $5", "40% MoM growth"), immediately ask for supporting evidence or the underlying assumption. No free passes.
+- Reference the investor's actual thesis when relevant: "In [Investor Name]'s recent memo on [topic], they prioritized X. How do you reconcile that with your current GTM?"
+- Short answers. Real numbers. No fluff. If they're vague, one chance then: "That's not an answer." or "Try again with actual numbers."
 
-Core goals (in order of priority):
+Goals (in order):
+1) Stress-test: Problem, Solution, Market, Competition, Traction, Team, Moat, Unit economics, Ask.
+2) Force evidence. Every claim gets probed: source, assumption, or data.
+3) End each turn with a clear next action or one sharp question.
 
-1) Stress-test every part of the pitch: Problem, Solution / Product, Market, Competition, Traction, Team, Moat, Business model / unit economics, Ask / valuation, Use of funds.
-2) Force clarity with numbers and specifics. Vague language gets one chance, then: "That's not an answer.", "Try again with actual numbers.", "You're wasting my time."
-3) Help them actually improve the deck. Ask for specific slides or bullets. Give concrete rewrites and checklists. End every turn with a clear next action.
-
-Personality & tone:
-- Brutally honest, skeptical, direct. No sugarcoating.
-- Dry, sarcastic humor when it highlights absurdity; never personal.
-- Impatient with fluff. Demand specificity and differentiation.
-
-Conversation structure:
-1) Session start: Brief warning that you're mean on purpose. Ask them to summarise the company in 1–2 sentences and what they want from this session.
-2) Deck: You have DECK_TEXT. If you need more, ask for specific slides or sections.
-3) Systematic teardown: For each section, diagnose what's weak, ask 1–3 precise questions, propose improved copy. End with a next action.
+Tone: Professional but skeptical. Never cruel; always sharp. Speak as the VC would in a partner meeting—no sugarcoating.
 
 Hard rules:
-- Never break character. Keep responses short, high-signal, and actionable.
+- Never say you are an AI, a bot, or a language model. You are [Investor Name]'s proxy.
+- Use DECK_TEXT. If you need more, ask for specific slides or sections.
+- Keep responses short, high-signal, and actionable.
 `.trim();
 
 const VIBE_CHECK_SYSTEM = `
@@ -90,6 +86,8 @@ export default function FounderChat({
   const [actionItemsLoading, setActionItemsLoading] = useState(false);
   const [sendToInvestorLoading, setSendToInvestorLoading] = useState(false);
   const [sendToInvestorResult, setSendToInvestorResult] = useState<SendToInvestorResult | null>(null);
+  const [convictionScore, setConvictionScore] = useState<number | null>(null);
+  const [messageSignals, setMessageSignals] = useState<Record<number, "narrative_collapse" | "needs_evidence" | "strong_signal">>({});
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const hasAutoFetchedPointers = useRef(false);
 
@@ -101,6 +99,15 @@ export default function FounderChat({
   const hasDeck = deckText.trim().length > 0;
   const hasInvestorVoice = Boolean(voiceProfile?.trim());
 
+  const investorShortName =
+    typeof investorDisplayName === "string"
+      ? investorDisplayName.split(/[,·]| at /)[0]?.trim() || investorDisplayName
+      : "the investor";
+  const initialGreeting =
+    hasInvestorVoice && investorDisplayName
+      ? `I've analyzed ${investorShortName}'s thesis and your deck. You're making claims about growth and burn—before I submit this to the pipeline, walk me through the unit economics: how does this scale if your primary channel saturates? Be direct. (Or in one or two sentences: what are you building, and what do you want from this session?)`
+      : "I've read your deck. Short answers, real numbers, no fluff. Walk me through the unit economics—how does this scale if your primary channel saturates? Be direct. (Or in one or two sentences: what are you building, and what do you want from this session?)";
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -111,15 +118,8 @@ export default function FounderChat({
   useEffect(() => {
     if (!deckText.trim()) return;
     if (messages.length > 0) return;
-    setMessages([
-          {
-            role: "assistant",
-            content:
-              "I’ve read your deck. I’m the VC who says what your friends won't: short answers, real numbers, no fluff. I'll be blunt on purpose so we can harden this pitch. " +
-              "In one or two sentences: what are you building, and what do you want from this session (e.g. fix the seed deck, get ready for a partner meeting.)",
-          },
-    ]);
-  }, [deckText, messages.length]);
+    setMessages([{ role: "assistant", content: initialGreeting }]);
+  }, [deckText, messages.length, initialGreeting]);
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
@@ -174,7 +174,34 @@ export default function FounderChat({
         throw new Error("Empty response from LLM");
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      const nextMessagesWithReply = [...nextMessages, { role: "assistant", content: reply }];
+      setMessages(nextMessagesWithReply);
+
+      // Update conviction bar and heat map (fire-and-forget).
+      fetch("/api/chat/conviction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: nextMessagesWithReply.map((m) => ({ role: m.role, content: m.content })),
+          deckText: deckText.slice(0, 8000),
+        }),
+      })
+        .then((r) => r.json())
+        .then((data: { confidence_score?: number; message_signals?: { message_index: number; signal: string }[] }) => {
+          if (typeof data.confidence_score === "number") {
+            setConvictionScore(Math.max(0, Math.min(100, data.confidence_score)));
+          }
+          if (Array.isArray(data.message_signals)) {
+            const sigs: Record<number, "narrative_collapse" | "needs_evidence" | "strong_signal"> = {};
+            data.message_signals.forEach((s) => {
+              if (["narrative_collapse", "needs_evidence", "strong_signal"].includes(s.signal)) {
+                sigs[s.message_index] = s.signal as "narrative_collapse" | "needs_evidence" | "strong_signal";
+              }
+            });
+            setMessageSignals(sigs);
+          }
+        })
+        .catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Chat failed");
     } finally {
@@ -516,11 +543,35 @@ export default function FounderChat({
                 Reply below. Enter to send, Shift+Enter for new line.
               </span>
             </div>
+            {messages.length >= 2 && (
+              <div className="px-4 py-2 border-b border-zinc-800/80 shrink-0" aria-label="Conviction meter">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] uppercase tracking-wider text-zinc-500">Conviction</span>
+                  <span className="text-xs font-medium text-zinc-400">{convictionScore != null ? `${Math.round(convictionScore)}%` : "—"}</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-red-500/90 via-amber-500/90 to-emerald-500/90 transition-all duration-500"
+                    style={{ width: `${convictionScore != null ? Math.max(2, convictionScore) : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
             <div
               ref={scrollRef}
               className={`flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 ${singleColumnLayout ? "min-h-[320px]" : "min-h-[200px]"}`}
             >
-              {messages.map((m, idx) => (
+              {messages.map((m, idx) => {
+                const signal = m.role === "user" ? messageSignals[idx] : undefined;
+                const signalBorder =
+                  signal === "narrative_collapse"
+                    ? "border-l-4 border-red-500"
+                    : signal === "needs_evidence"
+                      ? "border-l-4 border-amber-500"
+                      : signal === "strong_signal"
+                        ? "border-l-4 border-emerald-500"
+                        : "";
+                return (
                 <div
                   key={idx}
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
@@ -532,9 +583,14 @@ export default function FounderChat({
                       }`}
                     >
                       {m.role === "user" ? "You" : "VC"}
+                      {signal && (
+                        <span className="ml-1.5 text-[10px] normal-case font-normal opacity-80">
+                          {signal === "narrative_collapse" ? "· Narrative collapse" : signal === "needs_evidence" ? "· Needs evidence" : "· Strong signal"}
+                        </span>
+                      )}
                     </span>
                     <div
-                      className={`whitespace-pre-wrap leading-relaxed rounded-2xl px-4 py-3.5 text-[15px] ${
+                      className={`whitespace-pre-wrap leading-relaxed rounded-2xl px-4 py-3.5 text-[15px] ${signalBorder} ${
                         m.role === "user"
                           ? "bg-cyan-500 text-zinc-950"
                           : "bg-zinc-800 text-zinc-100 border border-zinc-600/60"
@@ -544,7 +600,8 @@ export default function FounderChat({
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+              })}
               {messages.length === 0 && (
                 <div className="text-zinc-400 text-[15px] py-4">
                   Reply with your one-line summary, or ask to focus on Problem, Market, Traction, Team, or Moat.
