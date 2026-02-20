@@ -34,6 +34,7 @@ export default function OnboardingPage() {
   const [done, setDone] = useState(false);
   const [liveLink, setLiveLink] = useState("");
   const [needManualStep, setNeedManualStep] = useState(false);
+  const [manualStepMessage, setManualStepMessage] = useState<string | null>(null);
   const [manualDescription, setManualDescription] = useState("");
 
   useEffect(() => {
@@ -133,6 +134,7 @@ export default function OnboardingPage() {
       });
       const ingestJson = (await ingestRes.json()) as { status?: string; error?: string };
       if (ingestJson.status === "insufficient_content") {
+        setManualStepMessage((ingestJson as { message?: string }).message ?? null);
         setNeedManualStep(true);
         setBuilding(false);
         return;
@@ -288,7 +290,7 @@ export default function OnboardingPage() {
           <div className="max-w-lg mx-auto">
             <h1 className="text-lg font-semibold tracking-tight">Almost there</h1>
             <p className="text-sm text-zinc-400 mt-1">
-              We need a bit more to build your voice. Speak or type below.
+              {manualStepMessage ?? "We need a bit more to build your voice. Speak or type below."}
             </p>
           </div>
         </header>
@@ -298,13 +300,16 @@ export default function OnboardingPage() {
               {error}
             </div>
           )}
+          <p className="text-xs text-zinc-500 mb-3">
+            Record your voice or upload an audio file—we&apos;ll transcribe it. Or type in the box below.
+          </p>
           <VoiceStyleInput
             value={manualDescription}
             onChange={setManualDescription}
             rows={5}
             getAccessToken={getSupabaseAccessToken}
-            label="Describe your investment style"
-            hint="Speak (record or upload a voice note) or type. We'll use your words to build your voice."
+            label=""
+            hint=""
             placeholder="e.g. I look for repeat founders with clear metrics. I pass when it's pre-product..."
             className="mb-6"
             prominentVoice
@@ -347,7 +352,7 @@ export default function OnboardingPage() {
           <section className="space-y-3">
             <h2 className="text-sm font-medium text-zinc-300">Step 1 · Social links (build your voice)</h2>
             <p className="text-xs text-zinc-500">
-              Add your public writing so Robin can learn your tone and how you evaluate founders. We’ll scrape these to build your voice. Add at least one.
+              Add your public writing so Robin can learn your tone and how you evaluate founders. We’ll read these to build your voice. Add at least one.
             </p>
             <input
               type="url"
@@ -427,7 +432,7 @@ export default function OnboardingPage() {
             >
               {building ? "Building your voice…" : saving ? "Saving…" : "Build my voice & get my pitch link"}
             </button>
-            <p className="text-[11px] text-zinc-500 text-center sm:text-left">Building voice can take up to 5 minutes while we scrape your links.</p>
+            <p className="text-[11px] text-zinc-500 text-center sm:text-left">Building voice can take up to 5 minutes while we read your links.</p>
             <button
               type="button"
               onClick={handleGetLinkOnly}

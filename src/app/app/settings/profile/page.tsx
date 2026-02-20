@@ -335,9 +335,10 @@ export default function ProfileSettingsPage() {
             onChange={setManualText}
             rows={4}
             getAccessToken={getSupabaseAccessToken}
-            label="Text or voice (optional)"
-            hint="Type, or record / upload a short voice note. We'll transcribe it and use it with your links when you Rebuild."
+            label={needsManual ? "" : "Text or voice (optional)"}
+            hint={needsManual ? "" : "Type, or record / upload a short voice note. We'll transcribe it and use it with your links when you Rebuild."}
             placeholder="e.g. I look for repeat founders with clear metrics. I pass when..."
+            prominentVoice={needsManual}
           />
         </section>
 

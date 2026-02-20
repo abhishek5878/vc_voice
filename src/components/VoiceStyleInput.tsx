@@ -142,14 +142,14 @@ export default function VoiceStyleInput({
   );
 
   const voiceButtons = (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className={`flex items-stretch gap-3 ${prominentVoice ? "flex-col sm:flex-row w-full sm:w-auto" : "flex-wrap"}`}>
       <button
         type="button"
         onClick={recording ? stopRecording : startRecording}
         disabled={disabled || uploading}
         className={
           prominentVoice
-            ? "inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-medium border border-cyan-400/50 disabled:opacity-50"
+            ? "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-medium border border-cyan-400/50 disabled:opacity-50 min-w-[140px]"
             : "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium disabled:opacity-50"
         }
       >
@@ -165,7 +165,7 @@ export default function VoiceStyleInput({
       <label
         className={
           prominentVoice
-            ? "inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-medium border border-cyan-400/50 cursor-pointer disabled:opacity-50"
+            ? "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-medium border border-cyan-400/50 cursor-pointer disabled:opacity-50 min-w-[140px]"
             : "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium cursor-pointer disabled:opacity-50"
         }
       >
@@ -189,12 +189,18 @@ export default function VoiceStyleInput({
       {hint && <p className="text-sm text-zinc-500">{hint}</p>}
       {prominentVoice ? (
         <>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-zinc-200">Speak your answer</p>
+          <div className="rounded-xl border-2 border-cyan-500/40 bg-cyan-500/10 p-4 space-y-3">
+            <p className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+              <span className="inline-flex w-8 h-8 rounded-full bg-cyan-500/30 items-center justify-center text-cyan-300" aria-hidden>
+                🎤
+              </span>
+              Speak your answer
+            </p>
+            <p className="text-xs text-zinc-400">Record with your mic or upload an audio file. We&apos;ll add the transcript below.</p>
             {voiceButtons}
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-zinc-200">Or type below</p>
+            <p className="text-sm font-medium text-zinc-400">Or type below</p>
             <textarea
               value={value}
               onChange={(e) => onChange(e.target.value)}
