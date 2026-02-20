@@ -47,7 +47,8 @@ export default function AuthPage() {
           password,
         });
         if (signInError) {
-          setError(signInError.message || "Could not sign in.");
+          const msg = signInError.message || "Could not sign in.";
+          setError(msg.includes("Email not confirmed") ? "Your account isn’t confirmed yet. Try again in a moment, or contact support." : msg);
           setLoading(false);
           return;
         }

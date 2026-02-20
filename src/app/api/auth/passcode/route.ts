@@ -50,11 +50,12 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
     page += 1;
   }
 
+  const now = new Date().toISOString();
   if (existing) {
     const updateRes = await fetch(`${baseUrl}/admin/users/${existing.id}`, {
       method: "PUT",
       headers,
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ password, email_confirm: true, email_confirmed_at: now }),
     });
     if (!updateRes.ok) {
       const errText = await updateRes.text();
@@ -66,7 +67,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
   const createRes = await fetch(`${baseUrl}/admin/users`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ email, password, email_confirm: true }),
+    body: JSON.stringify({ email, password, email_confirm: true, email_confirmed_at: now }),
   });
   if (!createRes.ok) {
     const errBody = await createRes.text();
@@ -84,7 +85,7 @@ async function ensureUserForEmail(_supabase: ReturnType<typeof createAdminSupaba
           const updateRes2 = await fetch(`${baseUrl}/admin/users/${user.id}`, {
             method: "PUT",
             headers,
-            body: JSON.stringify({ password }),
+            body: JSON.stringify({ password, email_confirm: true, email_confirmed_at: new Date().toISOString() }),
           });
           if (updateRes2.ok) return;
         }
