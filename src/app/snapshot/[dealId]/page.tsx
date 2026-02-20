@@ -1,6 +1,49 @@
 import { notFound } from "next/navigation";
-import { getDealPublicForSnapshot, getDealRunsForResult } from "@/lib/deals/db";
+import {
+  getDealPublicForSnapshot,
+  getDealRunsForResult,
+  getVcDisplayByUserId,
+  getStrengthPercentile,
+} from "@/lib/deals/db";
+import { createAdminSupabase } from "@/lib/supabase/admin";
 import type { DealRun } from "@/lib/deals/types";
+import { SnapshotShare, SnapshotFooterCta } from "@/components/SnapshotShare";
+
+const BASE_URL = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+  : "https://pitchrobin.work";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ dealId: string }>;
+}) {
+  const { dealId } = await params;
+  const deal = await getDealPublicForSnapshot(dealId);
+  if (!deal) return { title: "Snapshot · PitchRobin" };
+  const runs = await getDealRunsForResult(dealId);
+  const lastRun = runs[0];
+  const clarityScore = lastRun?.clarity_score != null ? Math.round(lastRun.clarity_score) : null;
+  const vc = await getVcDisplayByUserId(deal.user_id);
+  const companyDisplay = deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company";
+  const byLine = vc.display_name ? `Stress-tested by ${vc.display_name}` : "Stress-tested by PitchRobin";
+  return {
+    title: `${companyDisplay} · PitchRobin Belief Map`,
+    description: `Clarity ${clarityScore ?? "—"}/100 · ${byLine}`,
+    openGraph: {
+      title: `${companyDisplay} · PitchRobin Belief Map`,
+      description: `Clarity ${clarityScore ?? "—"}/100 · ${byLine}`,
+      url: `${BASE_URL}/snapshot/${dealId}`,
+      siteName: "PitchRobin",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${companyDisplay} · PitchRobin Belief Map`,
+      description: byLine,
+    },
+  };
+}
 
 function riskLabel(riskScore: number | null): string {
   if (riskScore == null) return "—";
@@ -70,17 +113,31 @@ export default async function SnapshotPage({
   if (!deal) notFound();
   const runs = await getDealRunsForResult(dealId);
   const lastRun = runs[0];
+  const [vc, strength] = await Promise.all([
+    getVcDisplayByUserId(deal.user_id),
+    getStrengthPercentile(deal.user_id, dealId, createAdminSupabase()),
+  ]);
   const redFlags = (lastRun?.red_flags ?? []) as { question: string }[];
   const topRed = redFlags.slice(0, 3).map((r) => (r.question ?? "").replace(/\n/g, " ").trim().slice(0, 160));
   const riskScore = lastRun?.risk_score ?? null;
   const clarityScore = lastRun?.clarity_score != null ? Math.round(lastRun.clarity_score) : null;
   const resistanceScore = lastRun?.resistance_score ?? null;
   const companyDisplay = deal.company_name && deal.company_name !== "Unknown" ? deal.company_name : "Unnamed company";
+  const vcName = vc.display_name || (vc.slug ? vc.slug.replace(/-/g, " ") : null);
+  const topPct =
+    strength.percentile != null && strength.totalDeals > 0
+      ? Math.round(100 - strength.percentile)
+      : null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 flex flex-col items-center">
       <div className="max-w-lg w-full rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-6">
         <h1 className="text-xl font-semibold text-zinc-200">{companyDisplay}</h1>
+        {topPct != null && vcName && strength.totalDeals > 1 && (
+          <p className="text-sm text-cyan-400/90">
+            Your pitch ranked in the top {topPct}% of pitches submitted to {vcName}.
+          </p>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
             <p className="text-zinc-500 text-xs uppercase mb-0.5">Clarity</p>
@@ -123,7 +180,17 @@ export default async function SnapshotPage({
           <h2 className="text-sm font-medium text-zinc-400 mb-2">GRUE coverage</h2>
           <GrueRadar runs={runs} />
         </div>
-        <p className="text-xs text-zinc-500 text-center pt-4">PitchRobin · Belief Map snapshot</p>
+        <div className="border-t border-zinc-800 pt-4 space-y-4">
+          <h2 className="text-sm font-medium text-zinc-400">Share this snapshot</h2>
+          <SnapshotShare
+            snapshotUrl={`${BASE_URL}/snapshot/${dealId}`}
+            vcDisplayName={vc.display_name}
+          />
+        </div>
+        <div className="text-center pt-2">
+          <p className="text-xs text-zinc-500">PitchRobin · Belief Map snapshot</p>
+          <SnapshotFooterCta />
+        </div>
       </div>
     </div>
   );

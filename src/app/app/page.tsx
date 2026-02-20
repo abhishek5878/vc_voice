@@ -41,6 +41,7 @@ export default function AppPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [lastDealId, setLastDealId] = useState<string | null>(null);
   const [profileSlug, setProfileSlug] = useState<string | null>(null);
+  const [copySnippet, setCopySnippet] = useState<"link" | "twitter" | "signature" | null>(null);
   const clipboardChecked = useRef(false);
   const urlRunFetched = useRef(false);
 
@@ -247,17 +248,43 @@ export default function AppPage() {
               </div>
             )}
             {profileSlug && (
-              <button
-                type="button"
-                onClick={() => {
-                  const url = typeof window !== "undefined" ? `${window.location.origin}/pitch/${profileSlug}` : "";
-                  if (url) void navigator.clipboard.writeText(url).then(() => setToastMessage("Link copied"));
-                  setTimeout(() => setToastMessage(null), 2000);
-                }}
-                className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium"
-              >
-                Copy link
-              </button>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2 justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = typeof window !== "undefined" ? `${window.location.origin}/pitch/${profileSlug}` : "";
+                    if (url) void navigator.clipboard.writeText(url).then(() => { setToastMessage("Link copied"); setCopySnippet("link"); setTimeout(() => setCopySnippet(null), 2000); });
+                    setTimeout(() => setToastMessage(null), 2000);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-medium"
+                >
+                  {copySnippet === "link" ? "Copied" : "Copy link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = typeof window !== "undefined" ? `${window.location.origin}/pitch/${profileSlug}` : "";
+                    const line = `Want to pitch me? Start here → ${url}`;
+                    if (url) void navigator.clipboard.writeText(line).then(() => { setToastMessage("Twitter bio line copied"); setCopySnippet("twitter"); setTimeout(() => setCopySnippet(null), 2000); });
+                    setTimeout(() => setToastMessage(null), 2000);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium"
+                >
+                  {copySnippet === "twitter" ? "Copied" : "Copy Twitter bio line"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = typeof window !== "undefined" ? `${window.location.origin}/pitch/${profileSlug}` : "";
+                    const sig = `Want to pitch me? Start here → ${url}`;
+                    if (url) void navigator.clipboard.writeText(sig).then(() => { setToastMessage("Email signature snippet copied"); setCopySnippet("signature"); setTimeout(() => setCopySnippet(null), 2000); });
+                    setTimeout(() => setToastMessage(null), 2000);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-sm font-medium"
+                >
+                  {copySnippet === "signature" ? "Copied" : "Copy email signature snippet"}
+                </button>
+              </div>
             )}
             <div className="mt-10 flex flex-wrap gap-4 justify-center">
               <Link href="/app/deals" className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm">

@@ -198,38 +198,60 @@ export default function PitchIntake({
                       </div>
                     </div>
                     {resultDealId && (
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const url = `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/snapshot/${resultDealId}`;
-                            navigator.clipboard.writeText(url).then(() => {
-                              setShareCopied(true);
-                              setShareError(null);
-                              setTimeout(() => setShareCopied(false), 2000);
-                            }).catch(() => {
-                              setShareError("Couldn't copy — please try clicking manually.");
-                            });
-                          }}
-                          className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-semibold"
-                        >
-                          {shareCopied ? "Link copied" : "Share your results"}
-                        </button>
-                        {shareError && (
-                          <p className="text-xs text-amber-400">{shareError}</p>
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const url = `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/snapshot/${resultDealId}`;
+                              navigator.clipboard.writeText(url).then(() => {
+                                setShareCopied(true);
+                                setShareError(null);
+                                setTimeout(() => setShareCopied(false), 2000);
+                              }).catch(() => {
+                                setShareError("Couldn't copy — please try clicking manually.");
+                              });
+                            }}
+                            className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-900 text-sm font-semibold"
+                          >
+                            {shareCopied ? "Link copied" : "Share your results"}
+                          </button>
+                          {shareError && (
+                            <p className="text-xs text-amber-400">{shareError}</p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPhase("form");
+                              setSubmitted(false);
+                              setResultDealId(null);
+                              setBeliefMap(null);
+                            }}
+                            className="px-4 py-2 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm font-medium"
+                          >
+                            Resubmit with changes
+                          </button>
+                        </div>
+                        {investorDisplayName && slug && (
+                          <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
+                            <p className="text-sm text-zinc-300 mb-2">
+                              Know another founder pitching {investorDisplayName}? Send them this — they can stress-test their deck before the meeting too.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const pitchUrl = `${typeof window !== "undefined" ? window.location.origin : "https://pitchrobin.work"}/pitch/${slug}`;
+                                navigator.clipboard.writeText(pitchUrl).then(() => {
+                                  setToastMessage("Pitch link copied — send it to your fellow founder");
+                                  setTimeout(() => setToastMessage(null), 2000);
+                                }).catch(() => {});
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-400 text-sm font-medium"
+                            >
+                              Copy link for another founder
+                            </button>
+                          </div>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPhase("form");
-                            setSubmitted(false);
-                            setResultDealId(null);
-                            setBeliefMap(null);
-                          }}
-                          className="px-4 py-2 rounded-lg border border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm font-medium"
-                        >
-                          Resubmit with changes
-                        </button>
                       </div>
                     )}
                   </>

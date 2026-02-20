@@ -294,6 +294,21 @@ export async function getSlugByUserId(userId: string): Promise<string | null> {
   return (data.slug as string) ?? null;
 }
 
+/** Get VC display name and slug for snapshot/OG (public). */
+export async function getVcDisplayByUserId(userId: string): Promise<{ slug: string | null; display_name: string | null }> {
+  const supabase = createAdminSupabase();
+  const { data, error } = await supabase
+    .from("robin_profiles")
+    .select("slug, display_name")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error || !data) return { slug: null, display_name: null };
+  return {
+    slug: (data.slug as string) ?? null,
+    display_name: (data.display_name as string)?.trim() || null,
+  };
+}
+
 export async function getDealRunsForSnapshot(dealId: string): Promise<DealRun[]> {
   return getDealRuns(dealId);
 }
